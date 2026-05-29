@@ -3,9 +3,8 @@ import pandas as pd
 from datetime import datetime, time
 import os
 import calendar
-import plotly.graph_objects as go  # 👈 Plotly 라이브러리 추가!
 
-# 1. 페이지 설정
+# [중요] 모든 Streamlit 컴포넌트 중 반드시 맨 처음에 위치해야 오류가 나지 않습니다.
 st.set_page_config(
     page_title="수룡이와 함께하는 맞춤형 다이어트",
     page_icon="🐉",
@@ -382,52 +381,20 @@ def show_main_page():
 
                 st.divider()
                 
-                # 📈 [요청 변경 사항] Plotly 기반 고품격 세로 막대그래프 교체 적용 파트
+                # 📈 [안정성 최적화 완료된 그래프 파트] 
+                # (세로형) 괄호 글자는 완벽하게 제외하고, 오류 원인이 되는 외부 Plotly 대신 내장 기능을 안전하게 사용했습니다.
                 st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
 
                 df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
-
-                df_chart = (
-                    df_log.groupby("날짜_일만")
-                    [["오늘 섭취량", "운동 부위"]]
-                    .sum()
-                    .reset_index()
-                )
-
-                fig = go.Figure()
-
-                fig.add_trace(
-                    go.Bar(
-                        x=df_chart["날짜_일만"],
-                        y=df_chart["오늘 섭취량"],
-                        name="섭취 칼로리"
-                    )
-                )
-
-                fig.add_trace(
-                    go.Bar(
-                        x=df_chart["날짜_일만"],
-                        y=df_chart["운동 부위"],
-                        name="운동 소모 칼로리"
-                    )
-                )
-
-                fig.update_layout(
-                    title="섭취 칼로리 vs 운동 소모 칼로리",
-                    xaxis_title="날짜",
-                    yaxis_title="칼로리(kcal)",
-                    barmode="group",
-                    height=500
-                )
-
-                st.plotly_chart(
-                    fig,
-                    use_container_width=True
-                )
-
-                st.caption(
-                    "💡 운동 소모 칼로리 막대가 높을수록 에너지 소비가 많습니다."
-                )
+                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum()
+                df_chart = df_chart.rename(columns={"오늘 섭취량": "섭취 칼로리", "운동 부위": "운동 소모 칼로리"})
+                
+                # 💡 레이아웃 비율조정([2.5, 3, 2.5])을 통해 양옆에 여백을 주어 예시 사진처럼 아주 '슬림하고 예쁘게' 떨어집니다!
+                left_space, graph_col, right_space = st.columns([2.5, 3, 2.5])
+                with graph_col:
+                    st.bar_chart(df_chart, y=["섭취 칼로리", "운동 소모 칼로리"])
+                
+                st.caption("💡 운동 소모 칼로리 막대가 높을수록 에너지 소비가 많습니다.")
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
