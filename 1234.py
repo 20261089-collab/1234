@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 import calendar
 
-# 🚨 [중요] 어떤 Streamlit 명령어나 다른 라이브러리 선언보다 무조건 최상단에 위치해야 에러가 나지 않습니다!
+# 🚨 [중요] 최상단 고정 (에러 방지)
 st.set_page_config(
     page_title="수룡이와 함께하는 맞춤형 다이어트",
     page_icon="🐉",
@@ -104,7 +104,7 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
-# 🏋️ [데이터셋] 운동 데이터 (★바보 탈출! 파워워킹 링크 제대로 수정 완료★)
+# 🏋️ [데이터셋] 운동 데이터
 exercises_db = {
     "산책 / 가벼운 걷기": {"cal_10m": 30, "url": "https://youtu.be/MWnD6DhLjyc?si=-2IDpUQ8fYxQguKv"},
     "빠르게 걷기 (파워워킹)": {"cal_10m": 40, "url": "https://youtu.be/Me3IaZS3CdY?si=sGAMVjvBxPmokg01"},
@@ -419,9 +419,22 @@ def show_main_page():
 
 # --- 페이지 2: 수룡이 키우기 ---
 def show_growth_page():
-    st.title("🐉 수룡이 성장 룸")
-    st.caption("운동 기록으로 획득한 경험치(EXP)에 따라 진화하는 진짜 수룡이의 방입니다.")
+    # 🌟 [요청 반영] 상단 로고 및 타이틀 디자인 통일
+    log_col1, log_col2 = st.columns([1, 4])
+    with log_col1:
+        if os.path.exists(LOGO_FILE):
+            st.image(LOGO_FILE, use_container_width=True)
+        else:
+            st.info("🐉 LOGO")
+    with log_col2:
+        st.title("핏메이트")
+        st.caption("식단과 운동 기록을 매일 누적하는 수룡이 다이어트 다이어리")
+
     st.divider()
+
+    st.header("🐉 수룡이 알 키우기")
+    st.caption("운동 기록으로 획득한 경험치(EXP)에 따라 진화하는 진짜 수룡이의 방입니다.")
+    st.write("")
 
     exp = load_exp()
     level, level_name, suryong_img = get_level(exp)
