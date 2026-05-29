@@ -75,7 +75,7 @@ def save_profile(profile):
     df.to_csv(PROFILE_FILE, index=False, encoding="utf-8-sig")
 
 
-# 데이터셋
+# [데이터셋] 음식 데이터
 foods = {
     "김밥": {"calorie": 450, "type": "한식", "is_healthy": True},
     "참치김밥": {"calorie": 500, "type": "한식", "is_healthy": True},
@@ -104,6 +104,25 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
+# 🏋️ [데이터셋] 60kg 기준 운동 종목별 10분당 소비 칼로리 데이터 개편
+exercises_db = {
+    "산책 / 가벼운 걷기": {"cal_10m": 30, "url": "https://youtu.be/jpTQdM7okkI"},
+    "빠르게 걷기 (파워워킹)": {"cal_10m": 40, "url": "https://youtu.be/jpTQdM7okkI"},
+    "가벼운 조깅 (러닝머신)": {"cal_10m": 75, "url": "https://youtu.be/dZbPtAgofwI"},
+    "계단 오르기": {"cal_10m": 75, "url": "https://youtu.be/ul5GqyTSSIk"},
+    "실내 자전거": {"cal_10m": 68, "url": "https://youtu.be/gSz5n4sLENI"},
+    "줄넘기": {"cal_10m": 100, "url": "https://youtu.be/gSz5n4sLENI"},
+    "수영 (자유형)": {"cal_10m": 95, "url": "https://youtu.be/gSz5n4sLENI"},
+    "스트레칭 / 요가": {"cal_10m": 28, "url": "https://youtu.be/jpTQdM7okkI"},
+    "필라테스": {"cal_10m": 35, "url": "https://youtu.be/iOSYLKBk894"},
+    "웨이트 트레이닝 (헬스장 머신)": {"cal_10m": 55, "url": "https://youtu.be/Dw8PbebpF9w"},
+    "맨몸 스쿼트 / 런지": {"cal_10m": 60, "url": "https://youtu.be/dpBYYEhdofI"},
+    "플랭크 / 복근 운동": {"cal_10m": 50, "url": "https://youtu.be/iOSYLKBk894"},
+    "팔굽혀펴기 / 상체 홈트": {"cal_10m": 55, "url": "https://youtu.be/2swcod5RYvU"},
+    "버피 테스트": {"cal_10m": 100, "url": "https://youtu.be/gSz5n4sLENI"},
+    "복싱": {"cal_10m": 95, "url": "https://youtube.com/shorts/ocMkMZya3ac"}
+}
+
 
 # --- 페이지 1: 메인 다이어리 ---
 def show_main_page():
@@ -121,10 +140,7 @@ def show_main_page():
 
     profile = load_profile()
 
-    # 수정이 정보 입력으로 변경
     st.header("👤 수정이 정보 입력")
-    
-    # 기본값 '영범이의 아이들'로 지정
     name = st.text_input("이름", value=profile.get("이름", "영범이의 아이들"))
 
     gender_options = ["여자", "남자"]
@@ -175,15 +191,8 @@ def show_main_page():
     selected_foods = st.multiselect("오늘 어떤 음식을 드셨나요?", list(foods.keys()))
 
     total = 0
-    healthy_count = 0
-    unhealthy_count = 0
-
     for food in selected_foods:
         total += foods[food]["calorie"]
-        if foods[food]["is_healthy"]:
-            healthy_count += 1
-        else:
-            unhealthy_count += 1
 
     if selected_foods:
         col_h, col_uh = st.columns(2)
@@ -253,7 +262,7 @@ def show_main_page():
 
         st.divider()
 
-        tab1, tab2, tab3 = st.tabs(["🍱 추천 식단", "🏃 추천 운동 및 설정", "📅 나의 누적 다이어트 일지"])
+        tab1, tab2, tab3 = st.tabs(["🍱 추천 식단", "🏃 맞춤 운동 추천 및 계산", "📅 나의 누적 다이어트 일지"])
 
         with tab1:
             st.write("✨ **수룡이가 엄선한 건강한 다이어트 추천 메뉴**")
@@ -272,107 +281,87 @@ def show_main_page():
                 st.write(f"- {f}: {foods[f]['calorie']} kcal")
 
         with tab2:
-            st.write("🏋️ **오늘 나의 상태에 딱 맞는 맞춤형 운동 프로그램**")
+            st.write("🏋️ **오늘 나의 상태에 딱 맞는 운동 종목별 맞춤 계산기**")
 
-            # 📅 날짜 지정을 위한 선택 컴포넌트 추가
             st.subheader("📅 운동 날짜 지정")
             select_date = st.date_input("기록을 입력할 날짜를 선택하세요", datetime.now().date())
 
-            ex_col1, ex_col2, ex_col3 = st.columns(3)
-            with ex_col1:
-                place_style = st.selectbox("운동 장소 선택 🏢", ["홈트레이닝 (집)", "헬스장 (Gym)"])
-            with ex_col2:
-                target_part = st.selectbox("운동 부위 설정 🎯", ["전신", "상체 (가슴/팔)", "하체 (엉덩이/허벅지)", "코어 (복부/허리)"])
-            with ex_col3:
-                condition = st.selectbox("오늘의 컨디션 🌡️", ["컨디션 최고! 🔥", "보통이에요 🙂", "피곤하고 무거워요 😴"])
-
-            exercise_time = st.slider("오늘 실제 운동한 시간(분)", 0, 120, 30)
-            bmi_status = "고체중 (관절 보호)" if user_bmi >= 25.0 else ("저체중 (근력 강화)" if user_bmi < 18.5 else "정상 체중")
-            st.info(f"📋 분석 리포트: {bmi_status} 상태에 맞춤형 [{place_style} - {target_part}] 프로그램을 제안합니다.")
-
-            # 📊 10분당 칼로리 소비량 기준 정의 및 총 소비 칼로리 계산
-            if place_style == "홈트레이닝 (집)":
-                base_calorie_per_10min = 55  # 홈트 10분당 평균 55kcal
+            st.divider()
+            st.subheader("👟 오늘 진행할 운동 조합 선택")
+            
+            # 사용자가 오늘 수행할 운동 종목들을 멀티셀렉트로 선택
+            selected_ex_list = st.multiselect("오늘 어떤 운동들을 묶어서 조합하실 건가요? (복수 선택 가능)", list(exercises_db.keys()))
+            
+            total_burned_calories = 0
+            total_time_sum = 0
+            exercise_time_dict = {}
+            
+            if selected_ex_list:
+                st.write("⏱️ **선택한 운동 조합별 진행 시간(분)을 설정하세요**")
+                
+                # 각각 선택된 운동들의 슬라이더를 띄워 개별 소모량 합산
+                for ex_name in selected_ex_list:
+                    cal_per_10m = exercises_db[ex_name]["cal_10m"]
+                    ex_time = st.slider(f"[{ex_name}] 진행 시간 (10분당 {cal_per_10m} kcal 소모 기준)", 0, 120, 20, key=f"time_{ex_name}")
+                    
+                    # 칼로리 공식 계산: (설정분 / 10) * 10분당 소모량
+                    ex_burned = round((ex_time / 10) * cal_per_10m)
+                    total_burned_calories += ex_burned
+                    total_time_sum += ex_time
+                    exercise_time_dict[ex_name] = ex_time
+                
+                st.divider()
+                
+                # 🧮 맞춤 운동 조합이 소비하는 총 칼로리 리포트 메트릭으로 출력
+                st.subheader("🔥 오늘의 맞춤 운동 총 소비 칼로리 결과")
+                
+                col_calc1, col_calc2 = st.columns(2)
+                col_calc1.metric("선택한 총 운동 시간", f"{total_time_sum} 분")
+                col_calc2.metric("예상 총 소비 칼로리", f"{total_burned_calories} kcal")
+                
+                st.info(f"💡 선택한 조합 계측: 60kg 기준, 오늘 설정하신 루틴을 완수하면 총 **{total_burned_calories} kcal**가 소비됩니다!")
+                
+                # 📺 영상 참고 안내 출력 (요청 문구 포함)
+                st.write("📺 **추천 운동 가이드 영상 안내 (참고용)**")
+                for ex_name in selected_ex_list:
+                    url = exercises_db[ex_name]["url"]
+                    st.markdown(f"- **{ex_name}** 영상 보러가기: [링크 클릭]({url}) *(참고용)*")
             else:
-                base_calorie_per_10min = 50  # 헬스장 웨이트 10분당 평균 50kcal
+                st.info("운동 리스트에서 오늘 수행할 종목 조합을 먼저 선택해 주세요!")
 
-            # 컨디션에 따른 보정 변수
-            if condition == "컨디션 최고! 🔥":
-                cond_msg = "오늘은 강도 높은 운동도 가능해요!"
-                gym_set = "4세트"
-                home_mission = "맨몸 스쿼트 20회 + 플랭크 1분 추가 진행!"
-                base_calorie_per_10min += 15  # 고강도 활동 보정 (+15kcal)
-            elif condition == "보통이에요 🙂":
-                cond_msg = "정석 자세에 집중하면서 무리하지 않게 운동해요."
-                gym_set = "3세트"
-                home_mission = "영상 가이드를 80% 이상 따라 하기!"
-            else:
-                cond_msg = "오늘은 무리하지 말고 스트레칭 및 가벼운 운동 위주로 해요."
-                gym_set = "2세트"
-                home_mission = "힘들면 앞쪽 10분만 따라 하고 휴식하기!"
-                base_calorie_per_10min -= 10  # 저강도 활동 보정 (-10kcal)
-
-            st.warning(f"🌡️ 오늘의 컨디션 케어: {cond_msg}")
-
-            # 🧮 총 소비 칼로리 최종 계산 후 화면 표시
-            burned_calories = round((exercise_time / 10) * base_calorie_per_10min)
-            st.subheader(f"🔥 예상 운동 소비 칼로리")
-            st.info(f"선택하신 운동 조합의 10분당 소모 칼로리는 약 **{base_calorie_per_10min} kcal** 이며, "
-                    f"총 **{exercise_time}분** 운동 시 약 **{burned_calories} kcal**가 소비됩니다.")
-
-            # 영상 출력 부분 (참고용 문구 추가)
-            if place_style == "홈트레이닝 (집)":
-                st.success("🏠 오늘의 추천 홈트 영상 (참고용)")
-                if target_part == "전신":
-                    st.markdown("- [추천 영상 1](https://youtu.be/gSz5n4sLENI) / [추천 영상 2](https://youtu.be/dZbPtAgofwI)")
-                elif target_part == "상체 (가슴/팔)":
-                    st.markdown("- [추천 영상 1](https://youtu.be/2swcod5RYvU) / [추천 영상 2](https://youtu.be/T-bVqdhqW2U)")
-                elif target_part == "하체 (엉덩이/허벅지)":
-                    st.markdown("- [추천 영상 1](https://youtu.be/dpBYYEhdofI) / [추천 영상 2](https://youtu. sailboats/NDsjmxTROEo)")
-                else:
-                    st.markdown("- [추천 영상 1](https://youtu.be/jpTQdM7okkI) / [추천 영상 2](https://youtu.be/iOSYLKBk894)")
-                with st.expander("ℹ️ 홈트 가이드 설명 보기"):
-                    st.write(home_mission)
-            else:
-                st.success(f"💪 오늘의 헬스장 추천 머신 루틴 ({gym_set}씩 수행, 참고용)")
-                if target_part == "상체 (가슴/팔)":
-                    st.markdown("- [추천 강좌 보기](https://youtu.be/Dw8PbebpF9w)")
-                elif target_part == "하체 (엉덩이/허벅지)":
-                    st.markdown("- [추천 강좌 보기](https://youtu.be/Na0Dhue1oqk)")
-                elif target_part == "코어 (복부/허리)":
-                    st.markdown(
-                        "- [추천 숏츠 1](https://youtube.com/shorts/ocMkMZya3ac) / [추천 숏츠 2](https://youtube.com/shorts/bAFDWHA7fG8)")
-                else:
-                    st.markdown(
-                        "- [추천 숏츠 1](https://youtube.com/shorts/ul5GqyTSSIk) / [추천 숏츠 2](https://youtube.com/shorts/1FZYk9OyxV0)")
-
+            st.divider()
             st.subheader("💾 운동 기록 저장")
             if st.button("🔥 지정된 날짜로 기록 저장하고 경험치 받기"):
-                current_time_str = datetime.now().strftime("%H:%M")
-                formatted_date = f"{select_date.strftime('%Y-%m-%d')} {current_time_str}"
+                if not selected_ex_list:
+                    st.error("저장할 운동 조합이 없습니다. 종목을 선택해 주세요.")
+                else:
+                    current_time_str = datetime.now().strftime("%H:%M")
+                    formatted_date = f"{select_date.strftime('%Y-%m-%d')} {current_time_str}"
+                    
+                    ex_summary = ", ".join(selected_ex_list)
 
-                new_data = {
-                    "날짜": formatted_date, "이름": name if name else "사용자",
-                    "체중(kg)": weight, "BMI": user_bmi, "목표 칼로리": daily_calorie, "오늘 섭취량": total,
-                    "운동 장소": place_style, "운동 부위": target_part, "오늘 컨디션": condition, "운동 시간(분)": exercise_time
-                }
-                df = pd.read_csv(LOG_FILE) if os.path.exists(LOG_FILE) else pd.DataFrame(columns=new_data.keys())
-                df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
-                df.to_csv(LOG_FILE, index=False, encoding="utf-8-sig")
+                    new_data = {
+                        "날짜": formatted_date, "이름": name if name else "사용자",
+                        "체중(kg)": weight, "BMI": user_bmi, "목표 칼로리": daily_calorie, "오늘 섭취량": total,
+                        "운동 장소": ex_summary, "운동 부위": f"총 {total_burned_calories}kcal 소모", "오늘 컨디션": "정상", "운동 시간(분)": total_time_sum
+                    }
+                    df = pd.read_csv(LOG_FILE) if os.path.exists(LOG_FILE) else pd.DataFrame(columns=new_data.keys())
+                    df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
+                    df.to_csv(LOG_FILE, index=False, encoding="utf-8-sig")
 
-                old_exp = load_exp()
-                gained_exp = 10
+                    old_exp = load_exp()
+                    gained_exp = 10
 
-                new_exp = old_exp + gained_exp
-                save_exp(new_exp)
+                    new_exp = old_exp + gained_exp
+                    save_exp(new_exp)
 
-                old_lvl, old_lvl_n, _ = get_level(old_exp)
-                new_lvl, new_lvl_n, _ = get_level(new_exp)
+                    old_lvl, old_lvl_n, _ = get_level(old_exp)
+                    new_lvl, new_lvl_n, _ = get_level(new_exp)
 
-                st.success(f"🎉 {select_date.strftime('%m월 %d일')} 운동 기록 저장 완료! 수룡이가 {gained_exp} EXP를 얻었어요.")
-                if new_lvl > old_lvl:
-                    st.balloons()
-                    st.success(f"🎊 진화 성공! {old_lvl_n} → {new_lvl_n}")
+                    st.success(f"🎉 {select_date.strftime('%m월 %d일')} 운동 조합 기록 완료! 수룡이가 {gained_exp} EXP를 얻었어요.")
+                    if new_lvl > old_lvl:
+                        st.balloons()
+                        st.success(f"🎊 진화 성공! {old_lvl_n} → {new_lvl_n}")
 
         with tab3:
             st.write("📅 **나의 누적 다이어트 일지**")
