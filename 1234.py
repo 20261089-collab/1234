@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as pd
 import pandas as pd
 from datetime import datetime, time
 import os
@@ -121,10 +121,10 @@ def show_main_page():
 
     profile = load_profile()
 
-    # 🛠️ '사용자 정보 입력' -> '수정이 정보 입력'으로 수정
+    # 수정이 정보 입력으로 변경
     st.header("👤 수정이 정보 입력")
     
-    # 🛠️ 이름 기본값을 '영범이의 아이들'로 지정
+    # 기본값 '영범이의 아이들'로 지정
     name = st.text_input("이름", value=profile.get("이름", "영범이의 아이들"))
 
     gender_options = ["여자", "남자"]
@@ -290,35 +290,51 @@ def show_main_page():
             bmi_status = "고체중 (관절 보호)" if user_bmi >= 25.0 else ("저체중 (근력 강화)" if user_bmi < 18.5 else "정상 체중")
             st.info(f"📋 분석 리포트: {bmi_status} 상태에 맞춤형 [{place_style} - {target_part}] 프로그램을 제안합니다.")
 
+            # 📊 10분당 칼로리 소비량 기준 정의 및 총 소비 칼로리 계산
+            if place_style == "홈트레이닝 (집)":
+                base_calorie_per_10min = 55  # 홈트 10분당 평균 55kcal
+            else:
+                base_calorie_per_10min = 50  # 헬스장 웨이트 10분당 평균 50kcal
+
+            # 컨디션에 따른 보정 변수
             if condition == "컨디션 최고! 🔥":
                 cond_msg = "오늘은 강도 높은 운동도 가능해요!"
-                gym_set = "4세트";
+                gym_set = "4세트"
                 home_mission = "맨몸 스쿼트 20회 + 플랭크 1분 추가 진행!"
+                base_calorie_per_10min += 15  # 고강도 활동 보정 (+15kcal)
             elif condition == "보통이에요 🙂":
                 cond_msg = "정석 자세에 집중하면서 무리하지 않게 운동해요."
-                gym_set = "3세트";
+                gym_set = "3세트"
                 home_mission = "영상 가이드를 80% 이상 따라 하기!"
             else:
-                cond_msg = "오늘은 무리하지 말고 스트레칭 and 가벼운 운동 위주로 해요."
-                gym_set = "2세트";
+                cond_msg = "오늘은 무리하지 말고 스트레칭 및 가벼운 운동 위주로 해요."
+                gym_set = "2세트"
                 home_mission = "힘들면 앞쪽 10분만 따라 하고 휴식하기!"
+                base_calorie_per_10min -= 10  # 저강도 활동 보정 (-10kcal)
 
             st.warning(f"🌡️ 오늘의 컨디션 케어: {cond_msg}")
 
+            # 🧮 총 소비 칼로리 최종 계산 후 화면 표시
+            burned_calories = round((exercise_time / 10) * base_calorie_per_10min)
+            st.subheader(f"🔥 예상 운동 소비 칼로리")
+            st.info(f"선택하신 운동 조합의 10분당 소모 칼로리는 약 **{base_calorie_per_10min} kcal** 이며, "
+                    f"총 **{exercise_time}분** 운동 시 약 **{burned_calories} kcal**가 소비됩니다.")
+
+            # 영상 출력 부분 (참고용 문구 추가)
             if place_style == "홈트레이닝 (집)":
-                st.success("🏠 오늘의 추천 홈트 영상")
+                st.success("🏠 오늘의 추천 홈트 영상 (참고용)")
                 if target_part == "전신":
                     st.markdown("- [추천 영상 1](https://youtu.be/gSz5n4sLENI) / [추천 영상 2](https://youtu.be/dZbPtAgofwI)")
                 elif target_part == "상체 (가슴/팔)":
                     st.markdown("- [추천 영상 1](https://youtu.be/2swcod5RYvU) / [추천 영상 2](https://youtu.be/T-bVqdhqW2U)")
                 elif target_part == "하체 (엉덩이/허벅지)":
-                    st.markdown("- [추천 영상 1](https://youtu.be/dpBYYEhdofI) / [추천 영상 2](https://youtu.be/NDsjmxTROEo)")
+                    st.markdown("- [추천 영상 1](https://youtu.be/dpBYYEhdofI) / [추천 영상 2](https://youtu. sailboats/NDsjmxTROEo)")
                 else:
                     st.markdown("- [추천 영상 1](https://youtu.be/jpTQdM7okkI) / [추천 영상 2](https://youtu.be/iOSYLKBk894)")
                 with st.expander("ℹ️ 홈트 가이드 설명 보기"):
                     st.write(home_mission)
             else:
-                st.success(f"💪 오늘의 헬스장 추천 머신 루틴 ({gym_set}씩 수행)")
+                st.success(f"💪 오늘의 헬스장 추천 머신 루틴 ({gym_set}씩 수행, 참고용)")
                 if target_part == "상체 (가슴/팔)":
                     st.markdown("- [추천 강좌 보기](https://youtu.be/Dw8PbebpF9w)")
                 elif target_part == "하체 (엉덩이/허벅지)":
@@ -332,7 +348,6 @@ def show_main_page():
 
             st.subheader("💾 운동 기록 저장")
             if st.button("🔥 지정된 날짜로 기록 저장하고 경험치 받기"):
-                # 현재 시각의 '시:분'을 가져와 선택한 날짜 형식과 결합
                 current_time_str = datetime.now().strftime("%H:%M")
                 formatted_date = f"{select_date.strftime('%Y-%m-%d')} {current_time_str}"
 
@@ -345,7 +360,6 @@ def show_main_page():
                 df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
                 df.to_csv(LOG_FILE, index=False, encoding="utf-8-sig")
 
-                # 고정으로 10 EXP를 획득하도록 설정
                 old_exp = load_exp()
                 gained_exp = 10
 
