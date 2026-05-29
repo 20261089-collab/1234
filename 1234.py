@@ -143,6 +143,25 @@ gym_details = {
             "tip": "엎드린 자세에서 발목 뒷 패드를 엉덩이 방향으로 가깝게 당겨 허벅지 뒤쪽(햄스트링) 근육을 강하게 수축해 줍니다."
         }
     ],
+    # 💡 [요청 반영] 근육증가 테마용 고강도 맨몸 운동 시트 추가
+    "맨몸_웨이트": [
+        {
+            "name": "정석 맨몸 스쿼트 (하체 빌딩)", "cal_10m": 65,
+            "tip": "다리를 어깨너비로 벌리고 발끝을 살짝 바깥으로 엽니다. 무릎이 안으로 말리지 않게 주의하며, 의자에 앉듯 고관절을 접으며 깊숙이 앉습니다. 일어날 때 발뒤꿈치로 땅을 밀어내세요."
+        },
+        {
+            "name": "워킹 런지 / 백 런지 (둔근 및 대퇴)", "cal_10m": 60,
+            "tip": "한쪽 발을 크게 앞으로 디디며 양 무릎이 직각(90도)이 될 때까지 몸을 내립니다. 앞발 무릎이 발끝 앞으로 너무 튀어나가지 않게 중심을 수직 하방으로 내리는 것이 정석입니다."
+        },
+        {
+            "name": "정석 푸쉬업 (가슴 및 삼두)", "cal_10m": 55,
+            "tip": "손을 어깨너비보다 살짝 넓게 짚고, 머리부터 발끝까지 몸을 일직선으로 만듭니다. 가슴이 바닥에 닿기 직전까지 내려갔다가 밀어 올립니다. 힘들면 무릎을 대고 진행하세요!"
+        },
+        {
+            "name": "정식 엘보우 플랭크 (코어 강화)", "cal_10m": 45,
+            "tip": "팔꿈치를 어깨 아래에 두고 전완으로 바닥을 지지합니다. 복부와 엉덩이에 강하게 힘을 주어 몸이 아래로 처지거나 엉덩이가 위로 솟구치지 않도록 평평한 상태를 단단히 유지합니다."
+        }
+    ],
     "접근성_유산소": [
         {"name": "줄넘기 (또는 제자리 가볍게 뛰기)", "cal_10m": 100},
         {"name": "실내 고정식 싸이클 자전거", "cal_10m": 65},
@@ -334,30 +353,23 @@ def show_main_page():
 
             # --- [정밀 분배 엔진 및 처방 렌더링 세션] ---
             if ex_place == "헬스장":
-                # 분기점 1: [헬스장 + 감량] -> 유산소 중심 기구 및 서킷 처방
                 if goal == "감량":
                     st.markdown(f"### 🎯 AI 헬스장 체지방 커팅 루틴 처방 (감량 맞춤)")
-                    
                     weight_total_time = round(target_total_time * 0.4)
                     cardio_total_time = target_total_time - weight_total_time
-                    
                     st.success(f"🔥 감량 목표에 맞춰 **유산소 비중을 60%({cardio_total_time}분)**으로 늘리고, 근력 기구는 짧고 굵게 **{weight_total_time}분**으로 세팅했습니다.")
                     
                     col_upper_page, col_lower_page = st.columns(2)
-                    
                     with col_upper_page:
                         st.markdown("#### 💪 루틴 A: 전신 칼로리 소모형 근력")
                         with st.container(border=True):
                             circuit_list = [gym_details["하체"][0], gym_details["상체"][1], gym_details["하체"][2]]
                             time_per_ex = max(4, round(weight_total_time / len(circuit_list)))
-                            
                             for item in circuit_list:
                                 st.markdown(f"**🔹 {item['name']}**")
                                 st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (15회 라이트하게 3세트)")
-                                # 💡 [요청 반영] 감량 서킷 머신 설명서/팁 확장 패널 추가!
                                 with st.expander("💡 기구 사용법 및 자극 꿀팁 보기"):
                                     st.caption(item["tip"])
-                                
                                 ai_prescribed_exercises.append(item['name'])
                                 ai_prescribed_calories += round((time_per_ex / 10) * item.get("cal_10m", 60))
                             
@@ -366,7 +378,6 @@ def show_main_page():
                         with st.container(border=True):
                             cardio1 = round(cardio_total_time * 0.6)
                             cardio2 = cardio_total_time - cardio1
-                            
                             st.markdown(f"**1️⃣ 트레드밀 (러닝머신)** ➡️ ⏱️ **{cardio1}분**")
                             st.caption("🏃 2분 빠르게 뛰고, 2분 빠르게 걷는 인터벌 방식으로 체지방 연소를 극대화합니다.")
                             ai_prescribed_exercises.append("트레드밀 (러닝머신)")
@@ -378,16 +389,13 @@ def show_main_page():
                                 ai_prescribed_exercises.append("천국의 계단 (스텝밀)")
                                 ai_prescribed_calories += round((cardio2 / 10) * 100)
 
-                # 분기점 2: [헬스장 + 근육증가 또는 유지] -> 웨이트 빌딩 중심 세팅
                 else:
                     st.markdown(f"### 🎯 AI 헬스장 벌크 및 근비대 루틴 처방 (근육증가 맞춤)")
                     weight_total_time = round(target_total_time * 0.75)
                     cardio_total_time = target_total_time - weight_total_time
-                    
                     st.info(f"💪 근육 성장을 위해 **근력 기구 웨이트 {weight_total_time}분(75%) + 심폐 마무리 유산소 {cardio_total_time}분(25%)**으로 배분했습니다.")
                     
                     col_upper_page, col_lower_page = st.columns(2)
-                    
                     with col_upper_page:
                         st.markdown("#### 💪 옵션: 오늘 추천 상체 기구 루틴")
                         with st.container(border=True):
@@ -418,7 +426,31 @@ def show_main_page():
                                 with st.expander("💡 기구 사용법 및 자극 꿀팁 보기"):
                                     st.caption(item["tip"])
 
-            # CASE 2: 장소가 '홈트'이고 다이어트 목적이 '감량'인 홈트레이닝 유산소 루틴
+            # 💡 [요청 반영] CASE 2-A: 장소가 '홈트'이고 목적이 '근육증가'인 경우 맨몸 웨이트 세팅 분기 신설
+            elif ex_place == "홈트" and goal == "근육증가":
+                st.markdown(f"### 🏠 AI 맨몸 근성장 웨이트 하이퍼 홈트 처방")
+                st.info(f"기구 없이 맨몸으로 근육을 쥐어짜는 **타겟 부위별 정석 맨몸 근비대 루틴**입니다. 총 **{target_total_time}분**에 맞춰 균등 배분되었습니다.")
+                
+                with st.container(border=True):
+                    bodyweight_list = gym_details["맨몸_웨이트"]
+                    time_per_ex = max(5, round(target_total_time / len(bodyweight_list)))
+                    
+                    col_hw1, col_hw2 = st.columns(2)
+                    
+                    for idx, item in enumerate(bodyweight_list):
+                        # 대시보드를 이쁘게 양쪽으로 분할 렌더링
+                        target_col = col_hw1 if idx % 2 == 0 else col_hw2
+                        with target_col:
+                            with st.container(border=True):
+                                st.markdown(f"**🔥 {item['name']}**")
+                                st.markdown(f"  - ⏱️ 권장 소요: **{time_per_ex}분** (실패 지점까지 4세트)")
+                                with st.expander("📖 정석 자세 및 자극 부위 가이드 보기"):
+                                    st.caption(item["tip"])
+                                
+                                ai_prescribed_exercises.append(item['name'])
+                                ai_prescribed_calories += round((time_per_ex / 10) * item.get("cal_10m", 60))
+
+            # CASE 2-B: 장소가 '홈트'이고 다이어트 목적이 '감량'인 홈트레이닝 유산소 루틴
             elif ex_place == "홈트" and goal == "감량":
                 st.markdown(f"### 🏠 AI 홈트레이닝 다원화 유산소 처방")
                 video_time = 20
@@ -486,7 +518,6 @@ def show_main_page():
             # --- [실제 수행 기록 정산기 단락] ---
             st.subheader("🏋️ 오늘 실제로 완료한 운동 체크")
             
-            # 💡 [요청 반영] AI 추천루틴 통째로 넣기 체크박스 인터페이스 구현
             use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 루틴을 그대로 완벽하게 수행했습니다! (원클릭 등록)", value=False)
 
             actual_burned_calories = 0
@@ -494,7 +525,6 @@ def show_main_page():
             ex_summary = ""
 
             if use_ai_routine:
-                # 체크박스 활성화 시 AI 처방값을 연산엔진에 즉시 바인딩
                 actual_time_sum = target_total_time
                 actual_burned_calories = ai_prescribed_calories
                 ex_summary = ", ".join(ai_prescribed_exercises)
@@ -519,7 +549,7 @@ def show_main_page():
                                 if item["name"] == ex_name:
                                     cal_factor = item.get("cal_10m", 60)
                         
-                        done_time = st.slider(f"[{ex_name}] 실제 몇 분 하셨나요?", 0, 180, 30, key=f"v10_time_{ex_name}")
+                        done_time = st.slider(f"[{ex_name}] 실제 몇 분 하셨나요?", 0, 180, 30, key=f"v11_time_{ex_name}")
                         actual_burned_calories += round((done_time / 10) * cal_factor)
                         actual_time_sum += done_time
                     ex_summary = ", ".join(actual_done_list)
