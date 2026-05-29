@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime, time
 import os
 import calendar
+import plotly.graph_objects as go  # 👈 Plotly 라이브러리 추가!
 
 # 1. 페이지 설정
 st.set_page_config(
@@ -364,7 +365,7 @@ def show_main_page():
                 
                 df_log["오늘 섭취량"] = pd.to_numeric(df_log["오늘 섭취량"], errors="coerce").fillna(0)
                 df_log["운동 부위"] = pd.to_numeric(df_log["운동 부위"], errors="coerce").fillna(0)
-                df_log["운동 시간(분)"] = pd.to_numeric(df_log["운동 시간(분)"], errors="coerce").fillna(0)
+                df_log["운동 시간(분)"] = pd.to_numeric(df_log["운동 시간(분)"].fillna(0), errors="coerce")
                 
                 df_display = df_log.copy()
                 df_display = df_display.rename(columns={"운동 장소": "수행한 운동 조합", "운동 부위": "소비 칼로리(kcal)"})
@@ -381,21 +382,52 @@ def show_main_page():
 
                 st.divider()
                 
-                # 📈 [요청 변경 사항] 섭취량 vs 운동 소모량 비교 막대그래프 레이아웃 대폭 개편
+                # 📈 [요청 변경 사항] Plotly 기반 고품격 세로 막대그래프 교체 적용 파트
                 st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
-                
+
                 df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
-                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum()
-                df_chart = df_chart.rename(columns={"오늘 섭취량": "섭취 칼로리", "운동 부위": "운동 소모 칼로리"})
-                
-                # 💡 [뚱뚱하지 않게 필터링!] 양쪽에 빈 공간 컬럼(2.5씩)을 넓게 배치하고, 
-                # 가운데 그래프 컬럼(3)을 얇게 쪼개어 예시 사진처럼 뚱뚱하지 않고 슬림하게 올라오는 세로 막대로 구현했습니다.
-                left_space, graph_col, right_space = st.columns([2.5, 3, 2.5])
-                
-                with graph_col:
-                    # Streamlit 내장 st.bar_chart로 세로 막대 컴포넌트를 깔끔하게 구현
-                    st.bar_chart(df_chart, y=["섭취 칼로리", "운동 소모 칼로리"])
-                    st.caption("※ 날짜별 키재기! 파란색 막대보다 주황색 막대가 더 높아야 건강하게 살이 빠집니다!")
+
+                df_chart = (
+                    df_log.groupby("날짜_일만")
+                    [["오늘 섭취량", "운동 부위"]]
+                    .sum()
+                    .reset_index()
+                )
+
+                fig = go.Figure()
+
+                fig.add_trace(
+                    go.Bar(
+                        x=df_chart["날짜_일만"],
+                        y=df_chart["오늘 섭취량"],
+                        name="섭취 칼로리"
+                    )
+                )
+
+                fig.add_trace(
+                    go.Bar(
+                        x=df_chart["날짜_일만"],
+                        y=df_chart["운동 부위"],
+                        name="운동 소모 칼로리"
+                    )
+                )
+
+                fig.update_layout(
+                    title="섭취 칼로리 vs 운동 소모 칼로리",
+                    xaxis_title="날짜",
+                    yaxis_title="칼로리(kcal)",
+                    barmode="group",
+                    height=500
+                )
+
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True
+                )
+
+                st.caption(
+                    "💡 운동 소모 칼로리 막대가 높을수록 에너지 소비가 많습니다."
+                )
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
