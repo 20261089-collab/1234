@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime, time
+from datetime import datetime
 import os
 import calendar
 
-# [필수] 모든 Streamlit 컴포넌트 중 반드시 맨 처음에 위치해야 오류가 나지 않습니다.
+# 🚨 [중요] 어떤 Streamlit 명령어나 다른 라이브러리 선언보다 무조건 최상단에 위치해야 에러가 나지 않습니다!
 st.set_page_config(
     page_title="수룡이와 함께하는 맞춤형 다이어트",
     page_icon="🐉",
@@ -365,27 +365,19 @@ def show_main_page():
 
                 st.divider()
                 
-                # 📈 [가로형 막대 분리 배치 파트]
+                # 📈 [오류 없는 세로형 분리 막대그래프 파트]
                 st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
 
                 df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
-                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum().reset_index()
                 
-                # 1. 컬럼명을 깔끔하게 한글 이름으로 변경
+                # 날짜별로 섭취량과 운동 소모량을 명확한 컬럼명으로 요약
+                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum()
                 df_chart = df_chart.rename(columns={"오늘 섭취량": "🍽️ 섭취 칼로리", "운동 부위": "🔥 운동 소모 칼로리"})
                 
-                # 2. 데이터를 일렬로 멜트(Melt)하여 누적 현상 방지
-                df_melted = df_chart.melt(id_vars="날짜_일만", var_name="칼로리 분류", value_name="kcal")
+                # 가로축(x)은 날짜, 세로축(y)에 두 컬럼을 배열로 넘기면 0선에서 따로 시작하여 나란히 서게 됩니다!
+                st.bar_chart(df_chart, y=["🍽️ 섭취 칼로리", "🔥 운동 소모 칼로리"])
                 
-                # 3. 인덱스를 '날짜_일만'과 '칼로리 분류'의 멀티 인덱스로 지정하여 가로로 완벽 분리
-                df_final = df_melted.set_index(["날짜_일만", "칼로리 분류"])
-
-                left_space, graph_col, right_space = st.columns([1, 6, 1])
-                with graph_col:
-                    # 💡 가로 배치(horizontal=True)를 켠 상태에서 분리된 인덱스를 바인딩합니다.
-                    st.bar_chart(df_final, y="kcal", horizontal=True)
-                
-                st.caption("💡 섭취 칼로리와 운동 소모 칼로리가 0부터 각각 출발하여 한눈에 직접 비교가 가능합니다.")
+                st.caption("💡 각 날짜 아래에 두 종류의 막대가 0부터 나란히 시작하므로 크기를 직접 비교하기 좋습니다.")
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
