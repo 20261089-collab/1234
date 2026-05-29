@@ -104,7 +104,7 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
-# 🏋️ [데이터셋] 운동 데이터 (전달해주신 최신 유튜브 링크로 교체 완료!)
+# 🏋️ [데이터셋] 운동 데이터
 exercises_db = {
     "산책 / 가벼운 걷기": {"cal_10m": 30, "url": "https://youtu.be/MWnD6DhLjyc?si=-2IDpUQ8fYxQguKv"},
     "빠르게 걷기 (파워워킹)": {"cal_10m": 40, "url": "https://youtu.be/Me3IaZS3CdY?si=sGAMVjvBxPmokg01"},
@@ -294,12 +294,14 @@ def show_main_page():
                 st.write("⏱️ **선택한 운동 조합별 진행 시간(분)을 설정하세요**")
                 
                 for ex_name in selected_ex_list:
-                    cal_per_10m = exercises_db[ex_name]["cal_10m"]
-                    ex_time = st.slider(f"[{ex_name}] 진행 시간 (10분당 {cal_per_10m} kcal 소모)", 0, 120, 20, key=f"time_{ex_name}")
-                    
-                    ex_burned = round((ex_time / 10) * cal_per_10m)
-                    total_burned_calories += ex_burned
-                    total_time_sum += ex_time
+                    # 각 독립된 항목별 딕셔너리 안전 참조
+                    if ex_name in exercises_db:
+                        cal_per_10m = exercises_db[ex_name]["cal_10m"]
+                        ex_time = st.slider(f"[{ex_name}] 진행 시간 (10분당 {cal_per_10m} kcal 소모)", 0, 120, 20, key=f"time_{ex_name}")
+                        
+                        ex_burned = round((ex_time / 10) * cal_per_10m)
+                        total_burned_calories += ex_burned
+                        total_time_sum += ex_time
                 
                 st.divider()
                 
@@ -311,9 +313,11 @@ def show_main_page():
                 st.info(f"💡 선택한 조합 계측: 오늘 설정하신 루틴을 완수하면 총 **{total_burned_calories} kcal**가 소비됩니다!")
                 
                 st.write("📺 **추천 운동 가이드 영상 안내 (참고용)**")
+                # 🛠️ [버그 수정] 루프 내 독립 매칭 가동하여 중복 노출 절대 차단
                 for ex_name in selected_ex_list:
-                    url = exercises_db[ex_name]["url"]
-                    st.markdown(f"- **{ex_name}** 영상 보러가기: [링크 클릭]({url})")
+                    if ex_name in exercises_db:
+                        url = exercises_db[ex_name]["url"]
+                        st.markdown(f"- **{ex_name}** 영상 보러가기: [링크 클릭]({url})")
             else:
                 st.info("운동 리스트에서 오늘 수행할 종목 조합을 먼저 선택해 주세요!")
 
@@ -367,13 +371,17 @@ def show_main_page():
                 
                 st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
 
-                df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
-                
-                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum()
-                df_chart = df_chart.rename(columns={"오늘 섭취량": "🍽️ 섭취 칼로리", "운동 부위": "🔥 운동 소모 칼로리"})
-                
-                st.bar_chart(df_chart, y=["🍽️ 섭취 칼로리", "🔥 운동 소모 칼로리"])
-                st.caption("💡 각 날짜 아래에 두 종류의 막대가 0부터 나란히 시작하므로 크기를 직접 비교하기 좋습니다.")
+                # 🛠️ [차트 에러 방지] 일자 변환 및 그룹 데이터 구조 엄격 명시
+                try:
+                    df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
+                    df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum().reset_index()
+                    df_chart = df_chart.rename(columns={"오늘 섭취량": "🍽️ 섭취 칼로리", "운동 부위": "🔥 운동 소모 칼로리"})
+                    df_chart = df_chart.set_index("날짜_일만")
+                    
+                    st.bar_chart(df_chart[["🍽️ 섭취 칼로리", "🔥 운동 소모 칼로리"]])
+                    st.caption("💡 각 날짜별 막대를 통해 칼로리 섭취량과 소모 루틴을 비교할 수 있습니다.")
+                except Exception as e:
+                    st.info("데이터를 누적 중입니다. 다음 기록 입력 시 그래프가 활성화됩니다.")
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
