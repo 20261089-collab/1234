@@ -105,23 +105,23 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
-# 🏋️ [데이터셋] 운동 데이터 고도화 (유형, 장소, 강도 및 추천 기본값 단위 추가)
+# 🏋️ [데이터셋] 운동 데이터
 exercises_db = {
-    "산책 / 가벼운 걷기": {"cal_10m": 30, "url": "https://youtu.be/MWnD6DhLjyc?si=-2IDpUQ8fYxQguKv", "type": "유산소", "place": "홈트", "intensity": "하", "default_unit": "40분 걷기"},
-    "빠르게 걷기 (파워워킹)": {"cal_10m": 40, "url": "https://youtu.be/Me3IaZS3CdY?si=sGAMVjvBxPmokg01", "type": "유산소", "place": "홈트", "intensity": "중", "default_unit": "30분 집중 수행"},
-    "가벼운 조깅 (러닝머신)": {"cal_10m": 75, "url": "https://youtu.be/O3GU4hMK75w?si=foZpMfnW9iu39OAP", "type": "유산소", "place": "헬스장", "intensity": "중", "default_unit": "30분 달리기"},
-    "계단 오르기": {"cal_10m": 75, "url": "https://youtu.be/iRfeov-7KeQ?si=rW4bzFABsSlnhAM-", "type": "유산소", "place": "홈트", "intensity": "상", "default_unit": "20분 오르기"},
-    "실내 자전거": {"cal_10m": 68, "url": "https://youtu.be/xEhPT6ydXRY?si=645qR1WgmixDdFRI", "type": "유산소", "place": "홈트", "intensity": "중", "default_unit": "30분 페달링"},
-    "줄넘기": {"cal_10m": 100, "url": "https://youtu.be/7A_XOU4FkIk?si=-4SwZkx474jk-ARY", "type": "유산소", "place": "홈트", "intensity": "상", "default_unit": "100회씩 5세트 반복"},
-    "수영 (자유형)": {"cal_10m": 95, "url": "https://youtu.be/tVhe4wXsn5I?si=r7D7QuYyJgaLJ8zt", "type": "유산소", "place": "헬스장", "intensity": "상", "default_unit": "30분 왕복 레인"},
-    "스트레칭 / 요가": {"cal_10m": 28, "url": "https://youtu.be/Kk7TQGqQ3nA?si=_dSuiQeCyyB3Ojib", "type": "유산소", "place": "홈트", "intensity": "하", "default_unit": "20분 전신 이완"},
-    "필라테스": {"cal_10m": 35, "url": "https://youtu.be/sb51gF18cYo?si=g65fbxnREHItwbQ-", "type": "무산소", "place": "홈트", "intensity": "중", "default_unit": "30분 코어 강화 코스"},
-    "웨이트 트레이닝 (헬스장 머신)": {"cal_10m": 55, "url": "https://youtu.be/e7fOcatby_k?si=GnUzZIBQ-DlMSXnx", "type": "무산소", "place": "헬스장", "intensity": "상", "default_unit": "부위별 12회씩 4세트"},
-    "맨몸 스쿼트 / 런지": {"cal_10m": 60, "url": "https://youtu.be/Xcu271Ia720?si=o7ZDniBYeCamqRT2", "type": "무산소", "place": "홈트", "intensity": "중", "default_unit": "20회씩 3세트 진행"},
-    "플랭크 / 복근 운동": {"cal_10m": 50, "url": "https://youtu.be/USJgKSLxDRc?si=OAkWcADFXofRdvRg", "type": "무산소", "place": "홈트", "intensity": "중", "default_unit": "1분 유지 4세트 반복"},
-    "팔굽혀펴기 / 상체 홈트": {"cal_10m": 55, "url": "https://youtu.be/XmxpYKKlokok?si=MjtgeJUSRYkRqTBV", "type": "무산소", "place": "홈트", "intensity": "중", "default_unit": "15회씩 3세트 진행"},
-    "버피 테스트": {"cal_10m": 100, "url": "https://youtu.be/UeVDx20Jbs8?si=XEXhU_FPG2yCr5zw", "type": "무산소", "place": "홈트", "intensity": "상", "default_unit": "15회씩 3세트 전신 루틴"},
-    "복싱": {"cal_10m": 95, "url": "https://youtu.be/p7IetTCzUUQ?si=Mco-GJrZ0NHMkAW_", "type": "유산소", "place": "헬스장", "intensity": "상", "default_unit": "샌드백 트레이닝 25분"}
+    "산책 / 가벼운 걷기": {"cal_10m": 30, "url": "https://youtu.be/MWnD6DhLjyc?si=-2IDpUQ8fYxQguKv", "type": "유산소", "place": "홈트", "intensity": "하"},
+    "빠르게 걷기 (파워워킹)": {"cal_10m": 40, "url": "https://youtu.be/Me3IaZS3CdY?si=sGAMVjvBxPmokg01", "type": "유산소", "place": "홈트", "intensity": "중"},
+    "가벼운 조깅 (러닝머신)": {"cal_10m": 75, "url": "https://youtu.be/O3GU4hMK75w?si=foZpMfnW9iu39OAP", "type": "유산소", "place": "헬스장", "intensity": "중"},
+    "계단 오르기": {"cal_10m": 75, "url": "https://youtu.be/iRfeov-7KeQ?si=rW4bzFABsSlnhAM-", "type": "유산소", "place": "홈트", "intensity": "상"},
+    "실내 자전거": {"cal_10m": 68, "url": "https://youtu.be/xEhPT6ydXRY?si=645qR1WgmixDdFRI", "type": "유산소", "place": "홈트", "intensity": "중"},
+    "줄넘기": {"cal_10m": 100, "url": "https://youtu.be/7A_XOU4FkIk?si=-4SwZkx474jk-ARY", "type": "유산소", "place": "홈트", "intensity": "상"},
+    "수영 (자유형)": {"cal_10m": 95, "url": "https://youtu. Shelton_tVhe4wXsn5I?si=r7D7QuYyJgaLJ8zt", "type": "유산소", "place": "헬스장", "intensity": "상"},
+    "스트레칭 / 요가": {"cal_10m": 28, "url": "https://youtu.be/Kk7TQGqQ3nA?si=_dSuiQeCyyB3Ojib", "type": "유산소", "place": "홈트", "intensity": "하"},
+    "필라테스": {"cal_10m": 35, "url": "https://youtu.be/sb51gF18cYo?si=g65fbxnREHItwbQ-", "type": "무산소", "place": "홈트", "intensity": "중"},
+    "웨이트 트레이닝 (헬스장 머신)": {"cal_10m": 55, "url": "https://youtu.be/e7fOcatby_k?si=GnUzZIBQ-DlMSXnx", "type": "무산소", "place": "헬스장", "intensity": "상"},
+    "맨몸 스쿼트 / 런지": {"cal_10m": 60, "url": "https://youtu.be/Xcu271Ia720?si=o7ZDniBYeCamqRT2", "type": "무산소", "place": "홈트", "intensity": "중"},
+    "플랭크 / 복근 운동": {"cal_10m": 50, "url": "https://youtu.be/USJgKSLxDRc?si=OAkWcADFXofRdvRg", "type": "무산소", "place": "홈트", "intensity": "중"},
+    "팔굽혀펴기 / 상체 홈트": {"cal_10m": 55, "url": "https://youtu.be/XmxpYKKlokok?si=MjtgeJUSRYkRqTBV", "type": "무산소", "place": "홈트", "intensity": "중"},
+    "버피 테스트": {"cal_10m": 100, "url": "https://youtu.be/UeVDx20Jbs8?si=XEXhU_FPG2yCr5zw", "type": "무산소", "place": "홈트", "intensity": "상"},
+    "복싱": {"cal_10m": 95, "url": "https://youtu.be/p7IetTCzUUQ?si=Mco-GJrZ0NHMkAW_", "type": "유산소", "place": "헬스장", "intensity": "상"}
 }
 
 
@@ -259,7 +259,7 @@ def show_main_page():
 
         st.divider()
 
-        tab1, tab2, tab3 = st.tabs(["🍱 추천 식단", "🏃 AI 단일 루틴 처방 및 정산", "📅 나의 누적 다이어트 일지"])
+        tab1, tab2, tab3 = st.tabs(["🍱 추천 식단", "🏃 AI 목표 시간 맞춤형 루틴", "📅 나의 누적 다이어트 일지"])
 
         with tab1:
             st.write("✨ **수룡이가 엄선한 건강한 다이어트 추천 메뉴**")
@@ -278,7 +278,7 @@ def show_main_page():
                 st.write(f"- {f}: {foods[f]['calorie']} kcal")
 
         with tab2:
-            st.write("🤖 **수룡이 AI의 고도화된 단일 맞춤 루틴 처방전**")
+            st.write("🤖 **수룡이 AI의 타임라인 매칭 스포츠 루틴 설계**")
 
             # 환경 및 컨디션 입력 받기
             st.subheader("📋 오늘의 환경 및 신체 컨디션")
@@ -290,78 +290,94 @@ def show_main_page():
             with col_ex3:
                 user_condition = st.selectbox("현재 나의 컨디션", ["최상 (에너지 넘침)", "정상 (보통)", "피곤함 (가벼운 운동 필요)", "근육통 있음"])
 
+            # 🌟 [신규 추가] 사용자가 운동하고 싶은 시간 설정
+            st.write("")
+            st.subheader("⏱️ 오늘 운동에 투자할 총 시간 설정")
+            target_total_time = st.slider("오늘은 총 몇 분 동안 운동을 하고 싶으신가요?", 10, 180, 50, step=5)
+
             st.divider()
 
-            # --- [AI 내부 필터링 엔진] ---
-            # 1. 장소 필터링
+            # --- [AI 내부 필터링 및 시간 슬라이싱 엔진] ---
+            # 1. 장소 기본 필터링
             available_pool = {k: v for k, v in exercises_db.items() if v["place"] == ex_place}
             
             # 2. 컨디션 필터링 (피곤 또는 근육통 시 고강도 운동 탈락)
             if user_condition in ["피곤함 (가벼운 운동 필요)", "근육통 있음"]:
                 available_pool = {k: v for k, v in available_pool.items() if v["intensity"] != "상"}
             
-            # 3. 목표에 매칭되는 종목 분리
+            # 3. 유산소 / 무산소 풀 분리
             aerobic_pool = [k for k, v in available_pool.items() if v["type"] == "유산소"]
             anaerobic_pool = [k for k, v in available_pool.items() if v["type"] == "무산소"]
 
-            st.subheader(f"🎯 AI가 설계한 오늘의 핵심 추천 루틴")
+            st.subheader(f"🎯 AI가 설계한 오늘 딱 {target_total_time}분 최적 루틴")
             
-            # 단일 루틴 조립 프로세스
+            # 비율에 기반한 시간 분배 로직
             routine_items = []
             
             if goal == "감량":
-                st.info("💡 체지방 연소를 촉진하기 위해 **[유산소 메인 + 보조 홈트]** 단일 루틴을 조합했습니다.")
-                if aerobic_pool:
-                    routine_items.append((aerobic_pool[0], exercises_db[aerobic_pool[0]]["default_unit"], exercises_db[aerobic_pool[0]]["url"]))
-                if len(aerobic_pool) > 1:
-                    routine_items.append((aerobic_pool[1], "20분 지속하기", exercises_db[aerobic_pool[1]]["url"]))
-                elif anaerobic_pool:
-                    routine_items.append((anaerobic_pool[0], "15회씩 3세트 (가볍게)", exercises_db[anaerobic_pool[0]]["url"]))
+                # 감량: 유산소 70%, 무산소 30%
+                aerobic_time = round(target_total_time * 0.7)
+                anaerobic_time = target_total_time - aerobic_time
+                
+                st.info(f"💡 목표가 **[감량]**이므로 입력하신 {target_total_time}분 중 **유산소 {aerobic_time}분 + 무산소 {anaerobic_time}분**으로 쪼개어 배정했습니다.")
+                
+                if aerobic_pool and aerobic_time > 0:
+                    routine_items.append((aerobic_pool[0], f"{aerobic_time}분 집중 지속하기", exercises_db[aerobic_pool[0]]["url"]))
+                if anaerobic_pool and anaerobic_time > 0:
+                    routine_items.append((anaerobic_pool[0], f"{anaerobic_time}분 동안 세트 나누어 진행", exercises_db[anaerobic_pool[0]]["url"]))
                     
             elif goal == "근육증가":
-                st.info("💡 근육량 펌핑 및 근비대를 위해 **[무산소 메인 + 타겟 단백질 자극]** 단일 루틴을 조합했습니다.")
-                if anaerobic_pool:
-                    routine_items.append((anaerobic_pool[0], exercises_db[anaerobic_pool[0]]["default_unit"], exercises_db[anaerobic_pool[0]]["url"]))
-                if len(anaerobic_pool) > 1:
-                    routine_items.append((anaerobic_pool[1], "20회씩 3세트 고정", exercises_db[anaerobic_pool[1]]["url"]))
-                elif aerobic_pool:
-                    routine_items.append((aerobic_pool[0], "15분 인터벌 달리기", exercises_db[aerobic_pool[0]]["url"]))
+                # 근육증가: 무산소 70%, 유산소 30%
+                anaerobic_time = round(target_total_time * 0.7)
+                aerobic_time = target_total_time - anaerobic_time
+                
+                st.info(f"💡 목표가 **[근육증가]**이므로 입력하신 {target_total_time}분 중 **무산소 {anaerobic_time}분 + 유산소 {aerobic_time}분**으로 쪼개어 배정했습니다.")
+                
+                if anaerobic_pool and anaerobic_time > 0:
+                    routine_items.append((anaerobic_pool[0], f"{anaerobic_time}분 동안 고집중 타겟팅 세트", exercises_db[anaerobic_pool[0]]["url"]))
+                if aerobic_pool and aerobic_time > 0:
+                    routine_items.append((aerobic_pool[0], f"{aerobic_time}분 마무리 유산소 페이스 조절", exercises_db[aerobic_pool[0]]["url"]))
                     
             else:  # 유지
-                st.info("💡 건강 지표 유지를 위해 **[유산소 1종 + 근력 1종]** 컴비네이션 루틴을 조합했습니다.")
-                if aerobic_pool:
-                    routine_items.append((aerobic_pool[0], "25분 밸런스 운동", exercises_db[aerobic_pool[0]]["url"]))
-                if anaerobic_pool:
-                    routine_items.append((anaerobic_pool[0], "20회씩 3세트", exercises_db[anaerobic_pool[0]]["url"]))
+                # 유지: 50대 50 밸런스
+                aerobic_time = round(target_total_time * 0.5)
+                anaerobic_time = target_total_time - aerobic_time
+                
+                st.info(f"💡 목표가 **[유지]**이므로 입력하신 {target_total_time}분 중 **유산소 {aerobic_time}분 + 무산소 {anaerobic_time}분**으로 균형 배정했습니다.")
+                
+                if aerobic_pool and aerobic_time > 0:
+                    routine_items.append((aerobic_pool[0], f"{aerobic_time}분 동안 루틴 러닝", exercises_db[aerobic_pool[0]]["url"]))
+                if anaerobic_pool and anaerobic_time > 0:
+                    routine_items.append((anaerobic_pool[0], f"{anaerobic_time}분 홈코어 트레이닝", exercises_db[anaerobic_pool[0]]["url"]))
 
-            # 처방전 가시화 박스
+            # 처방전 타임라인 시각화 박스
             if routine_items:
                 with st.container(border=True):
-                    st.markdown(f"### 📋 오늘의 원픽(One-Pick) 스포츠 처방전")
+                    st.markdown(f"### 📋 오늘의 타임박스(Time-Box) 스포츠 처방전")
                     for idx, (ex_title, unit_text, link_url) in enumerate(routine_items, 1):
                         st.markdown(f"**{idx}. {ex_title}** ➡️ `{unit_text}`")
                         st.markdown(f"   📺 [시청하며 따라하기 (유튜브 영상 링크)]({link_url})")
             else:
-                st.warning("선택하신 조건(장소/컨디션)에 맞는 추천 풀이 일시적으로 부족합니다. 조건을 조절해 보세요.")
+                st.warning("조건에 맞는 운동 풀이 부족합니다. 운동 장소나 컨디션을 변경하여 다시 조율해 보세요.")
 
             st.divider()
 
             # --- [실제 수행 기록 섹션] ---
             st.subheader("🏋️ 오늘 실제로 완료한 운동 기록하기")
-            st.caption("AI의 추천 대로 수행했거나, 혹은 다른 운동을 개별적으로 진행했을 수도 있으니 실제로 한 운동을 아래에서 정확히 골라주세요!")
+            st.caption("AI의 추천 시간을 토대로 수행했거나, 혹은 상황에 따라 다르게 진행했을 수도 있으니 실제 완료한 운동을 직접 등록해 주세요!")
             
-            # 사용자가 오늘 실제로 한 운동 다중 선택 (전체 목록 풀 제공)
-            actual_done_list = st.multiselect("오늘 실제 수행 완료한 모든 종목을 선택하세요", list(exercises_db.keys()))
+            # 사용자가 프리셋 리스트에서 직접 체크하여 진행 시간 산정
+            actual_done_list = st.multiselect("오늘 실제 수행 완료한 모든 종목을 자유롭게 선택하세요", list(exercises_db.keys()))
             
             actual_burned_calories = 0
             actual_time_sum = 0
             
             if actual_done_list:
-                st.write("⏱️ **선택하신 운동별 실제 수행 시간(분)을 기입하세요**")
+                st.write("⏱️ **선택하신 운동별 실제 수행 시간(분)을 입력하세요**")
                 for ex_name in actual_done_list:
                     cal_per_10m = exercises_db[ex_name]["cal_10m"]
                     
-                    # 사용자가 직접 몇 분 했는지 슬라이더 조절
+                    # 실시간 미세 조정을 위한 슬라이더
                     done_time = st.slider(f"[{ex_name}] 실제 몇 분 진행하셨나요?", 0, 150, 30, key=f"actual_time_{ex_name}")
                     
                     ex_burned = round((done_time / 10) * cal_per_10m)
