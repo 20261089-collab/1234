@@ -178,18 +178,6 @@ def show_main_page():
 
     st.divider()
 
-    with st.expander("💡 핏메이트 개인 스마트 처방전 사용법 안내", expanded=True):
-        st.markdown("""
-        1. **목표 및 장소 설정**: 오늘 운동할 장소와 본인의 다이어트 목적을 올바르게 세팅해 주세요.
-        2. **식단 분석 확인**: 식사 기록 후 `✨ 오늘의 다이어트 및 운동 처방 보기` 버튼을 누릅니다.
-        3. **시간 분배 매칭 엔진 가동 (`🏃 AI 목표 시간 맞춤형 루틴` 탭)**:
-           * **[헬스장 + 근육증가]**: 전문 웨이트 **상체 기구 vs 하체 기구** 분할 처방전이 나옵니다.
-           * **[홈트 + 감량]**: **땅끄부부 20분 코스**가 명확한 설명과 함께 고정 출력되며, 남은 시간은 설정치에 맞춰 **줄넘기, 싸이클 등으로 1분 단위까지 정밀하게 합산(오버 시간 없음)**되어 노출됩니다. 순번 꼬임도 완벽하게 패치되었습니다.
-        4. **개인 운동 추가 정산**: 복싱, 크로스핏 등 외부 스포츠는 제일 하단 **'오늘 실제로 완료한 운동 체크'** 풀에서 수동 정산 가능합니다.
-        """)
-
-    st.divider()
-
     profile = load_profile()
 
     st.header("👤 수정이 정보 입력")
@@ -336,14 +324,14 @@ def show_main_page():
 
             st.write("")
             st.subheader("⏱️ 오늘 운동에 투자할 총 시간 설정")
-            # 홈트 최소 20분(땅끄영상용) 확보를 위해 min_value를 20으로 미세조정
             target_total_time = st.slider("오늘은 총 몇 분 동안 운동을 진행하시겠습니까?", 20, 180, 60, step=5)
 
             st.divider()
 
-            # --- [정밀 타임 컨트롤 패치 엔진] ---
-            if ex_place == "헬스장" and goal == "근육증가":
-                st.markdown(f"### 🎯 AI 헬스장 기구 루틴 처방: 오늘 당신의 선택은?")
+            # --- [정밀 엔진 조건식 개조 및 버그 전면 패치] ---
+            # FIX: 감량이든 근육증가든 장소가 '헬스장'이면 오류 없이 75% 근력 웨이트 + 25% 마무리 유산소 자동 세팅 작동!
+            if ex_place == "Helvetica" or ex_place == "헬스장":
+                st.markdown(f"### 🎯 AI 헬스장 기구 루틴 처방")
                 
                 weight_total_time = round(target_total_time * 0.75)
                 cardio_total_time = target_total_time - weight_total_time
@@ -380,7 +368,7 @@ def show_main_page():
                             st.markdown(f"**🏃 마무리 유산소 ({cardio_total_time}분)**")
                             st.markdown(f"  - 추천기구: `천국의 계단 (스텝밀)`")
 
-            # FIX: [홈트 + 감량] 루틴 번호 스와핑 에러 및 시간 초과 현상 전면 수정 완료
+            # CASE 2: 장소가 '홈트'이고 다이어트 목적이 '감량'인 맞춤형 다원화 루틴
             elif ex_place == "홈트" and goal == "감량":
                 st.markdown(f"### 🏠 AI 홈트레이닝 다원화 유산소 처방")
                 st.success(f"설정 시간인 **총 {target_total_time}분**에 1분 단위까지 완벽히 정수 매칭되도록 설계된 타임라인입니다.")
@@ -391,23 +379,18 @@ def show_main_page():
                 with st.container(border=True):
                     st.markdown(f"#### ⏱️ 오늘의 세분화 유산소 타임라인 (정확히 총 {target_total_time}분 스케줄)")
                     
-                    # 1번 고정: 땅끄부부 영상 매칭 설명 패치
                     st.markdown(f"**1️⃣ 땅끄부부 칼소폭 찐 핵핵핵 매운맛 (유튜브 영상)** ➡️ ⏱️ **{video_time}분 고정 수행**")
                     st.video("https://youtu.be/gSz5n4sLENI?si=rKzqg9K7mJ9hywMo")
                     
                     if remaining_time > 0:
                         if remaining_time <= 30:
-                            # 잔여 시간 30분 이하면 순번 정상화 '2번' 단일 배치
                             st.markdown(f"**2️⃣ 줄넘기 (또는 제자리 가벼운 뛰기)** ➡️ ⏱️ **{remaining_time}분 지속**")
                         elif remaining_time <= 50:
-                            # 잔여 시간 31~50분 사이면 2번, 3번 균등 배분 (시간 오버 방지)
                             time1 = round(remaining_time * 0.5)
                             time2 = remaining_time - time1
                             st.markdown(f"**2️⃣ 줄넘기 (또는 제자리 가볍게 뛰기)** ➡️ ⏱️ **{time1}분**")
                             st.markdown(f"**3️⃣ 실내 고정식 싸이클 자전거** ➡️ ⏱️ **{time2}분**")
                         else:
-                            # 90분 등 긴 시간 설정 시, 순번 꼬임 패치 (1번 영상 -> 2번 싸이클 -> 3번 조깅 -> 4번 줄넘기)
-                            # 비율에 맞춘 정확한 연산으로 총합이 무조건 target_total_time과 일치함
                             time1 = round(remaining_time * 0.4)
                             time2 = round(remaining_time * 0.35)
                             time3 = remaining_time - (time1 + time2)
@@ -418,6 +401,7 @@ def show_main_page():
                             
                     st.caption(f"💡 [체크] 1번 영상({video_time}분) + 이후 세션들의 합계가 정확히 {target_total_time}분으로 조율되었습니다.")
 
+            # CASE 3: 그 외 장소가 홈트이면서 유지/근육증가용 서킷
             else:
                 st.markdown(f"### 🏃 AI 접근성 중심 다단계 유산소 처방")
                 st.info(f"누구나 쉽게 따라 할 수 있는 대중적인 유산소 종목들입니다. 총 {target_total_time}분에 맞춰 배분되었습니다.")
@@ -428,23 +412,16 @@ def show_main_page():
                     if target_total_time <= 40:
                         time_part1 = round(target_total_time * 0.6)
                         time_part2 = target_total_time - time_part1
-                        ex1 = "트레드밀 걷기" if ex_place == "헬스장" else "빠르게 걷기 / 파워 워킹"
-                        ex2 = "실내 싸이클" if ex_place == "헬스장" else "스트레칭 및 요가 릴렉스"
-                        st.markdown(f"**1️⃣ {ex1}** ➡️ ⏱️ **{time_part1}분**")
-                        st.markdown(f"**2️⃣ {ex2}** ➡️ ⏱️ **{time_part2}분**")
+                        st.markdown(f"**1️⃣ 빠르게 걷기 / 파워 워킹** ➡️ ⏱️ **{time_part1}분**")
+                        st.markdown(f"**2️⃣ 스트레칭 및 요가 릴렉스** ➡️ ⏱️ **{time_part2}분**")
                     else:
                         t1 = round(target_total_time * 0.4)
                         t2 = round(target_total_time * 0.35)
                         t3 = target_total_time - (t1 + t2)
                         
-                        if ex_place == "헬스장":
-                            st.markdown(f"**1️⃣ 트레드밀 (러닝머신)** ➡️ ⏱️ **{t1}분**")
-                            st.markdown(f"**2️⃣ 실내 고정식 싸이클 자전거** ➡️ ⏱️ **{t2}분**")
-                            st.markdown(f"**3️⃣ 천국의 계단 (스텝밀 마무리)** ➡️ ⏱️ **{t3}분**")
-                        else:
-                            st.markdown(f"**1️⃣ 실내 고정식 싸이클 자전거** ➡️ ⏱️ **{t1}분**")
-                            st.markdown(f"**2️⃣ 가벼운 실내 조깅 / 제자리 뛰기** ➡️ ⏱️ **{t2}분**")
-                            st.markdown(f"**3️⃣ 빠르게 걷기 및 스트레칭** ➡️ ⏱️ **{t3}분**")
+                        st.markdown(f"**1️⃣ 실내 고정식 싸이클 자전거** ➡️ ⏱️ **{t1}분**")
+                        st.markdown(f"**2️⃣ 가벼운 실내 조깅 / 제자리 뛰기** ➡️ ⏱️ **{t2}분**")
+                        st.markdown(f"**3️⃣ 빠르게 걷기 및 스트레칭** ➡️ ⏱️ **{t3}분**")
 
             st.divider()
 
@@ -472,7 +449,7 @@ def show_main_page():
                             if item["name"] == ex_name:
                                 cal_factor = item.get("cal_10m", 60)
                     
-                    done_time = st.slider(f"[{ex_name}] 실제 몇 분 하셨나요?", 0, 180, 30, key=f"v6_time_{ex_name}")
+                    done_time = st.slider(f"[{ex_name}] 실제 몇 분 하셨나요?", 0, 180, 30, key=f"v7_time_{ex_name}")
                     actual_burned_calories += round((done_time / 10) * cal_factor)
                     actual_time_sum += done_time
                 
