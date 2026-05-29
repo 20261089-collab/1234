@@ -105,19 +105,43 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
-# 🏋️ [데이터베이스 고도화] 조건별 처방을 위한 기구 및 일반 종목 재정의
+# 🏋️ [데이터베이스 구조화] 기구별 팁 정보 분리 및 고강도 트렌디 종목(복싱, 크로스핏 등) 대거 확장
 gym_details = {
     "상체": [
-        {"name": "체스트 프레스 머신 (가슴)", "cal_10m": 60},
-        {"name": "렛 풀 다운 (등)", "cal_10m": 55},
-        {"name": "덤벨 숄더 프레스 (어깨)", "cal_10m": 55},
-        {"name": "시티드 케이블 로우 (등)", "cal_10m": 50}
+        {
+            "name": "체스트 프레스 머신 (가슴)", "cal_10m": 60,
+            "tip": "엉덩이와 등 패드를 밀착하고 허리는 아치형을 만드세요. 바를 밀 때 숨을 내쉬고, 가슴 근육의 이완을 느끼며 천천히 받아줍니다. 어깨가 과도하게 들리지 않도록 주의하세요."
+        },
+        {
+            "name": "렛 풀 다운 (등)", "cal_10m": 55,
+            "tip": "바를 쇄골 방향으로 당기면서 날개뼈를 아래로 접어줍니다. 팔 힘이 아니라 광배근(등 외곽)으로 당긴다는 느낌에 집중하세요. 상체가 너무 뒤로 눕지 않도록 중심을 잡습니다."
+        },
+        {
+            "name": "덤벨 숄더 프레스 (어깨)", "cal_10m": 55,
+            "tip": "덤벨을 귀 높이까지 내렸다가 정수리 위로 모아주듯 밀어 올립니다. 팔꿈치가 너무 뒤로 빠지면 어깨 부상 위험이 있으니 살짝 앞으로 향하게 하세요."
+        },
+        {
+            "name": "시티드 케이블 로우 (등)", "cal_10m": 50,
+            "tip": "발판을 지지하고 허리를 곧게 편 상태에서 그립을 배꼽 쪽으로 당깁니다. 어깨를 으쓱하지 않고 뒤로 젖히며 등 중앙을 강하게 수축하세요."
+        }
     ],
     "하체": [
-        {"name": "레그 프레스 머신 (허벅지 전체)", "cal_10m": 70},
-        {"name": "스미스머신 스쿼트 (하체 전체)", "cal_10m": 80},
-        {"name": "레그 익스텐션 (허벅지 앞쪽)", "cal_10m": 55},
-        {"name": "레그 컬 (허벅지 뒤쪽)", "cal_10m": 55}
+        {
+            "name": "레그 프레스 머신 (허벅지 전체)", "cal_10m": 70,
+            "tip": "발판에 발을 어깨너비로 대고, 밀어낼 때 무릎을 100% 다 펴서 튕기지 않도록 약간 구부린 상태를 유지합니다. 내릴 때 무릎이 안쪽으로 모이지 않게 조절하세요."
+        },
+        {
+            "name": "스미스머신 스쿼트 (하체 전체)", "cal_10m": 80,
+            "tip": "바를 승모근에 안정적으로 얹고 무릎과 고관절을 동시에 접으며 앉습니다. 체중을 발뒤꿈치에 싣고 무릎이 발끝 방향을 바라보게 내려갑니다."
+        },
+        {
+            "name": "레그 익스텐션 (허벅지 앞쪽)", "cal_10m": 55,
+            "tip": "패드를 발목에 걸치고 허벅지 앞쪽 근육을 쥐어짜듯 다리를 올려줍니다. 내릴 때도 무게를 버티며 천천히 내려와야 자극이 극대화됩니다."
+        },
+        {
+            "name": "레그 컬 (허벅지 뒤쪽)", "cal_10m": 55,
+            "tip": "엎드려서 발목 패드를 엉덩이 쪽으로 당겨 뒤쪽 허벅지(햄스트링)를 수축합니다. 골반이 패드에서 과도하게 뜨지 않도록 꽉 눌러주세요."
+        }
     ],
     "헬스유산소": [
         {"name": "천국의 계단 (스텝밀)", "cal_10m": 100},
@@ -134,6 +158,13 @@ gym_details = {
         {"name": "빠르게 걷기 / 파워 워킹", "cal_10m": 45},
         {"name": "가벼운 전신 실내 조깅", "cal_10m": 70},
         {"name": "스트레칭 및 요가", "cal_10m": 28}
+    ],
+    "트렌디_복합": [
+        {"name": "정통 복싱 / 미트치기 / 샌드백", "cal_10m": 95},
+        {"name": "크로스핏 WOD (고강도 와드)", "cal_10m": 110},
+        {"name": "타바타 / HIIT (고강도 인터벌 홈트)", "cal_10m": 90},
+        {"name": "실내 클라이밍 (볼더링)", "cal_10m": 85},
+        {"name": "실내 배드민턴 경기", "cal_10m": 70}
     ]
 }
 
@@ -155,10 +186,10 @@ def show_main_page():
     with st.expander("💡 핏메이트 개인 스마트 처방전 사용법 안내", expanded=True):
         st.markdown("""
         1. **목표 및 장소 설정**: `목표(근육증가/감량)`와 `오늘의 운동 장소(헬스장/홈트)`를 상황에 맞게 골라보세요.
-        2. **식단 분석 확인**: 드신 음식을 선택하고 `✨ 오늘의 다이어트 및 운동 처방 보기`를 꾹 누릅니다.
+        2. **식단 분석 확인**: 음식을 고르고 `✨ 오늘의 다이어트 및 운동 처방 보기`를 실행합니다.
         3. **상황별 맞춤 루틴 확인 (`🏃 AI 목표 시간 맞춤형 루틴` 탭)**:
-           * **[헬스장 + 근육증가]** 일 때: AI가 **상체 세트 vs 하체 세트** 2가지 분할 패키지를 동시에 제안합니다! 골라서 수행하세요.
-           * **[홈트]** 이거나 **[감량/유지]** 일 때: 복잡한 분할 없이 설정 시간에 맞춰 **"줄넘기 30분 + 스쿼트 20분"** 형태로 깔끔한 원코스 시간표를 짜줍니다.
+           * **[헬스장 + 근육증가]** 일 때: AI가 **상체 세트 vs 하체 세트** 2가지 패키지를 제안합니다. 각 기구 아래 **'사용법 팁 토글'**을 열어 올바른 자세를 확인하세요!
+           * **[홈트] 거나 [감량/유지]** 일 때: 복잡한 기구 분할 없이 **"복싱 30분 + 줄넘기 20분"**처럼 깔끔한 원코스 통합 시간표를 짜줍니다.
         """)
 
     st.divider()
@@ -251,7 +282,7 @@ def show_main_page():
             status_color = "warning"
         elif total > daily_calorie + 150:
             suryong_img = "fat_suryong.jpg"
-            suryong_msg = "오늘 권장 칼로리를 초과했습니다! 웨이트 트레이닝을 더 열심히 해볼까요? 🔥"
+            suryong_msg = "오늘 권장 칼로리를 초과했습니다! 고강도 복싱이나 크로스핏을 추천합니다! 🔥"
             status_color = "error"
         else:
             suryong_img = "normal_suryong.jpg"
@@ -296,7 +327,7 @@ def show_main_page():
                 st.write(f"- {f}: {foods[f]['calorie']} kcal")
 
         with tab2:
-            st.write("🤖 **수룡이 AI 헬스 트레이너의 고정 맞춤형 운동 처방**")
+            st.write("🤖 **수룡이 AI 스포츠 닥터의 상황별 타임스라이스 루틴**")
 
             st.subheader("📋 오늘의 환경 및 신체 컨디션")
             col_ex1, col_ex2, col_ex3 = st.columns(3)
@@ -313,16 +344,15 @@ def show_main_page():
 
             st.divider()
 
-            # --- [★ 핵심 분기 로직 개조 엔진 ★] ---
-            # 오직 [헬스장] 이면서 [근육증가] 일 때만 기구 분할(상체 vs 하체) 패널 노출
+            # --- [AI 엔진 핵심 분할 분기 필터링] ---
+            # 오직 [헬스장] 이면서 [근육증가] 일 때만 디테일 상하체 기구 분할 패널 가동 + 토글 사용법 노출
             if ex_place == "헬스장" and goal == "근육증가":
-                st.markdown(f"### 🎯 AI 헬스장 추천: 오늘 당신의 선택은? (상체 vs 하체 패키지 대기 중)")
+                st.markdown(f"### 🎯 AI 헬스장 기구 루틴 추천: 오늘 당신의 선택은?")
                 
-                # 웨이트 75%, 유산소 25% 비율 분배
                 weight_total_time = round(target_total_time * 0.75)
                 cardio_total_time = target_total_time - weight_total_time
                 
-                st.info(f"💡 설정하신 {target_total_time}분 중 **근력 웨이트 {weight_total_time}분 + 마무리 유산소 {cardio_total_time}분**으로 정밀 타임 라인을 설계했습니다.")
+                st.info(f"💡 설정하신 {target_total_time}분 중 **근력 기구 웨이트 {weight_total_time}분 + 마무리 유산소 {cardio_total_time}분**으로 고강도 라인을 설계했습니다.")
                 
                 col_upper_page, col_lower_page = st.columns(2)
                 
@@ -333,8 +363,9 @@ def show_main_page():
                         time_per_ex = max(5, round(weight_total_time / len(upper_list)))
                         for item in upper_list:
                             st.markdown(f"**🔹 {item['name']}**")
-                            st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분**")
-                            st.markdown(f"  - 📊 가이드: **8~12회 $\\times$ 4세트** (세트 사이 1분 휴식)")
+                            st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (8~12회 $\\times$ 4세트)")
+                            with st.expander("💡 기구 사용법 및 꿀팁 보기"):
+                                st.caption(item["tip"])
                         if cardio_total_time > 0:
                             st.markdown(f"**🏃 마무리 유산소 ({cardio_total_time}분)**")
                             st.markdown(f"  - 추천기구: `{gym_details['헬스유산소'][1]['name']}`")
@@ -346,73 +377,72 @@ def show_main_page():
                         time_per_ex = max(5, round(weight_total_time / len(lower_list)))
                         for item in lower_list:
                             st.markdown(f"**🔸 {item['name']}**")
-                            st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분**")
-                            st.markdown(f"  - 📊 가이드: **8~12회 $\\times$ 4세트** (세트 사이 1분 30초 휴식)")
+                            st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (8~12회 $\\times$ 4세트)")
+                            with st.expander("💡 기구 사용법 및 꿀팁 보기"):
+                                st.caption(item["tip"])
                         if cardio_total_time > 0:
                             st.markdown(f"**🏃 마무리 유산소 ({cardio_total_time}분)**")
                             st.markdown(f"  - 추천기구: `{gym_details['헬스유산소'][0]['name']}`")
 
-            # 그 외의 모든 경우 (홈트레이닝 전체 혹은 헬스장이어도 감량/유지 목적일 때) -> 상하체 분할 없이 원코스로 깔끔 분배
+            # 그 외 모든 경우 (홈트레이닝이거나 헬스장이더라도 감량/유지 목적일 때) -> 복잡한 분할 없이 직관적인 타임라인 통합 매칭
             else:
-                st.markdown(f"### 🏃 AI 맞춤형 원코스 타임라인 처방")
+                st.markdown(f"### 🏃 AI 맞춤형 원코스 타임라인 통합 처방")
                 
-                # 목적 및 장소에 따른 최적의 2가지 종목 매칭 시스템
                 if ex_place == "홈트":
-                    st.info(f"🏠 홈트레이닝 환경에 맞게 상/하체 분할 없이 수행 가능한 **맨몸 근력 및 유산소** 복합 시간표를 짜드렸습니다.")
-                    ex1_name = gym_details["홈트_유산소"][0]["name"] # 줄넘기
-                    ex2_name = gym_details["홈트_무산소"][0]["name"] # 맨몸 스쿼트/런지
+                    # 홈트면서 감량/유지/증가인 경우 복싱, 줄넘기, 크로스핏 등 다이내믹 믹스 처방
+                    st.info(f"🏠 홈트 및 체육관 복합 환경에 맞게 상/하체 분할 없이 칼로리를 소모하는 **종합 패키지 시간표**를 짜드렸습니다.")
+                    ex1_name = gym_details["트렌디_복합"][0]["name"]  # 정통 복싱 / 미트치기
+                    ex2_name = gym_details["홈트_유산소"][0]["name"]  # 줄넘기
                     
-                    # 6:4 비율 시간 분배
                     time_ex1 = round(target_total_time * 0.6)
                     time_ex2 = target_total_time - time_ex1
                 else:
-                    # 헬스장이지만 감량/유지 목적일 때
-                    st.info(f"🎯 체지방 연소와 컨디션 관리에 맞춰 분할 루틴 대신 **유산소와 순환 운동** 중심 시간표를 구성했습니다.")
-                    ex1_name = gym_details["헬스유산소"][1]["name"] # 트레드밀
-                    ex2_name = gym_details["상체"][1]["name"] # 렛풀다운 같은 가벼운 웨이트 머신
+                    # 헬스장이지만 감량/유지 타겟일 때 고강도 크로스핏/유산소 서킷 매칭
+                    st.info(f"🎯 빠른 체지방 연소와 체력 강화에 맞춰 분할 루틴 대신 **복합 기능성 고강도 서킷** 시간표를 구성했습니다.")
+                    ex1_name = gym_details["트렌디_복합"][1]["name"]  # 크로스핏 WOD
+                    ex2_name = gym_details["헬스유산소"][0]["name"]  # 천국의 계단
                     
                     time_ex1 = round(target_total_time * 0.5)
                     time_ex2 = target_total_time - time_ex1
 
-                # 가이드 박스 출력
+                # 심플 시간표 레이아웃 출력
                 with st.container(border=True):
-                    st.markdown(f"#### ⏱️ 오늘의 맞춤 고정 시간표 (총 {target_total_time}분 코스)")
-                    st.markdown(f"**1️⃣ {ex1_name}** ➡️ ⏱️ **{time_ex1}분 동안 지속 수행**")
-                    st.markdown(f"   * 안내: 일정한 페이스를 유지하며 땀이 밸 수 있도록 집중하세요.*")
+                    st.markdown(f"#### ⏱️ 오늘의 프리미엄 추천 시간표 (총 {target_total_time}분 코스)")
+                    st.markdown(f"**1️⃣ {ex1_name}** ➡️ ⏱️ **{time_ex1}분 집중 수행**")
+                    st.markdown(f"   * 안내: 라운드별 타이머를 켜두고 지치지 않는 템포로 페이스를 이어 나가세요.*")
                     st.markdown("")
-                    st.markdown(f"**2️⃣ {ex2_name}** ➡️ ⏱️ **{time_ex2}분 동안 지속 수행**")
-                    st.markdown(f"   * 안내: 무리하지 않는 선에서 정해진 타이머가 끝날 때까지 세트를 이어나가세요.*")
+                    st.markdown(f"**2️⃣ {ex2_name}** ➡️ ⏱️ **{time_ex2}분 마무리 수행**")
+                    st.markdown(f"   * 안내: 심박수를 끝까지 높여 체지방 연소 효율을 극대화합니다.*")
 
             st.divider()
 
-            # --- [실제 수행 기록 정산기] ---
-            st.subheader("🏋️ 오늘 실제로 완료한 운동 체크")
-            st.caption("처방받은 타임라인을 참고하여, 실제로 진행을 완료한 종목들을 아래에서 선택해 칼로리를 연동해 보세요.")
+            # --- [실제 수행 기록 정산기 확장] ---
+            st.subheader("🏋️ 오늘 실제로 완료한 운동 체크 (종목 대폭 확대)")
+            st.caption("복싱, 크로스핏, 실전 기구 웨이트 등 오늘 실제로 한 종목들을 전부 골라 칼로리를 정산해 보세요.")
             
-            # 모든 종목을 풀에 통합하여 유저가 자유롭게 멀티 셀렉트 가능하도록 구성
-            all_pool_options = (
-                [ex["name"] for ex in gym_details["상체"]] + 
-                [ex["name"] for ex in gym_details["하체"]] + 
-                [ex["name"] for ex in gym_details["헬스유산소"]] +
-                [ex["name"] for ex in gym_details["홈트_무산소"]] +
-                [ex["name"] for ex in gym_details["홈트_유산소"]]
-            )
-            actual_done_list = st.multiselect("오늘 실제 끝마친 모든 운동을 체크하세요.", all_pool_options)
+            # 딕셔너리에 정의된 모든 풀의 종목을 하나의 종합 리스트로 결합
+            all_pool_options = []
+            for category in gym_details.values():
+                for item in category:
+                    if item["name"] not in all_pool_options:
+                        all_pool_options.append(item["name"])
+                        
+            actual_done_list = st.multiselect("실제 완료한 종목들을 리스트에서 자유롭게 멀티 선택하세요.", all_pool_options)
             
             actual_burned_calories = 0
             actual_time_sum = 0
             
             if actual_done_list:
-                st.write("⏱️ **선택하신 기구 및 종목별 실제 진행 시간(분) 설정**")
+                st.write("⏱️ **선택하신 운동별 실제 진행 시간(분) 설정**")
                 for ex_name in actual_done_list:
-                    # 칼로리 계수 찾기 연산 자동화
+                    # 통합 칼로리 계수 매칭 엔진
                     cal_factor = 60 
                     for category in gym_details.values():
                         for item in category:
                             if item["name"] == ex_name:
                                 cal_factor = item.get("cal_10m", 60)
                     
-                    done_time = st.slider(f"[{ex_name}] 실제 진행 시간 (분 단위)", 0, 120, 20, key=f"dyn_time_{ex_name}")
+                    done_time = st.slider(f"[{ex_name}] 실제 몇 분 하셨나요?", 0, 150, 25, key=f"trend_time_{ex_name}")
                     actual_burned_calories += round((done_time / 10) * cal_factor)
                     actual_time_sum += done_time
                 
@@ -422,7 +452,7 @@ def show_main_page():
                 col_res1.metric("총 결산 운동 시간", f"{actual_time_sum} 분")
                 col_res2.metric("수룡이 인증 소모 칼로리", f"{actual_burned_calories} kcal")
             else:
-                st.info("운동을 하나 이상 체크하면 칼로리 정산용 시간 슬라이더와 저장 버튼이 활성화됩니다.")
+                st.info("운동을 하나 이상 체크하시면 실시간 칼로리 계산기와 기록 세이브 버튼이 활성화됩니다.")
 
             st.divider()
             st.subheader("💾 최종 운동 기록 세이브")
@@ -447,7 +477,7 @@ def show_main_page():
                     new_exp = old_exp + 10
                     save_exp(new_exp)
 
-                    st.success(f"🎉 맞춤 처방 기록 데이터베이스 세이브 성공! 수룡이 경험치가 10 EXP 상승했습니다.")
+                    st.success(f"🎉 오늘의 다이내믹 스포츠 활동 기록 세이브 성공! 경험치 10 EXP가 정상 지급되었습니다.")
 
         with tab3:
             st.write("📅 **나의 누적 다이어트 일지**")
@@ -494,7 +524,7 @@ def show_main_page():
                             ).properties(width="container", height=320)
                             st.altair_chart(custom_chart, use_container_width=True)
                 except Exception as e:
-                    st.info("데이터를 계산하고 있습니다.")
+                    st.info("데이터를 동계화하고 있습니다.")
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
