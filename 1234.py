@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import os
 import calendar
+import altair as alt
 
 # 🚨 [중요] 최상단 고정 (에러 방지)
 st.set_page_config(
@@ -367,18 +368,60 @@ def show_main_page():
 
                 st.divider()
                 
+                # 🌟 [요청 사항 반영] 일자별 선택형 인터페이스 및 차트 리뉴얼
                 st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
-
+                
                 try:
-                    df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
-                    df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum().reset_index()
-                    df_chart = df_chart.rename(columns={"오늘 섭취량": "🍽️ 섭취 칼로리", "운동 부위": "🔥 운동 소모 칼로리"})
-                    df_chart = df_chart.set_index("날짜_일만")
+                    df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%Y-%m-%d")
+                    df_unique_dates = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum().reset_index()
                     
-                    st.bar_chart(df_chart[["🍽️ 섭취 칼로리", "🔥 운동 소모 칼로리"]])
-                    st.caption("💡 각 날짜별 막대를 통해 칼로리 섭취량과 소모 루틴을 비교할 수 있습니다.")
+                    available_dates = df_unique_dates["날짜_일만"].tolist()
+                    
+                    if available_dates:
+                        # 레이아웃 구성: 왼쪽 칼럼에 차트, 오른쪽 칼럼에 날짜 선택 셀렉트박스 배치
+                        chart_col1, chart_col2 = st.columns([3, 1.5])
+                        
+                        with chart_col2:
+                            st.write("📅 **조회할 날짜 선택**")
+                            selected_chart_date = st.selectbox(
+                                "날짜를 클릭하세요", 
+                                options=available_dates, 
+                                index=len(available_dates)-1,
+                                key="chart_date_selector"
+                            )
+                        
+                        with chart_col1:
+                            # 선택된 날짜의 데이터만 추출
+                            day_data = df_unique_dates[df_unique_dates["날짜_일만"] == selected_chart_date].iloc[0]
+                            
+                            # 차트용 데이터프레임 구조 변경 (Melt 작업)
+                            plot_df = pd.DataFrame({
+                                "구분": ["섭취 칼로리", "사용 칼로리"],
+                                "칼로리(kcal)": [int(day_data["오늘 섭취량"]), int(day_data["운동 부위"])]
+                            })
+                            
+                            # Altair 차트를 이용한 정밀한 색상 맵핑
+                            # 요청 사항: 섭취 칼로리 = 진파랑('#1f77b4'), 사용 칼로리 = 하늘색('#aec7e8')
+                            custom_chart = alt.Chart(plot_df).mark_bar(size=40).encode(
+                                x=alt.X("구분:N", title="데이터 분류", axis=alt.Axis(labelAngle=0)),
+                                y=alt.Y("칼로리(kcal):Q", title="에너지 수치 (kcal)"),
+                                color=alt.Color(
+                                    "구분:N", 
+                                    scale=alt.Scale(
+                                        domain=["섭취 칼로리", "사용 칼로리"],
+                                        range=["#1f77b4", "#aec7e8"]
+                                    ),
+                                    legend=alt.Legend(title="범례")
+                                )
+                            ).properties(
+                                width="container",
+                                height=320
+                            )
+                            
+                            st.altair_chart(custom_chart, use_container_width=True)
+                            st.caption(f"💡 선택된 일자 **[{selected_chart_date}]**의 식단 대비 운동 소모량 지표입니다.")
                 except Exception as e:
-                    st.info("데이터를 누적 중입니다. 다음 기록 입력 시 그래프가 활성화됩니다.")
+                    st.info("데이터를 계산하고 있습니다. 기록을 한 번 더 등록하면 활성화됩니다.")
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
@@ -419,7 +462,6 @@ def show_main_page():
 
 # --- 페이지 2: 수룡이 키우기 ---
 def show_growth_page():
-    # 🌟 [요청 반영] 상단 로고 및 타이틀 디자인 통일
     log_col1, log_col2 = st.columns([1, 4])
     with log_col1:
         if os.path.exists(LOGO_FILE):
