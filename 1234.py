@@ -334,7 +334,6 @@ def show_main_page():
                     
                     ex_summary = ", ".join(selected_ex_list)
 
-                    # 저장 시 '운동 부위' 컬럼에는 순수 소모 칼로리 숫자 데이터만 남김으로써 나중에 평균을 구할 수 있게 처리
                     new_data = {
                         "날짜": formatted_date, "이름": name if name else "사용자",
                         "체중(kg)": weight, "BMI": user_bmi, "목표 칼로리": daily_calorie, "오늘 섭취량": total,
@@ -363,39 +362,39 @@ def show_main_page():
             if os.path.exists(LOG_FILE):
                 df_log = pd.read_csv(LOG_FILE)
                 
-                # 데이터 타입 예외 케이스 방어 가공
                 df_log["오늘 섭취량"] = pd.to_numeric(df_log["오늘 섭취량"], errors="coerce").fillna(0)
                 df_log["운동 부위"] = pd.to_numeric(df_log["운동 부위"], errors="coerce").fillna(0)
                 df_log["운동 시간(분)"] = pd.to_numeric(df_log["운동 시간(분)"], errors="coerce").fillna(0)
                 
-                # 표에 노출될 때 가독성을 위해 임시로 컬럼명 변경해서 출력
                 df_display = df_log.copy()
                 df_display = df_display.rename(columns={"운동 장소": "수행한 운동 조합", "운동 부위": "소비 칼로리(kcal)"})
                 st.dataframe(df_display.iloc[::-1], use_container_width=True)
 
-                # 📊 [요청 변경 사항] 나의 다이어트 요약 레이아웃 4분할 개편
                 st.subheader("📊 나의 다이어트 요약")
                 col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
                 
                 col_stat1.metric("총 기록 수", f"{len(df_log)} 회")
                 col_stat2.metric("평균 하루 섭취 칼로리", f"{int(df_log['오늘 섭취량'].mean())} kcal")
-                col_stat3.metric("평균 운동 소모 칼로리", f"{int(df_log['운동 부위'].mean())} kcal")  # 👈 추가 항목!
+                col_stat3.metric("평균 운동 소모 칼로리", f"{int(df_log['운동 부위'].mean())} kcal")
                 total_ex = int(df_log["운동 시간(분)"].sum())
                 col_stat4.metric("누적 운동 시간", f"{total_ex} 분")
 
                 st.divider()
                 
-                # 📈 [요청 변경 사항] 섭취 칼로리 vs 운동 소모 칼로리 비교 막대 그래프 시각화
-                st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
+                # 📈 [요청 변경 사항] 섭취 vs 소모 세로형(Vertical) + 슬림(뚱뚱하지 않게) 디자인 그래프 개편
+                st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교 (세로형)")
                 
-                # 그래프 그리기용 시계열 가공 데이터프레임 빌드
                 df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
                 df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum()
                 df_chart = df_chart.rename(columns={"오늘 섭취량": "섭취 칼로리", "운동 부위": "운동 소모 칼로리"})
                 
-                # 막대그래프 출력
-                st.bar_chart(df_chart, y=["섭취 칼로리", "운동 소모 칼로리"], use_container_width=True)
-                st.caption("💡 섭취량(파란색 막대)보다 소모량(빨간색/주황색 계열 막대)을 높여 '마이너스 칼로리' 상태를 유지하면 다이어트에 대성공입니다!")
+                # 💡 레이아웃을 3분할([1, 2, 1])하여 가운데(graph_col)에만 배치해 뚱뚱해지지 않도록 가로폭을 압축했습니다!
+                left_space, graph_col, right_space = st.columns([1, 2, 1])
+                
+                with graph_col:
+                    # st.bar_chart는 기본적으로 세로 막대그래프를 그립니다. 
+                    st.bar_chart(df_chart, y=["섭취 칼로리", "운동 소모 칼로리"])
+                    st.caption("※ 날짜별 칼로리 키재기! 섭취 막대보다 운동 소모 막대가 더 높아야 살이 빠집니다!")
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
@@ -438,7 +437,7 @@ def show_main_page():
                 st.info("아직 저장된 다이어트 일지가 없습니다.")
 
 
-# --- 페이지 2: 수룡이 키우기 (분리된 페이지) ---
+# --- 페이지 2: 수룡이 키우기 ---
 def show_growth_page():
     st.title("🐉 수룡이 성장 룸")
     st.caption("운동 기록으로 획득한 경험치($EXP$)에 따라 진화하는 진짜 수룡이의 방입니다.")
