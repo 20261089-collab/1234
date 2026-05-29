@@ -105,71 +105,74 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
-# 🏋️ [운동 데이터베이스]
-gym_details = {
-    "상체": [
-        {
-            "name": "체스트 프레스 머신 (가슴)", "cal_10m": 60,
-            "tip": "엉덩이와 등 패드를 가볍게 밀착하고 허리는 자연스러운 아치형을 만드세요. 바를 밀 때 숨을 내쉬고, 가슴 근육의 이완을 느끼며 천천히 시작 위치로 돌아옵니다."
+# --- 🏋️ 컨디션별 완전 분리형 오리지널 운동 스펙 데이터베이스 ---
+exercise_presets = {
+    "홈트": {
+        "근육증가": {
+            "최상 (에너지 넘침)": [
+                {"name": "정석 맨몸 스쿼트", "cal_10m": 65, "guide": "🔥 5세트 × 20회", "rest": "⏱️ 휴식 45초", "tip": "어깨너비로 벌리고 무릎이 안으로 말리지 않게 엉덩이를 깊숙이 내리세요."},
+                {"name": "워킹 런지 / 백 런지", "cal_10m": 60, "guide": "🔥 5세트 × 양발 12회", "rest": "⏱️ 휴식 45초", "tip": "한 발을 크게 디디며 무릎을 90도로 내리되, 앞 무릎이 발끝을 넘지 않게 주의하세요."},
+                {"name": "정석 푸쉬업", "cal_10m": 55, "guide": "🔥 5세트 × 15회", "rest": "⏱️ 휴식 45초", "tip": "머리부터 발끝까지 수평을 유지하고 가슴을 바닥 직전까지 내렸다가 밀어내세요."},
+                {"name": "정식 엘보우 플랭크", "cal_10m": 45, "guide": "🔥 4세트 × 60초 버티기", "rest": "⏱️ 휴식 30초", "tip": "팔꿈치로 바닥을 밀어내며 복부와 엉덩이에 힘을 주어 몸을 일직선으로 만드세요."}
+            ],
+            "정상 (보통)": [
+                {"name": "정석 맨몸 스쿼트", "cal_10m": 65, "guide": "✨ 4세트 × 15회", "rest": "⏱️ 휴식 60초", "tip": "체중을 발뒤꿈치에 싣고 일어날 때 둔근을 강하게 수축합니다."},
+                {"name": "워킹 런지 / 백 런지", "cal_10m": 60, "guide": "✨ 4세트 × 양발 10회", "rest": "⏱️ 휴식 60초", "tip": "상체를 곧게 세우고 수직 방향으로 체중을 내려 자극을 줍니다."},
+                {"name": "정석 푸쉬업", "cal_10m": 55, "guide": "✨ 4세트 × 10회", "rest": "⏱️ 휴식 60초", "tip": "힘들 경우 무릎을 대고 정자세로 가슴 자극을 느끼며 진행하세요."},
+                {"name": "정식 엘보우 플랭크", "cal_10m": 45, "guide": "✨ 3세트 × 45초 버티기", "rest": "⏱️ 휴식 45초", "tip": "허리가 아래로 처지면 부상 위험이 있으니 복부에 긴장을 유지하세요."}
+            ],
+            "피곤함 (가벼운 운동 필요)": [
+                {"name": "맨몸 와이드 스쿼트 (저강도)", "cal_10m": 50, "guide": "🔋 3세트 × 12회", "rest": "⏱️ 휴식 90초", "tip": "다리를 넓게 벌려 관절 부담을 줄이고 허벅지 안쪽 자극에 집중합니다."},
+                {"name": "매트 복부 크런치", "cal_10m": 40, "guide": "🔋 3세트 × 15회", "rest": "⏱️ 휴식 90초", "tip": "허리를 바닥에 붙인 채 상체 윗부분만 살짝 들어 올려 복부를 쥡니다."},
+                {"name": "벽 푸쉬업 (Wall Push-Up)", "cal_10m": 35, "guide": "🔋 3세트 × 12회", "rest": "⏱️ 휴식 90초", "tip": "벽을 짚고 서서 진행하여 어깨와 손목의 부담을 최소화합니다."},
+                {"name": "가벼운 제자리 걷기", "cal_10m": 30, "guide": "🔋 10분 지속 페이스", "rest": "⏱️ 여유롭게 호흡", "tip": "팔을 앞뒤로 흔들며 가볍게 몸을 움직여 혈액 순환을 돕습니다."}
+            ],
+            "근육통 있음": [
+                {"name": "하체 하체 전신 스트레칭", "cal_10m": 25, "guide": "🩹 부위별 30초 유지", "rest": "⏱️ 제한 없음", "tip": "뭉친 허벅지와 둔근 유연성을 늘려 피로 물질을 제거합니다."},
+                {"name": "상체 및 어깨 회전 리커버리", "cal_10m": 25, "guide": "🩹 3세트 반복", "rest": "⏱️ 편안하게 휴식", "tip": "가슴과 회전근개를 부드럽게 풀어주어 통증을 완화합니다."},
+                {"name": "코어 데드버그 코스", "cal_10m": 35, "guide": "🩹 3세트 × 10회", "rest": "⏱️ 휴식 90초", "tip": "누운 자세에서 팔다리를 교차해 움직이며 척추 부담 없이 코어를 깨웁니다."},
+                {"name": "요가 릴렉스 가이드", "cal_10m": 25, "guide": "🩹 15분 전신 호흡", "rest": "⏱️ 릴렉스", "tip": "호흡에 집중하며 전신의 긴장을 풀어주는 힐링 타임입니다."}
+            ]
         },
-        {
-            "name": "렛 풀 다운 (등)", "cal_10m": 55,
-            "tip": "바를 쇄골 방향으로 당기면서 날개뼈를 아래로 지그시 접어줍니다. 팔의 힘보다는 광배근(등) 쪽 자극으로 끌어내리는 느낌에 집중하세요."
-        },
-        {
-            "name": "덤벨 숄더 프레스 (어깨)", "cal_10m": 55,
-            "tip": "덤벨을 귀 높이까지 수직으로 내렸다가 정수리 위쪽으로 삼각근을 모아주듯 밀어 올립니다. 팔꿈치가 뒤로 빠지지 않게 주의하세요."
-        },
-        {
-            "name": "시티드 케이블 로우 (등)", "cal_10m": 50,
-            "tip": "발판에 발을 견고히 지지하고 상체를 곧게 편 상태에서 그립을 배꼽 아랫배 쪽으로 당기며 등 뒤를 수축합니다."
+        "감량": {
+            "최상 (에너지 넘침)": [
+                {"name": "땅끄부부 칼소폭 매운맛", "cal_10m": 90, "guide": "🔥 20분 풀버전 올인", "rest": "⏱️ 영상 페이스 유지", "tip": "동작을 크고 확실하게 하여 칼로리 버닝을 극대화합니다."},
+                {"name": "버피 테스트 (고강도 전신)", "cal_10m": 120, "guide": "🔥 4세트 × 15회", "rest": "⏱️ 휴식 45초", "tip": "속도보다는 정자세로 착지하여 관절을 보호하세요."},
+                {"name": "고속 제자리 무릎 높여 뛰기", "cal_10m": 100, "guide": "🔥 4세트 × 45초", "rest": "⏱️ 휴식 45초", "tip": "팔꿈치를 흔들며 무릎을 골반 높이까지 빠르게 끌어올립니다."}
+            ],
+            "정상 (보통)": [
+                {"name": "땅끄부부 칼소폭 매운맛", "cal_10m": 90, "guide": "✨ 20분 표준 수행", "rest": "⏱️ 표준 호흡 구사", "tip": "무리가 가지 않는 선에서 끝까지 완주하는 것을 목표로 합니다."},
+                {"name": "가벼운 실내 조깅 / 제자리 뛰기", "cal_10m": 70, "guide": "✨ 20분 지속", "rest": "⏱️ 일정하게 유지", "tip": "발바닥 전체가 부드럽게 닿도록 가볍게 리듬을 탑니다."}
+            ],
+            "피곤함 / 근육통 (동일 가이드)": [
+                {"name": "빠르게 걷기 / 파워 워킹", "cal_10m": 45, "guide": "🔋 30분 산책 페이스", "rest": "⏱️ 무리하지 않기", "tip": "땀이 가볍게 날 정도로만 속도를 조절해 걸어줍니다."},
+                {"name": "폼롤러 전신 근막 이완 코스", "cal_10m": 25, "guide": "🩹 20분 전신 순환", "rest": "⏱️ 힐링 템포", "tip": "아픈 부위를 지그시 누르며 호흡을 내쉬어 몸을 이완합니다."}
+            ]
         }
-    ],
-    "하체": [
-        {
-            "name": "레그 프레스 머신 (허벅지 전체)", "cal_10m": 70,
-            "tip": "발판에 발을 골반~어깨너비로 대고, 밀어낼 때 무릎을 100% 다 펴서 관절을 튕기지 않도록 살짝 구부린 안전 구간까지만 밀어줍니다."
-        },
-        {
-            "name": "스미스머신 스쿼트 (하체 전체)", "cal_10m": 80,
-            "tip": "바를 승모근 부위에 안정적으로 얹고 무릎이 발끝 방향을 향하도록 고관절을 열어주며 앉습니다. 허리가 굽지 않게 척추 중립을 유지하세요."
-        },
-        {
-            "name": "레그 익스텐션 (허벅지 앞쪽)", "cal_10m": 55,
-            "tip": "등받이에 엉덩이를 밀착하고 발목 패드를 걸친 후, 허벅지 앞쪽 대퇴사두근을 쥐어짜듯 다리를 쭉 펴 올려서 자극을 줍니다."
-        },
-        {
-            "name": "레그 컬 (허벅지 뒤쪽)", "cal_10m": 55,
-            "tip": "엎드린 자세에서 발목 뒷 패드를 엉덩이 방향으로 가깝게 당겨 허벅지 뒤쪽(햄스트링) 근육을 강하게 수축해 줍니다."
-        }
-    ],
-    "맨몸_웨이트": [
-        {
-            "name": "정석 맨몸 스쿼트 (하체 빌딩)", "cal_10m": 65,
-            "tip": "다리를 어깨너비로 벌리고 발끝을 살짝 바깥으로 엽니다. 무릎이 안으로 말리지 않게 주의하며, 의자에 앉듯 고관절을 접으며 깊숙이 앉습니다. 일어날 때 발뒤꿈치로 땅을 밀어내세요."
-        },
-        {
-            "name": "워킹 런지 / 백 런지 (둔근 및 대퇴)", "cal_10m": 60,
-            "tip": "한쪽 발을 크게 앞으로 디디며 양 무릎이 직각(90도)이 될 때까지 몸을 내립니다. 앞발 무릎이 발끝 앞으로 너무 튀어나가지 않게 중심을 수직 하방으로 내리는 것이 정석입니다."
-        },
-        {
-            "name": "정석 푸쉬업 (가슴 및 삼두)", "cal_10m": 55,
-            "tip": "손을 어깨너비보다 살짝 넓게 짚고, 머리부터 발끝까지 몸을 일직선으로 만듭니다. 가슴이 바닥에 닿기 직전까지 내려갔다가 밀어 올립니다. 힘들면 무릎을 대고 진행하세요!"
-        },
-        {
-            "name": "정식 엘보우 플랭크 (코어 강화)", "cal_10m": 45,
-            "tip": "팔꿈치를 어깨 아래에 두고 전완으로 바닥을 지지합니다. 복부와 엉덩이에 강하게 힘을 주어 몸이 아래로 처지거나 엉덩이가 위로 솟구치지 않도록 평평한 상태를 단단히 유지합니다."
-        }
-    ],
-    "접근성_유산소": [
-        {"name": "줄넘기 (또는 제자리 가볍게 뛰기)", "cal_10m": 100},
-        {"name": "실내 고정식 싸이클 자전거", "cal_10m": 65},
-        {"name": "가벼운 실내 조깅 / 제자리 뛰기", "cal_10m": 70},
-        {"name": "빠르게 걷기 / 파워 워킹", "cal_10m": 45},
+    },
+    "💡 기본 유산소/기타 프리셋": [
         {"name": "트레드밀 (러닝머신)", "cal_10m": 75},
         {"name": "천국의 계단 (스텝밀)", "cal_10m": 100},
-        {"name": "스트레칭 및 요가 릴렉스", "cal_10m": 28},
-        {"name": "땅끄부부 칼소폭 매운맛 (유튜브)", "cal_10m": 90}
+        {"name": "실내 고정식 싸이클 자전거", "cal_10m": 65}
+    ]
+}
+
+# 헬스장 전용 고정 프리셋 데이터 보강
+gym_presets = {
+    "최상 (에너지 넘침)": [
+        {"name": "스미스머신 스쿼트 (하체)", "cal_10m": 85, "guide": "🔥 고중량 5세트 × 10회", "rest": "⏱️ 휴식 60초", "tip": "무릎과 고관절을 동시에 접어 깊게 자극을 전달합니다."},
+        {"name": "렛 풀 다운 (등)", "cal_10m": 60, "guide": "🔥 5세트 × 12회", "rest": "⏱️ 휴식 60초", "tip": "광배근 하부까지 바를 꽉 쥐어 짜내듯 당깁니다."},
+        {"name": "체스트 프레스 머신 (가슴)", "cal_10m": 65, "guide": "🔥 5세트 × 12회", "rest": "⏱️ 휴식 60초", "tip": "가슴 밀착 후 최대 수축 구간까지 힘차게 밀어줍니다."}
+    ],
+    "정상 (보통)": [
+        {"name": "레그 프레스 머신 (하체)", "cal_10m": 70, "guide": "✨ 정석 4세트 × 15회", "rest": "⏱️ 휴식 60초", "tip": "발판을 밀 때 무릎 관절이 완전히 튕기지 않게 제어합니다."},
+        {"name": "렛 풀 다운 (등)", "cal_10m": 55, "guide": "✨ 정석 4세트 × 12회", "rest": "⏱️ 휴식 60초", "tip": "날개뼈를 아래로 지그시 접으며 등 근육에 집중합니다."},
+        {"name": "덤벨 숄더 프레스 (어깨)", "cal_10m": 55, "guide": "✨ 정석 4세트 × 12회", "rest": "⏱️ 휴식 60초", "tip": "덤벨을 귀 높이까지 수직으로 통제하며 내렸다 밀어 올립니다."}
+    ],
+    "피곤함 / 근육통 (동일 가이드)": [
+        {"name": "레그 익스텐션 (저중량 허벅지 앞)", "cal_10m": 45, "guide": "🔋 3세트 × 12회 라이트하게", "rest": "⏱️ 휴식 90초", "tip": "무게를 대폭 낮추고 혈류를 보낸다는 느낌으로 가볍게 다리를 펴줍니다."},
+        {"name": "시티드 케이블 로우 (저중량 등)", "cal_10m": 45, "guide": "🔋 3세트 × 12회 라이트하게", "rest": "⏱️ 휴식 90초", "tip": "반동을 전혀 쓰지 않고 등 근육을 부드럽게 이완·수축합니다."},
+        {"name": "실내 고정식 싸이클 자전거 (유산소)", "cal_10m": 50, "guide": "🚶 20분 가벼운 페달링", "rest": "⏱️ 릴렉스", "tip": "가벼운 저항으로 페달을 굴리며 하체의 젖산을 분해합니다."}
     ]
 }
 
@@ -338,163 +341,80 @@ def show_main_page():
 
             st.divider()
 
-            # --- 💡 [핵심 고도화] 컨디션 세부 수치 매핑 로직 엔진 빌드 ---
+            # --- 💡 [초고도화] 컨디션 가중치 및 라벨 통합 매핑 연산기 ---
             condition_multiplier = 1.0
+            condition_key = user_condition
+            
             if user_condition == "최상 (에너지 넘침)":
                 condition_multiplier = 1.2
-                set_guide = "💪 **고강도 집중 5세트** (개수 평소보다 +3회 더!)"
-                rest_guide = "⏱️ 세트 사이 휴식: **45초** (짧고 굵게 타이트하게)"
-                cardio_pace = "🏃 **인터벌 고속 대시 페이스**"
-                st.success("🔥 컨디션 최상 보너스 가동! 루틴의 세트 강도 및 예상 칼로리 소모량이 20% 상향 처방됩니다.")
+                st.success("🚀 **컨디션 최상 버프 가동!** 신체 에너지가 충만하므로 세트 수와 강도를 높이고 칼로리 소모 보너스($\times 1.2$)를 부여합니다!")
             elif user_condition == "정상 (보통)":
                 condition_multiplier = 1.0
-                set_guide = "✨ **정석 4세트** (세트당 12~15회 타겟)"
-                rest_guide = "⏱️ 세트 사이 휴식: **60초** (충분한 회복 가능)"
-                cardio_pace = "🏃 **안정적인 표준 러닝 페이스**"
-            elif user_condition == "피곤함 (가벼운 운동 필요)":
+                st.info("🟢 **정상 컨디션 가동:** 무리 없는 정석 세트 수와 표준 휴식 템포를 제공합니다.")
+            elif user_condition in ["피곤함 (가벼운 운동 필요)", "근육통 있음"]:
                 condition_multiplier = 0.8
-                set_guide = "🔋 **리커버리 가벼운 2~3세트** (자극 위주 10회)"
-                rest_guide = "⏱️ 세트 사이 휴식: **90초** (여유롭고 편안하게)"
-                cardio_pace = "🚶 **안전한 저강도 파워 워킹 페이스**"
-                st.warning("🔋 몸이 무거우시군요! 관절을 보호하기 위해 전체적인 세트 수와 강도를 낮게 자동 조절했습니다.")
-            else:  # 근육통 있음
-                condition_multiplier = 0.8
-                set_guide = "🩹 **통증 케어형 스트레칭 3세트** (가볍게 8~10회)"
-                rest_guide = "⏱️ 세트 사이 휴식: **90~120초** (부상 방지 최우선)"
-                cardio_pace = "🚶 **가벼운 릴렉스 사이클링 / 산책 페이스**"
-                st.info("🩹 특정 부위에 근육통이 감지되어 강한 수축 대신 림프 순환을 돕는 유연 처방 코스로 전환합니다.")
+                # 딕셔너리 조회를 위해 통일 키 세팅
+                condition_key = "피곤함 (가벼운 운동 필요)" if user_condition == "피곤함 (가벼운 운동 필요)" else "근육통 있음"
+                st.warning("🩹 **안전 제일 리커버리 모드 전환:** 관절 보호 및 젖산 대사를 위해 운동 종목 자체를 가벼운 서킷/스트레칭으로 자동 스위칭했습니다.")
 
             ai_prescribed_exercises = []
             ai_prescribed_calories = 0
 
-            # --- [컨디션 연동형 분기 엔진 스타트] ---
-            if ex_place == "헬스장":
-                if goal == "감량":
-                    st.markdown(f"### 🎯 AI 헬스장 체지방 커팅 루틴 처방 (감량 맞춤)")
-                    weight_total_time = round(target_total_time * 0.4)
-                    cardio_total_time = target_total_time - weight_total_time
-                    
-                    col_upper_page, col_lower_page = st.columns(2)
-                    with col_upper_page:
-                        st.markdown("#### 💪 루틴 A: 전신 칼로리 소모형 근력 기구")
+            # --- 💡 [메인 엔진 분기 코드 단락] ---
+            if ex_place == "홈트":
+                # 홈트 상황 목적어별 매핑 분리
+                sub_goal = "근육증가" if goal == "근육증가" else "감량"
+                current_pool = exercise_presets["홈트"][sub_goal].get(user_condition, exercise_presets["홈트"][sub_goal].get("피곤함 / 근육통 (동일 가이드)"))
+                
+                st.markdown(f"### 🏠 오늘 컨디션([{user_condition}])에 맞춘 맞춤형 {sub_goal} 홈트레이닝")
+                st.caption(f"선택하신 컨디션 전용으로 설계된 운동 종목들과 구체적인 가이드 세트입니다.")
+                
+                time_per_ex = max(5, round(target_total_time / len(current_pool)))
+                
+                col_hw1, col_hw2 = st.columns(2)
+                for idx, item in enumerate(current_pool):
+                    target_col = col_hw1 if idx % 2 == 0 else col_hw2
+                    with target_col:
                         with st.container(border=True):
-                            circuit_list = [gym_details["하체"][0], gym_details["상체"][1], gym_details["하체"][2]]
-                            time_per_ex = max(4, round(weight_total_time / len(circuit_list)))
-                            for item in circuit_list:
-                                st.markdown(f"**🔹 {item['name']}**")
-                                st.markdown(f"  - ⏱️ 시간: **{time_per_ex}분** | {set_guide}")
-                                st.caption(rest_guide)
-                                with st.expander("💡 기구 사용법 및 자극 꿀팁"):
-                                    st.caption(item["tip"])
-                                ai_prescribed_exercises.append(item['name'])
-                                ai_prescribed_calories += round((time_per_ex / 10) * item.get("cal_10m", 60) * condition_multiplier)
+                            st.markdown(f"🎯 **{item['name']}**")
+                            st.markdown(f"  - ⏱️ 추천 시간: **{time_per_ex}분**")
+                            st.markdown(f"  - 📊 수행 가이드: **{item['guide']}**")
+                            st.markdown(f"  - {item['rest']}")
+                            with st.expander("📖 정석 자세 및 부상방지 꿀팁"):
+                                st.caption(item["tip"])
                             
-                    with col_lower_page:
-                        st.markdown(f"#### 🏃 루틴 B: 이중 타겟 유산소 ({cardio_pace})")
-                        with st.container(border=True):
-                            cardio1 = round(cardio_total_time * 0.6)
-                            cardio2 = cardio_total_time - cardio1
-                            st.markdown(f"**1️⃣ 트레드밀 (러닝머신)** ➡️ ⏱️ **{cardio1}분**")
-                            ai_prescribed_exercises.append("트레드밀 (러닝머신)")
-                            ai_prescribed_calories += round((cardio1 / 10) * 75 * condition_multiplier)
-                            
-                            if cardio2 > 0:
-                                st.markdown(f"**2️⃣ 천국의 계단 (스텝밀)** ➡️ ⏱️ **{cardio2}분**")
-                                ai_prescribed_exercises.append("천국의 계단 (스텝밀)")
-                                ai_prescribed_calories += round((cardio2 / 10) * 100 * condition_multiplier)
+                            ai_prescribed_exercises.append(item['name'])
+                            ai_prescribed_calories += round((time_per_ex / 10) * item["cal_10m"] * condition_multiplier)
 
-                # 헬스장 + (근육증가 또는 유지)
-                else:
-                    st.markdown(f"### 🎯 AI 헬스장 벌크 및 근비대 루틴 처방")
-                    weight_total_time = round(target_total_time * 0.75)
-                    cardio_total_time = target_total_time - weight_total_time
-                    
-                    col_upper_page, col_lower_page = st.columns(2)
-                    with col_upper_page:
-                        st.markdown("#### 💪 가슴/등 주동근 타겟 기구")
+            else:  # 헬스장 케이스 분기
+                # 헬스장 전용 컨디션별 리스트 매핑 적용
+                current_pool = gym_presets.get(user_condition, gym_presets.get("피곤함 / 근육통 (동일 가이드)"))
+                
+                st.markdown(f"### 🏋️ 오늘 컨디션([{user_condition}])에 맞춘 헬스장 타겟 머신 처방")
+                st.caption("컨디션 스코어에 따라 기구 종류와 메인 세트 목표치가 전면 변경 구성되었습니다.")
+                
+                time_per_ex = max(5, round(target_total_time / len(current_pool)))
+                
+                col_gym1, col_gym2 = st.columns(2)
+                for idx, item in enumerate(current_pool):
+                    target_col = col_gym1 if idx % 2 == 0 else col_gym2
+                    with target_col:
                         with st.container(border=True):
-                            upper_list = gym_details["상체"]
-                            time_per_ex = max(5, round(weight_total_time / len(upper_list)))
-                            for item in upper_list:
-                                st.markdown(f"**🔹 {item['name']}**")
-                                st.markdown(f"  - ⏱️ 시간: **{time_per_ex}분** | {set_guide}")
-                                st.caption(rest_guide)
-                                with st.expander("💡 기구 사용법 및 자극 꿀팁"):
-                                    st.caption(item["tip"])
-                                ai_prescribed_exercises.append(item['name'])
-                                ai_prescribed_calories += round((time_per_ex / 10) * item.get("cal_10m", 60) * condition_multiplier)
-                            
-                            if cardio_total_time > 0:
-                                st.markdown(f"**🏃 심폐 리커버리 유산소 ({cardio_total_time}분)**")
-                                ai_prescribed_exercises.append("트레드밀 (러닝머신)")
-                                ai_prescribed_calories += round((cardio_total_time / 10) * 75 * condition_multiplier)
+                            st.markdown(f"🦾 **{item['name']}**")
+                            st.markdown(f"  - ⏱️ 추천 시간: **{time_per_ex}분**")
+                            st.markdown(f"  - 📊 수행 가이드: **{item['guide']}**")
+                            st.markdown(f"  - {item['rest']}")
+                            with st.expander("💡 기구 사용법 가이드 보기"):
+                                st.caption(item["tip"])
                                 
-                    with col_lower_page:
-                        st.markdown("#### 🍗 하체 협응근 기구 스케줄")
-                        with st.container(border=True):
-                            lower_list = gym_details["하체"]
-                            time_per_ex = max(5, round(weight_total_time / len(lower_list)))
-                            for item in lower_list:
-                                st.markdown(f"**🔸 {item['name']}**")
-                                st.markdown(f"  - ⏱️ 시간: **{time_per_ex}분** | {set_guide}")
-                                st.caption(rest_guide)
-                                with st.expander("💡 기구 사용법 및 자극 꿀팁"):
-                                    st.caption(item["tip"])
-
-            elif ex_place == "홈트":
-                # 홈트 + 근육증가 (맨몸 정석 웨이트 테마)
-                if goal == "근육증가":
-                    st.markdown(f"### 🏠 AI 맨몸 근성장 웨이트 하이퍼 홈트 처방")
-                    with st.container(border=True):
-                        bodyweight_list = gym_details["맨몸_웨이트"]
-                        time_per_ex = max(5, round(target_total_time / len(bodyweight_list)))
-                        
-                        col_hw1, col_hw2 = st.columns(2)
-                        for idx, item in enumerate(bodyweight_list):
-                            target_col = col_hw1 if idx % 2 == 0 else col_hw2
-                            with target_col:
-                                with st.container(border=True):
-                                    st.markdown(f"**🔥 {item['name']}**")
-                                    st.markdown(f"  - ⏱️ 배분: **{time_per_ex}분**")
-                                    st.markdown(f"  - 🎯 {set_guide}")
-                                    st.caption(rest_guide)
-                                    with st.expander("📖 정석 자세 및 부상 방지 가이드"):
-                                        st.caption(item["tip"])
-                                    
-                                    ai_prescribed_exercises.append(item['name'])
-                                    ai_prescribed_calories += round((time_per_ex / 10) * item.get("cal_10m", 60) * condition_multiplier)
-
-                # 홈트 + 감량
-                elif goal == "감량":
-                    st.markdown(f"### 🏠 AI 홈트레이닝 다원화 유산소 처방")
-                    video_time = 20
-                    remaining_time = max(0, target_total_time - video_time)
-                    
-                    with st.container(border=True):
-                        st.markdown(f"**1️⃣ 땅끄부부 칼소폭 매운맛 (유튜브 영상)** ➡️ ⏱️ **{video_time}분 고정**")
-                        st.video("https://youtu.be/gSz5n4sLENI?si=rKzqg9K7mJ9hywMo")
-                        ai_prescribed_exercises.append("땅끄부부 칼소폭 매운맛 (유튜브)")
-                        ai_prescribed_calories += round((video_time / 10) * 90 * condition_multiplier)
-                        
-                        if remaining_time > 0:
-                            st.markdown(f"**2️⃣ 컨디션 연계 마무리 유산소 조합** ➡️ ⏱️ **{remaining_time}분** ({cardio_pace})")
-                            ai_prescribed_exercises.append("줄넘기 (또는 제자리 가볍게 뛰기)")
-                            ai_prescribed_calories += round((remaining_time / 10) * 85 * condition_multiplier)
-
-                # 홈트 + 유지
-                else:
-                    st.markdown(f"### 🏠 AI 홈트 밸런스 유지 루틴")
-                    with st.container(border=True):
-                        st.markdown(f"🏃 컨디션 수치 및 시간에 맞춰 맨몸 스쿼트 및 제자리 조깅 코스를 유연 배합합니다. ({set_guide})")
-                        ai_prescribed_exercises.append("정석 맨몸 스쿼트 (하체 빌딩)")
-                        ai_prescribed_exercises.append("가벼운 실내 조깅 / 제자리 뛰기")
-                        ai_prescribed_calories += round((target_total_time / 10) * 60 * condition_multiplier)
+                            ai_prescribed_exercises.append(item['name'])
+                            ai_prescribed_calories += round((time_per_ex / 10) * item["cal_10m"] * condition_multiplier)
 
             st.divider()
 
             # --- [실제 수행 기록 정산기 단락] ---
             st.subheader("🏋️ 오늘 실제로 완료한 운동 체크")
-            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 루틴을 그대로 완벽하게 수행했습니다! (원클릭 등록)", value=False)
+            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 컨디션 루틴을 그대로 완료했습니다! (원클릭 자동 등록)", value=False)
 
             actual_burned_calories = 0
             actual_time_sum = 0
@@ -505,27 +425,16 @@ def show_main_page():
                 actual_burned_calories = ai_prescribed_calories
                 ex_summary = f"[{user_condition}] " + ", ".join(ai_prescribed_exercises)
                 
-                st.info(f"✨ AI 연동 완료: 설정된 신체 컨디션을 연산하여 총 **{actual_time_sum}분** 운동, 총 **{actual_burned_calories} kcal** 소모량이 자동 매핑되었습니다!")
+                st.info(f"✨ 연동 완료: 현재 내 몸 상태([{user_condition}]) 정보가 주입되어 총 **{actual_time_sum}분** 운동, 총 **{actual_burned_calories} kcal**가 정밀 자동 결산되었습니다!")
             else:
-                st.caption("AI 코스를 부분 수행했거나 다른 외부 운동을 하셨다면 아래 수동 선택기를 사용하세요.")
-                grand_pool = []
-                for category in gym_details.values():
-                    for item in category:
-                        if item["name"] not in grand_pool:
-                            grand_pool.append(item["name"])
-                            
-                actual_done_list = st.multiselect("오늘 실제 마친 운동 항목들을 선택해 주세요.", grand_pool)
+                st.caption("일부만 수행하셨거나 다른 운동을 하셨다면 아래 풀에서 직접 골라 입력하실 수 있습니다.")
+                grand_pool = ["정석 맨몸 스쿼트", "워킹 런지 / 백 런지", "정석 푸쉬업", "정식 엘보우 플랭크", "트레드밀 (러닝머신)", "천국의 계단 (스텝밀)", "실내 고정식 싸이클 자전거"]
+                actual_done_list = st.multiselect("오늘 실제 마친 항목들을 선택해 주세요.", grand_pool)
                 
                 if actual_done_list:
                     for ex_name in actual_done_list:
-                        cal_factor = 60 
-                        for category in gym_details.values():
-                            for item in category:
-                                if item["name"] == ex_name:
-                                    cal_factor = item.get("cal_10m", 60)
-                        
-                        done_time = st.slider(f"[{ex_name}] 수행 시간(분)", 0, 180, 30, key=f"v12_time_{ex_name}")
-                        actual_burned_calories += round((done_time / 10) * cal_factor * condition_multiplier)
+                        done_time = st.slider(f"[{ex_name}] 수행 시간(분)", 0, 180, 30, key=f"v13_time_{ex_name}")
+                        actual_burned_calories += round((done_time / 10) * 60 * condition_multiplier)
                         actual_time_sum += done_time
                     ex_summary = f"[{user_condition}/수동] " + ", ".join(actual_done_list)
 
@@ -534,7 +443,7 @@ def show_main_page():
                 st.subheader("🔥 당일 실전 운동 최종 정산 스코어")
                 col_res1, col_res2 = st.columns(2)
                 col_res1.metric("총 결산 운동 시간", f"{actual_time_sum} 분")
-                col_res2.metric("수룡이 인증 소모 칼로리", f"{actual_burned_calories} kcal (컨디션 가중치 반영 완료)")
+                col_res2.metric("수룡이 인증 소모 칼로리", f"{actual_burned_calories} kcal (컨디션 가중치 연동)")
 
             st.divider()
             st.subheader("💾 최종 운동 기록 세이브")
@@ -558,7 +467,7 @@ def show_main_page():
                     new_exp = old_exp + 10
                     save_exp(new_exp)
 
-                    st.success(f"🎉 맞춤 일지 저장 완료! 컨디션을 고려해 안전하게 마친 보상으로 수룡이 경험치 10 EXP가 정상 지급되었습니다!")
+                    st.success(f"🎉 맞춤 일지 저장 성공! 수룡이 경험치 10 EXP가 정상 지급되었습니다!")
 
         with tab3:
             st.write("📅 **나의 누적 다이어트 일지**")
