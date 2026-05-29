@@ -36,15 +36,16 @@ def calculate_tdee(bmr, activity):
     }
     return round(bmr * factors[activity])
 
+# [요구사항 반영] 경험치에 따른 진화 단계 및 이미지 파일명 매핑
 def get_level(exp):
     if exp < 50:
-        return 1, "🥚 알 수룡이"
+        return 1, "🥚 알 수룡이", "a.png"
     elif exp < 120:
-        return 2, "🐣 아기 수룡이"
+        return 2, "🐣 아기 수룡이", "b.png"
     elif exp < 220:
-        return 3, "🐉 청소년 수룡이"
+        return 3, "🐉 성장한 수룡이", "c.png"
     else:
-        return 4, "👑 성체 수룡이"
+        return 4, "👑 전설의 수룡이", "d.png"
 
 def load_exp():
     if os.path.exists(GROW_FILE):
@@ -98,7 +99,6 @@ foods = {
 
 # --- 페이지 1: 메인 다이어리 ---
 def show_main_page():
-    # 상단 로고 이미지 배치 (핏메이트 타이틀 옆 큰 로고)
     log_col1, log_col2 = st.columns([1, 4])
     with log_col1:
         if os.path.exists(LOGO_FILE):
@@ -142,7 +142,6 @@ def show_main_page():
     food_style_options = ["한식", "가벼운식단", "단백질", "간단식", "분식", "중식", "양식", "일식", "간식", "패스트푸드"]
     food_style = st.selectbox("선호 식단", food_style_options, index=food_style_options.index(profile.get("선호 식단", "한식")))
 
-    # 프로필 저장
     save_profile({
         "이름": name, "성별": gender, "나이": age, "키(cm)": height, "몸무게(kg)": weight,
         "활동량": activity, "목표": goal, "알레르기 음식": allergy, "싫어하는 음식": dislike, "선호 식단": food_style
@@ -190,11 +189,9 @@ def show_main_page():
 
     st.divider()
 
-    # --- [수정사항] 입력 후 바로 결과를 띄우지 않고, 버튼을 눌러야 결과 작동 ---
     st.subheader("💡 분석 및 맞춤 제안 받기")
     st.caption("정보 입력 및 오늘 먹은 음식 선택을 완료한 후 아래 버튼을 클릭하세요.")
     
-    # 버튼 작동 여부를 session_state로 관리
     if "calc_submitted" not in st.session_state:
         st.session_state.calc_submitted = False
 
@@ -202,27 +199,24 @@ def show_main_page():
         st.session_state.calc_submitted = True
 
     if st.session_state.calc_submitted:
-        st.header("🎮 수룡이의 현재 상태")
+        st.header("🎮 수룡이의 오늘 식단 상태")
 
+        # [요구사항 반영] 오직 '목표 칼로리' 대비 '섭취량' 기준으로만 상태 분기
         if total == 0:
             suryong_img = "normal_suryong.jpg"
             suryong_msg = f"배가 고파요! 오늘 먹은 음식을 기록해주세요. 현재 BMI는 {user_bmi}입니다."
             status_color = "info"
-        elif total > daily_calorie + 150:
-            suryong_img = "fat_suryong.jpg"
-            suryong_msg = f"권장 칼로리({daily_calorie}kcal)를 많이 초과했어요! 수룡이가 포동포동해졌어요. 😭"
-            status_color = "error"
-        elif unhealthy_count > 0 and unhealthy_count >= healthy_count:
-            suryong_img = "fat_suryong.jpg"
-            suryong_msg = "다이어트를 방해하는 음식이 많아요! 수룡이가 걱정하고 있어요. 👿"
-            status_color = "error"
         elif total < daily_calorie - 400:
             suryong_img = "slim_suryong.jpg"
-            suryong_msg = "영양이 너무 부족해요! 수룡이가 기운 없이 홀쭉해졌어요. 🥺"
+            suryong_msg = "목표 칼로리에 비해 영양이 너무 부족해요! 수룡이가 기운 없이 홀쭉해졌어요. 🥺"
             status_color = "warning"
+        elif total > daily_calorie + 150:
+            suryong_img = "fat_suryong.jpg"
+            suryong_msg = f"권장 목표 칼로리({daily_calorie}kcal)를 초과했어요! 수룡이가 포동포동해졌어요. 😭"
+            status_color = "error"
         else:
             suryong_img = "normal_suryong.jpg"
-            suryong_msg = "좋아요! 건강하게 목표 칼로리에 가까워지고 있어요. 👍"
+            suryong_msg = "좋아요! 오늘 목표 칼로리에 딱 맞게 아주 건강하게 드셨네요! 👍"
             status_color = "success"
 
         col_char, col_info = st.columns([1, 1])
@@ -233,7 +227,7 @@ def show_main_page():
                 st.error(f"⚠️ 저장소에서 '{suryong_img}' 파일을 찾을 수 없습니다.")
 
         with col_info:
-            st.subheader(f"🐲 {name if name else '사용자'}님의 수룡이")
+            st.subheader(f"🐲 {name if name else '사용자'}님의 수룡이 식단 체크")
             if status_color == "info": st.info(suryong_msg)
             elif status_color == "error": st.error(suryong_msg)
             elif status_color == "warning": st.warning(suryong_msg)
@@ -321,8 +315,8 @@ def show_main_page():
                 new_exp = old_exp + gained_exp
                 save_exp(new_exp)
                 
-                old_lvl, old_lvl_n = get_level(old_exp)
-                new_lvl, new_lvl_n = get_level(new_exp)
+                old_lvl, old_lvl_n, _ = get_level(old_exp)
+                new_lvl, new_lvl_n, _ = get_level(new_exp)
 
                 st.success(f"🎉 운동 기록 저장 완료! 수룡이가 {gained_exp} XP를 얻었어요.")
                 if new_lvl > old_lvl:
@@ -382,17 +376,11 @@ def show_main_page():
 # --- 페이지 2: 수룡이 키우기 (분리된 페이지) ---
 def show_growth_page():
     st.title("🐉 수룡이 성장 룸")
-    st.caption("나의 운동 기록과 노력을 통해 자라나는 수룡이 전용 관리실 공간입니다.")
+    st.caption("운동 기록으로 획득한 경험치($XP$)에 따라 진화하는 진짜 수룡이의 방입니다.")
     st.divider()
 
     exp = load_exp()
-    level, level_name = get_level(exp)
-
-    # 현재 단계에 따른 이미지 매핑 시도
-    suryong_img = "normal_suryong.jpg"
-    if level == 1: suryong_img = "normal_suryong.jpg" # 알 대신 기본 매핑 (필요시 파일명 변경)
-    elif level == 2: suryong_img = "slim_suryong.jpg"
-    elif level >= 3: suryong_img = "fat_suryong.jpg"
+    level, level_name, suryong_img = get_level(exp) # [요구사항 반영] a.png ~ d.png 불러오기
 
     grow_col1, grow_col2 = st.columns([1, 1])
 
@@ -400,25 +388,25 @@ def show_growth_page():
         try:
             st.image(suryong_img, use_container_width=True)
         except:
-            st.error("⚠️ 수룡이 이미지를 불러올 수 없습니다.")
+            st.error(f"⚠️ 수룡이 진화 이미지 파일('{suryong_img}')을 찾을 수 없습니다. 파일명을 확인해 주세요.")
 
     with grow_col2:
         st.subheader(f"현재 단계: {level_name}")
         if exp >= 220:
             st.progress(1.0)
-            st.success("최종 진화 완료! 수룡이가 멋진 성체가 되었어요 👑")
+            st.success("🎉 축하합니다! 최종 단계인 전설의 수룡이가 완성되었습니다! 👑")
         else:
             next_goal = 50 if exp < 50 else 120 if exp < 120 else 220
             st.progress(exp / next_goal)
-            st.write(f"📈 현재 경험치: **{exp} XP**")
+            st.write(f"📈 현재 누적 경험치: **{exp} XP**")
             st.write(f"✨ 다음 진화까지 **{next_goal - exp} XP** 남았어요.")
 
     st.divider()
-    st.write("📌 **진화 단계 안내**")
-    st.write("- 1단계: 🥚 알 수룡이 / 0 XP 이상")
-    st.write("- 2단계: 🐣 아기 수룡이 / 50 XP 이상")
-    st.write("- 3단계: 🐉 청소년 수룡이 / 120 XP 이상")
-    st.write("- 4단계: 👑 성체 수룡이 / 220 XP 이상")
+    st.write("📌 **수룡이 진화 단계 안내 (알 키우기)**")
+    st.write("- **1단계 (0 XP 이상):** 🥚 알 수룡이 `[a.png]`")
+    st.write("- **2단계 (50 XP 이상):** 🐣 아기 수룡이 `[b.png]`")
+    st.write("- **3단계 (120 XP 이상):** 🐉 성장한 수룡이 `[c.png]`")
+    st.write("- **4단계 (220 XP 이상):** 👑 전설의 수룡이 `[d.png]`")
 
     st.divider()
     if st.checkbox("⚠️ 수룡이 성장 기록 초기화"):
@@ -428,7 +416,7 @@ def show_growth_page():
             st.warning("수룡이 성장 기록이 초기화되었습니다. 해당 페이지를 새로고침 해주세요.")
 
 
-# --- 4. 멀티페이지 내비게이션 구성 ---
+# --- 멀티페이지 내비게이션 구성 ---
 pg = st.navigation([
     st.Page(show_main_page, title="📊 다이어트 다이어리", icon="📝"),
     st.Page(show_growth_page, title="🐉 수룡이 알 키우기", icon="🥚")
