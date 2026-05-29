@@ -104,7 +104,7 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
-# 🏋️ [데이터셋] 60kg 기준 운동 종목별 10분당 소비 칼로리 데이터 개편
+# 🏋️ [데이터셋] 60kg 기준 운동 종목별 10분당 소비 칼로리 데이터
 exercises_db = {
     "산책 / 가벼운 걷기": {"cal_10m": 30, "url": "https://youtu.be/jpTQdM7okkI"},
     "빠르게 걷기 (파워워킹)": {"cal_10m": 40, "url": "https://youtu.be/jpTQdM7okkI"},
@@ -289,7 +289,6 @@ def show_main_page():
             st.divider()
             st.subheader("👟 오늘 진행할 운동 조합 선택")
             
-            # 사용자가 오늘 수행할 운동 종목들을 멀티셀렉트로 선택
             selected_ex_list = st.multiselect("오늘 어떤 운동들을 묶어서 조합하실 건가요? (복수 선택 가능)", list(exercises_db.keys()))
             
             total_burned_calories = 0
@@ -299,12 +298,10 @@ def show_main_page():
             if selected_ex_list:
                 st.write("⏱️ **선택한 운동 조합별 진행 시간(분)을 설정하세요**")
                 
-                # 각각 선택된 운동들의 슬라이더를 띄워 개별 소모량 합산
                 for ex_name in selected_ex_list:
                     cal_per_10m = exercises_db[ex_name]["cal_10m"]
                     ex_time = st.slider(f"[{ex_name}] 진행 시간 (10분당 {cal_per_10m} kcal 소모 기준)", 0, 120, 20, key=f"time_{ex_name}")
                     
-                    # 칼로리 공식 계산: (설정분 / 10) * 10분당 소모량
                     ex_burned = round((ex_time / 10) * cal_per_10m)
                     total_burned_calories += ex_burned
                     total_time_sum += ex_time
@@ -312,16 +309,13 @@ def show_main_page():
                 
                 st.divider()
                 
-                # 🧮 맞춤 운동 조합이 소비하는 총 칼로리 리포트 메트릭으로 출력
                 st.subheader("🔥 오늘의 맞춤 운동 총 소비 칼로리 결과")
-                
                 col_calc1, col_calc2 = st.columns(2)
                 col_calc1.metric("선택한 총 운동 시간", f"{total_time_sum} 분")
                 col_calc2.metric("예상 총 소비 칼로리", f"{total_burned_calories} kcal")
                 
                 st.info(f"💡 선택한 조합 계측: 60kg 기준, 오늘 설정하신 루틴을 완수하면 총 **{total_burned_calories} kcal**가 소비됩니다!")
                 
-                # 📺 영상 참고 안내 출력 (요청 문구 포함)
                 st.write("📺 **추천 운동 가이드 영상 안내 (참고용)**")
                 for ex_name in selected_ex_list:
                     url = exercises_db[ex_name]["url"]
@@ -340,10 +334,11 @@ def show_main_page():
                     
                     ex_summary = ", ".join(selected_ex_list)
 
+                    # 저장 시 '운동 부위' 컬럼에는 순수 소모 칼로리 숫자 데이터만 남김으로써 나중에 평균을 구할 수 있게 처리
                     new_data = {
                         "날짜": formatted_date, "이름": name if name else "사용자",
                         "체중(kg)": weight, "BMI": user_bmi, "목표 칼로리": daily_calorie, "오늘 섭취량": total,
-                        "운동 장소": ex_summary, "운동 부위": f"총 {total_burned_calories}kcal 소모", "오늘 컨디션": "정상", "운동 시간(분)": total_time_sum
+                        "운동 장소": ex_summary, "운동 부위": total_burned_calories, "오늘 컨디션": "정상", "운동 시간(분)": total_time_sum
                     }
                     df = pd.read_csv(LOG_FILE) if os.path.exists(LOG_FILE) else pd.DataFrame(columns=new_data.keys())
                     df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
@@ -367,14 +362,40 @@ def show_main_page():
             st.write("📅 **나의 누적 다이어트 일지**")
             if os.path.exists(LOG_FILE):
                 df_log = pd.read_csv(LOG_FILE)
-                st.dataframe(df_log.iloc[::-1], use_container_width=True)
+                
+                # 데이터 타입 예외 케이스 방어 가공
+                df_log["오늘 섭취량"] = pd.to_numeric(df_log["오늘 섭취량"], errors="coerce").fillna(0)
+                df_log["운동 부위"] = pd.to_numeric(df_log["운동 부위"], errors="coerce").fillna(0)
+                df_log["운동 시간(분)"] = pd.to_numeric(df_log["운동 시간(분)"], errors="coerce").fillna(0)
+                
+                # 표에 노출될 때 가독성을 위해 임시로 컬럼명 변경해서 출력
+                df_display = df_log.copy()
+                df_display = df_display.rename(columns={"운동 장소": "수행한 운동 조합", "운동 부위": "소비 칼로리(kcal)"})
+                st.dataframe(df_display.iloc[::-1], use_container_width=True)
 
+                # 📊 [요청 변경 사항] 나의 다이어트 요약 레이아웃 4분할 개편
                 st.subheader("📊 나의 다이어트 요약")
-                col_stat1, col_stat2, col_stat3 = st.columns(3)
+                col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
+                
                 col_stat1.metric("총 기록 수", f"{len(df_log)} 회")
                 col_stat2.metric("평균 하루 섭취 칼로리", f"{int(df_log['오늘 섭취량'].mean())} kcal")
-                total_ex = int(df_log["운동 시간(분)"].sum()) if "운동 시간(분)" in df_log.columns else 0
-                col_stat3.metric("누적 운동 시간", f"{total_ex} 분")
+                col_stat3.metric("평균 운동 소모 칼로리", f"{int(df_log['운동 부위'].mean())} kcal")  # 👈 추가 항목!
+                total_ex = int(df_log["운동 시간(분)"].sum())
+                col_stat4.metric("누적 운동 시간", f"{total_ex} 분")
+
+                st.divider()
+                
+                # 📈 [요청 변경 사항] 섭취 칼로리 vs 운동 소모 칼로리 비교 막대 그래프 시각화
+                st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
+                
+                # 그래프 그리기용 시계열 가공 데이터프레임 빌드
+                df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
+                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum()
+                df_chart = df_chart.rename(columns={"오늘 섭취량": "섭취 칼로리", "운동 부위": "운동 소모 칼로리"})
+                
+                # 막대그래프 출력
+                st.bar_chart(df_chart, y=["섭취 칼로리", "운동 소모 칼로리"], use_container_width=True)
+                st.caption("💡 섭취량(파란색 막대)보다 소모량(빨간색/주황색 계열 막대)을 높여 '마이너스 칼로리' 상태를 유지하면 다이어트에 대성공입니다!")
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
