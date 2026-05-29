@@ -403,10 +403,10 @@ def show_growth_page():
 
     st.divider()
     st.write("📌 **수룡이 진화 단계 안내 (알 키우기)**")
-    st.write("- **1단계 (0 XP 이상):** 🥚 알 수룡이 `[a.png]`")
-    st.write("- **2단계 (50 XP 이상):** 🐣 아기 수룡이 `[b.png]`")
-    st.write("- **3단계 (120 XP 이상):** 🐉 성장한 수룡이 `[c.png]`")
-    st.write("- **4단계 (220 XP 이상):** 👑 전설의 수룡이 `[d.png]`")
+    st.write("- **1단계 (0 XP 이상):** 🥚 알 수룡이 `[a.jpg]`")
+    st.write("- **2단계 (50 XP 이상):** 🐣 아기 수룡이 `[b.jpg]`")
+    st.write("- **3단계 (120 XP 이상):** 🐉 성장한 수룡이 `[c.jpg]`")
+    st.write("- **4단계 (220 XP 이상):** 👑 전설의 수룡이 `[d.jpg]`")
 
     st.divider()
     if st.checkbox("⚠️ 수룡이 성장 기록 초기화"):
