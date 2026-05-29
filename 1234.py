@@ -381,9 +381,9 @@ def show_main_page():
             with col_ex1:
                 select_date = st.date_input("기록 날짜", datetime.now().date())
             with col_ex2:
-                ex_place = st.radio("오늘의 운동 장소", ["헬스장", "홈트"], key="main_ex_place_v8")
+                ex_place = st.radio("오늘의 운동 장소", ["헬스장", "홈트"], key="main_ex_place_v9")
             with col_ex3:
-                user_condition = st.selectbox("현재 나의 컨디션", ["최상 (에너지 넘침)", "정상 (보통)", "피곤함 (가벼운 운동 필요)", "근육통 있음"], key="main_condition_v8")
+                user_condition = st.selectbox("현재 나의 컨디션", ["최상 (에너지 넘침)", "정상 (보통)", "피곤함 (가벼운 운동 필요)", "근육통 있음"], key="main_condition_v9")
 
             # 💡 [보존] 근육증가 및 헬스장 선택 시 분할 선택 가이드라인 (절대 유지)
             muscle_gym_part = "상체만 진행"
@@ -393,13 +393,13 @@ def show_main_page():
                 muscle_gym_part = st.radio(
                     "오늘은 상체 and 하체 중 어느 부위를 집중 타겟팅하시겠습니까?", 
                     ["상체만 진행", "하체만 진행"], 
-                    key="muscle_gym_part_selector_v8",
+                    key="muscle_gym_part_selector_v9",
                     horizontal=True
                 )
 
             st.write("")
             st.subheader("⏱️ 오늘 운동에 투자할 총 시간 설정")
-            target_total_time = st.slider("오늘은 총 몇 분 동안 운동을 진행하시겠습니까?", 20, 180, 80, step=5, key="main_time_slider_v8")
+            target_total_time = st.slider("오늘은 총 몇 분 동안 운동을 진행하시겠습니까?", 20, 180, 80, step=5, key="main_time_slider_v9")
 
             st.divider()
 
@@ -418,7 +418,7 @@ def show_main_page():
             ai_prescribed_exercises = []
             ai_prescribed_calories = 0
             
-            safe_prefix = f"v8_{ex_place}_{goal}_{user_condition}".replace(" ", "_").replace("(", "").replace(")", "")
+            safe_prefix = f"v9_{ex_place}_{goal}_{user_condition}".replace(" ", "_").replace("(", "").replace(")", "")
 
             # --- 💡 다중 기구 로테이션 렌더링 엔진 ---
             with st.container():
@@ -426,32 +426,55 @@ def show_main_page():
                 if ex_place == "홈트":
                     sub_goal = "근육증가" if goal == "근육증가" else "감량"
                     
-                    # 💡 [감량 ➔ 홈트 시간 계산 누락 해결 단락]
+                    # 💡 [감량 ➔ 홈트 시간 연산 및 유튜브 조건 전면 개편]
                     if sub_goal == "감량":
                         st.markdown(f"### 🏃 **[목표: {goal}]** 컨디션 맞춤형 홈트레이닝 유산소 타임라인")
-                        current_pool = exercise_presets["홈트"]["감량"].get(user_condition, exercise_presets["홈트"]["감량"]["정상 (보통)"])
+                        raw_pool = exercise_presets["홈트"]["감량"].get(user_condition, exercise_presets["홈트"]["감량"]["정상 (보통)"])
                         
-                        num_exercises = len(current_pool) if len(current_pool) > 0 else 1
-                        time_per_ex = max(5, round(target_total_time / num_exercises))
+                        # 컨디션 좋거나 보통일 때 유튜브 고정 (나머지 상태일 때는 강제 제거)
+                        has_youtube = user_condition in ["최상 (에너지 넘침)", "정상 (보통)"]
+                        
+                        # 풀 필터링 (유튜브가 없는 컨디션이면 프리셋 풀에서 무조건 유튜브 항목 제거)
+                        if not has_youtube:
+                            current_pool = [item for item in raw_pool if "url" not in item]
+                        else:
+                            current_pool = list(raw_pool)
+
+                        num_exercises = len(current_pool)
                         
                         for idx, item in enumerate(current_pool):
                             st.markdown("---")
-                            st.markdown(f"## 🏃 {idx+1}단계 유산소 트랙: {item['name']}")
-                            # 🛠️ [시간 반영 수정] 이 부분에 time_per_ex 연산 변수를 완벽히 주입하여 고정 텍스트 오류를 해결했습니다.
-                            st.markdown(f"  - ⏱️ 집중 수행 시간: **{time_per_ex}분**")
+                            
+                            # 유튜브 동영상 노출인 경우 (1단계) - 무조건 20분 고정
+                            if "url" in item and has_youtube:
+                                time_per_ex = 20
+                                st.markdown(f"## 🏃 {idx+1}단계 유산소 트랙 (필수 고정): {item['name']}")
+                                st.markdown(f"  - ⏱️ 집중 수행 시간: **{time_per_ex}분** (유튜브 루틴 고정)")
+                            else:
+                                # 유튜브가 포함된 세션인 경우 남은 운동 시간 배분
+                                if has_youtube:
+                                    rem_time = max(5, target_total_time - 20)
+                                    time_per_ex = max(5, round(rem_time / (num_exercises - 1)))
+                                else:
+                                    # 유튜브가 아예 없는 컨디션 세션인 경우 전체 시간에서 1/N 배분
+                                    time_per_ex = max(5, round(target_total_time / max(1, num_exercises)))
+                                    
+                                st.markdown(f"## 🏃 {idx+1}단계 유산소 트랙: {item['name']}")
+                                st.markdown(f"  - ⏱️ 집중 수행 시간: **{time_per_ex}분**")
+                                
                             st.markdown(f"  - 📊 페이스 가이드: **{item['guide']}** | {item['rest']}")
                             
-                            if idx == 0 and "url" in item:
+                            if "url" in item and has_youtube:
                                 st.video(item["url"])
                                 st.info(f"🔗 [유튜브 앱에서 직접 보기]({item['url']})")
                                 
-                            with st.expander("💡 유산소 효과 배가 꿀팁", key=f"exp_{safe_prefix}_gym_cardio_home_{idx}_v8"):
+                            with st.expander("💡 유산소 효과 배가 꿀팁", key=f"exp_{safe_prefix}_gym_cardio_home_{idx}_v9"):
                                 st.caption(item["tip"])
                                 
                             ai_prescribed_exercises.append(item['name'])
                             ai_prescribed_calories += round((time_per_ex / 10) * item["cal_10m"] * condition_multiplier)
                     
-                    # 💡 [근육증가 ➔ 홈트 시간 및 UI 보존]
+                    # 💡 [근육증가 ➔ 홈트] N분할 시간 연산 완벽 반영
                     else:
                         st.markdown(f"### 🏠 오늘 신체 컨디션에 맞춘 {sub_goal} 전신 홈트레이닝")
                         current_pool = exercise_presets["홈트"]["근육증가"].get(user_condition, exercise_presets["홈트"]["근육증가"]["정상 (보통)"])
@@ -462,7 +485,7 @@ def show_main_page():
                             st.markdown(f"## 🎯 {idx+1}단계 코스: {item['name']}")
                             st.markdown(f"  - ⏱️ 추천 할당 시간: **{time_per_ex}분**")
                             st.markdown(f"  - 📊 수행 가이드: **{item['guide']}** | {item['rest']}")
-                            with st.expander("📖 정석 자세 및 부상방지 꿀팁", key=f"exp_{safe_prefix}_muscle_{idx}_v8"):
+                            with st.expander("📖 정석 자세 및 부상방지 꿀팁", key=f"exp_{safe_prefix}_muscle_{idx}_v9"):
                                 st.caption(item["tip"])
                             st.write("")
                             ai_prescribed_exercises.append(item['name'])
@@ -472,7 +495,7 @@ def show_main_page():
                 else: 
                     pool_dict = gym_split_presets.get(user_condition, gym_split_presets["정상 (보통)"])
                     
-                    # B-1. 헬스장 + 근육증가 목표 (보존 완료: 절대 안 건드림)
+                    # B-1. 헬스장 + 근육증가 목표 N분할 시간 연산 완벽 반영
                     if goal == "근육증가":
                         if muscle_gym_part == "상체만 진행":
                             st.markdown(f"### 🏋️ **[목표: 근육증가 - 상체 분할]** 오늘 진행하는 4종 상체 기구 집중 타겟 라인")
@@ -490,13 +513,13 @@ def show_main_page():
                             st.markdown(f"### 🔹 {item['name']}")
                             st.markdown(f"  - ⏱️ 권장 할당 시간: **{time_per_machine}분** (세트 사이 휴식 포함)")
                             st.markdown(f"  - 📊 수행 가이드: **{item['guide']}** | {item['rest']}")
-                            with st.expander(f"💡 {item['name']} 기구 사용 가이드 및 고립 자극 꿀팁", key=f"exp_{safe_prefix}_gym_parts_{idx}_v8"):
+                            with st.expander(f"💡 {item['name']} 기구 사용 가이드 및 고립 자극 꿀팁", key=f"exp_{safe_prefix}_gym_parts_{idx}_v9"):
                                 st.caption(item["tip"])
                             ai_prescribed_exercises.append(item['name'])
                             ai_prescribed_calories += round((time_per_machine / 10) * item["cal_10m"] * condition_multiplier)
                             st.write("")
                                 
-                    # B-2. [감량 헬스장 UI 유지] '단계' 방식 완벽 동기화
+                    # B-2. 헬스장 + 감량 목표 N분할 시간 연산 완벽 반영
                     else:
                         st.markdown(f"### 🏃 **[목표: {goal}]** 컨디션 맞춤형 고효율 다중 유산소 트랙")
                         cardio_list = pool_dict.get("유산소", [])
@@ -508,7 +531,7 @@ def show_main_page():
                             st.markdown(f"## 🏃 {idx+1}단계 유산소 트랙: {item['name']}")
                             st.markdown(f"  - ⏱️ 집중 수행 시간: **{time_per_ex}분**")
                             st.markdown(f"  - 📊 페이스 가이드: **{item['guide']}** | {item['rest']}")
-                            with st.expander("💡 유산소 효과 배가 꿀팁", key=f"exp_{safe_prefix}_gym_cardio_{idx}_v8"):
+                            with st.expander("💡 유산소 효과 배가 꿀팁", key=f"exp_{safe_prefix}_gym_cardio_{idx}_v9"):
                                 st.caption(item["tip"])
                             ai_prescribed_exercises.append(item['name'])
                             ai_prescribed_calories += round((time_per_ex / 10) * item["cal_10m"] * condition_multiplier)
@@ -518,7 +541,7 @@ def show_main_page():
 
             # --- [실제 수행 기록 정산기 단락] ---
             st.subheader("🏋️ 오늘 실제로 완료한 운동 체크")
-            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 균형 있는 다중 기구 루틴을 그대로 완료했습니다! (원클릭 등록)", value=False, key="checkbox_ai_routine_v8")
+            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 균형 있는 다중 기구 루틴을 그대로 완료했습니다! (원클릭 등록)", value=False, key="checkbox_ai_routine_v9")
 
             actual_burned_calories = 0
             actual_time_sum = 0
@@ -539,11 +562,11 @@ def show_main_page():
                     "레그 익스텐션 머신 (허벅지 앞쪽 고립)", "시티드 레그 컬 머신 (허벅지 뒤쪽 햄스트링)",
                     "천국의 계단 (스텝밀)", "트레드밀 (러닝머신)", "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛]"
                 ]
-                actual_done_list = st.multiselect("오늘 실제 마친 항목들을 골라주세요.", grand_pool, key="manual_select_ex_v8")
+                actual_done_list = st.multiselect("오늘 실제 마친 항목들을 골라주세요.", grand_pool, key="manual_select_ex_v9")
                 
                 if actual_done_list:
                     for ex_name in actual_done_list:
-                        done_time = st.slider(f"[{ex_name}] 수행 시간(분)", 0, 180, 15, key=f"fix_time_v8_{ex_name}")
+                        done_time = st.slider(f"[{ex_name}] 수행 시간(분)", 0, 180, 15, key=f"fix_time_v9_{ex_name}")
                         actual_burned_calories += round((done_time / 10) * 65 * condition_multiplier)
                         actual_time_sum += done_time
                     ex_summary = f"[{user_condition}/수동] " + ", ".join(actual_done_list)
@@ -557,7 +580,7 @@ def show_main_page():
 
             st.divider()
             st.subheader("💾 최종 운동 기록 세이브")
-            if st.button("🔥 정산된 수치로 최종 저장하고 수룡이 경험치 받기", key="btn_save_exercise_v8"):
+            if st.button("🔥 정산된 수치로 최종 저장하고 수룡이 경험치 받기", key="btn_save_exercise_v9"):
                 if not use_ai_routine and ('actual_done_list' not in locals() or not actual_done_list):
                     st.error("완료한 운동 수치가 정산되지 않았습니다. AI 원클릭 체크박스를 누르거나 수동 운동을 골라주세요.")
                 else:
@@ -607,7 +630,7 @@ def show_main_page():
                     if available_dates:
                         chart_col1, chart_col2 = st.columns([3, 1.5])
                         with chart_col2:
-                            selected_chart_date = st.selectbox("날짜를 클릭하세요", options=available_dates, index=len(available_dates)-1, key="chart_date_selector_v8")
+                            selected_chart_date = st.selectbox("날짜를 클릭하세요", options=available_dates, index=len(available_dates)-1, key="chart_date_selector_v9")
                         with chart_col1:
                             day_data = df_unique_dates[df_unique_dates["날짜_일만"] == selected_chart_date].iloc[0]
                             plot_df = pd.DataFrame({
@@ -652,8 +675,8 @@ def show_main_page():
                             else: cols[i].markdown(f"{day}")
 
                 st.divider()
-                if st.checkbox("⚠️ 전체 기록 지우기", key="delete_all_logs_check_v8"):
-                    if st.button("정말 삭제하시겠습니까?", key="btn_delete_logs_confirm_v8"):
+                if st.checkbox("⚠️ 전체 기록 지우기", key="delete_all_logs_check_v9"):
+                    if st.button("정말 삭제하시겠습니까?", key="btn_delete_logs_confirm_v9"):
                         os.remove(LOG_FILE)
                         st.warning("모든 다이어트 기록이 삭제되었습니다. 새로고침 해주세요.")
             else:
@@ -707,8 +730,8 @@ def show_growth_page():
     st.table(pd.DataFrame(level_data))
 
     st.divider()
-    if st.checkbox("⚠️ 수룡이 경험치 초기화 활성화", key="reset_exp_check_v8"):
-        if st.button("💥 수룡이를 다시 알(🥚)로 되돌리기", type="primary", key="btn_reset_exp_v8"):
+    if st.checkbox("⚠️ 수룡이 경험치 초기화 활성화", key="reset_exp_check_v9"):
+        if st.button("💥 수룡이를 다시 알(🥚)로 되돌리기", type="primary", key="btn_reset_exp_v9"):
             if os.path.exists(GROW_FILE):
                 os.remove(GROW_FILE)
             st.warning("수룡이의 경험치가 완전히 초기화되었습니다! 페이지를 새로고침(F5) 해주세요.")
