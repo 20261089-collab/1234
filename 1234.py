@@ -104,7 +104,7 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
-# 🏋️ [데이터셋] 운동 데이터
+# 🏋️ [데이터셋] 운동 데이터 (★바보 탈출! 파워워킹 링크 제대로 수정 완료★)
 exercises_db = {
     "산책 / 가벼운 걷기": {"cal_10m": 30, "url": "https://youtu.be/MWnD6DhLjyc?si=-2IDpUQ8fYxQguKv"},
     "빠르게 걷기 (파워워킹)": {"cal_10m": 40, "url": "https://youtu.be/Me3IaZS3CdY?si=sGAMVjvBxPmokg01"},
@@ -118,7 +118,7 @@ exercises_db = {
     "웨이트 트레이닝 (헬스장 머신)": {"cal_10m": 55, "url": "https://youtu.be/e7fOcatby_k?si=GnUzZIBQ-DlMSXnx"},
     "맨몸 스쿼트 / 런지": {"cal_10m": 60, "url": "https://youtu.be/Xcu271Ia720?si=o7ZDniBYeCamqRT2"},
     "플랭크 / 복근 운동": {"cal_10m": 50, "url": "https://youtu.be/USJgKSLxDRc?si=OAkWcADFXofRdvRg"},
-    "팔굽혀펴기 / 상체 홈트": {"cal_10m": 55, "url": "https://youtu.be/XmxpYKKlqok?si=MjtgeJUSRYkRqTBV"},
+    "팔굽혀펴기 / 상체 홈트": {"cal_10m": 55, "url": "https://youtu.be/XmxpYKKlokok?si=MjtgeJUSRYkRqTBV"},
     "버피 테스트": {"cal_10m": 100, "url": "https://youtu.be/UeVDx20Jbs8?si=XEXhU_FPG2yCr5zw"},
     "복싱": {"cal_10m": 95, "url": "https://youtu.be/p7IetTCzUUQ?si=Mco-GJrZ0NHMkAW_"}
 }
@@ -294,7 +294,6 @@ def show_main_page():
                 st.write("⏱️ **선택한 운동 조합별 진행 시간(분)을 설정하세요**")
                 
                 for ex_name in selected_ex_list:
-                    # 각 독립된 항목별 딕셔너리 안전 참조
                     if ex_name in exercises_db:
                         cal_per_10m = exercises_db[ex_name]["cal_10m"]
                         ex_time = st.slider(f"[{ex_name}] 진행 시간 (10분당 {cal_per_10m} kcal 소모)", 0, 120, 20, key=f"time_{ex_name}")
@@ -313,7 +312,6 @@ def show_main_page():
                 st.info(f"💡 선택한 조합 계측: 오늘 설정하신 루틴을 완수하면 총 **{total_burned_calories} kcal**가 소비됩니다!")
                 
                 st.write("📺 **추천 운동 가이드 영상 안내 (참고용)**")
-                # 🛠️ [버그 수정] 루프 내 독립 매칭 가동하여 중복 노출 절대 차단
                 for ex_name in selected_ex_list:
                     if ex_name in exercises_db:
                         url = exercises_db[ex_name]["url"]
@@ -371,7 +369,6 @@ def show_main_page():
                 
                 st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
 
-                # 🛠️ [차트 에러 방지] 일자 변환 및 그룹 데이터 구조 엄격 명시
                 try:
                     df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
                     df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum().reset_index()
