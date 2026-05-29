@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, time
 import os
 import calendar
 
@@ -40,7 +40,6 @@ def calculate_tdee(bmr, activity):
     return round(bmr * factors[activity])
 
 
-# [🔥 버그 수정] 파일 확장자를 .png에서 .jpg로 변경했습니다.
 def get_level(exp):
     if exp < 50:
         return 1, "🥚 알 수룡이", "a.jpg"
@@ -271,6 +270,11 @@ def show_main_page():
 
         with tab2:
             st.write("🏋️ **오늘 나의 상태에 딱 맞는 맞춤형 운동 프로그램**")
+            
+            # 📅 날짜 지정을 위한 선택 컴포넌트 추가
+            st.subheader("📅 운동 날짜 지정")
+            select_date = st.date_input("기록을 입력할 날짜를 선택하세요", datetime.now().date())
+            
             ex_col1, ex_col2, ex_col3 = st.columns(3)
             with ex_col1:
                 place_style = st.selectbox("운동 장소 선택 🏢", ["홈트레이닝 (집)", "헬스장 (Gym)"])
@@ -323,10 +327,14 @@ def show_main_page():
                     st.markdown(
                         "- [추천 숏츠 1](https://youtube.com/shorts/ul5GqyTSSIk) / [추천 숏츠 2](https://youtube.com/shorts/1FZYk9OyxV0)")
 
-            st.subheader("💾 오늘의 운동 기록 저장")
-            if st.button("🔥 오늘 운동 완료! 기록 저장하고 경험치 받기"):
+            st.subheader("💾 운동 기록 저장")
+            if st.button("🔥 지정된 날짜로 기록 저장하고 경험치 받기"):
+                # 현재 시각의 '시:분'을 가져와 선택한 날짜 형식과 결합
+                current_time_str = datetime.now().strftime("%H:%M")
+                formatted_date = f"{select_date.strftime('%Y-%m-%d')} {current_time_str}"
+                
                 new_data = {
-                    "날짜": datetime.now().strftime("%Y-%m-%d %H:%M"), "이름": name if name else "사용자",
+                    "날짜": formatted_date, "이름": name if name else "사용자",
                     "체중(kg)": weight, "BMI": user_bmi, "목표 칼로리": daily_calorie, "오늘 섭취량": total,
                     "운동 장소": place_style, "운동 부위": target_part, "오늘 컨디션": condition, "운동 시간(분)": exercise_time
                 }
@@ -334,10 +342,9 @@ def show_main_page():
                 df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
                 df.to_csv(LOG_FILE, index=False, encoding="utf-8-sig")
 
+                # 고정으로 10 EXP를 획득하도록 설정
                 old_exp = load_exp()
-                gained_exp = 0 if exercise_time == 0 else (
-                    10 if exercise_time < 20 else (20 if exercise_time < 40 else (30 if exercise_time < 60 else 40)))
-                if condition == "컨디션 최고! 🔥": gained_exp += 5
+                gained_exp = 10 
 
                 new_exp = old_exp + gained_exp
                 save_exp(new_exp)
@@ -345,7 +352,7 @@ def show_main_page():
                 old_lvl, old_lvl_n, _ = get_level(old_exp)
                 new_lvl, new_lvl_n, _ = get_level(new_exp)
 
-                st.success(f"🎉 운동 기록 저장 완료! 수룡이가 {gained_exp} XP를 얻었어요.")
+                st.success(f"🎉 {select_date.strftime('%m월 %d일')} 운동 기록 저장 완료! 수룡이가 {gained_exp} EXP를 얻었어요.")
                 if new_lvl > old_lvl:
                     st.balloons()
                     st.success(f"🎊 진화 성공! {old_lvl_n} → {new_lvl_n}")
@@ -407,7 +414,7 @@ def show_main_page():
 # --- 페이지 2: 수룡이 키우기 (분리된 페이지) ---
 def show_growth_page():
     st.title("🐉 수룡이 성장 룸")
-    st.caption("운동 기록으로 획득한 경험치($XP$)에 따라 진화하는 진짜 수룡이의 방입니다.")
+    st.caption("운동 기록으로 획득한 경험치($EXP$)에 따라 진화하는 진짜 수룡이의 방입니다.")
     st.divider()
 
     exp = load_exp()
@@ -423,21 +430,21 @@ def show_growth_page():
 
     with grow_col2:
         st.subheader(f"현재 단계: {level_name}")
-        if exp >= 220:
+        if exp >= 720:
             st.progress(1.0)
             st.success("🎉 축하합니다! 최종 단계인 전설의 수룡이가 완성되었습니다! 👑")
         else:
-            next_goal = 50 if exp < 50 else 120 if exp < 120 else 220
+            next_goal = 120 if exp < 120 else 360 if exp < 360 else 720
             st.progress(exp / next_goal)
-            st.write(f"📈 현재 누적 경험치: **{exp} XP**")
-            st.write(f"✨ 다음 진화까지 **{next_goal - exp} XP** 남았어요.")
+            st.write(f"📈 현재 누적 경험치: **{exp} EXP**")
+            st.write(f"✨ 다음 진화까지 **{next_goal - exp} EXP** 남았어요.")
 
     st.divider()
     st.write("📌 **수룡이 진화 단계 안내 (알 키우기)**")
-    st.write("- **1단계 (0 XP 이상):** 🥚 알 수룡이 `[a.jpg]`")
-    st.write("- **2단계 (50 XP 이상):** 🐣 아기 수룡이 `[b.jpg]`")
-    st.write("- **3단계 (120 XP 이상):** 🐉 성장한 수룡이 `[c.jpg]`")
-    st.write("- **4단계 (220 XP 이상):** 👑 전설의 수룡이 `[d.jpg]`")
+    st.write("- **1단계 (0 EXP 이상):** 🥚 알 수룡이")
+    st.write("- **2단계 (120 EXP 이상):** 🐣 아기 수룡이")
+    st.write("- **3단계 (360 EXP 이상):** 🐉 성장한 수룡이")
+    st.write("- **4단계 (720 EXP 이상):** 👑 전설의 수룡이")
 
     st.divider()
     if st.checkbox("⚠️ 수룡이 성장 기록 초기화"):
