@@ -381,20 +381,21 @@ def show_main_page():
 
                 st.divider()
                 
-                # 📈 [요청 변경 사항] 섭취 vs 소모 세로형(Vertical) + 슬림(뚱뚱하지 않게) 디자인 그래프 개편
-                st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교 (세로형)")
+                # 📈 [요청 변경 사항] 섭취량 vs 운동 소모량 비교 막대그래프 레이아웃 대폭 개편
+                st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
                 
                 df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
                 df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum()
                 df_chart = df_chart.rename(columns={"오늘 섭취량": "섭취 칼로리", "운동 부위": "운동 소모 칼로리"})
                 
-                # 💡 레이아웃을 3분할([1, 2, 1])하여 가운데(graph_col)에만 배치해 뚱뚱해지지 않도록 가로폭을 압축했습니다!
-                left_space, graph_col, right_space = st.columns([1, 2, 1])
+                # 💡 [뚱뚱하지 않게 필터링!] 양쪽에 빈 공간 컬럼(2.5씩)을 넓게 배치하고, 
+                # 가운데 그래프 컬럼(3)을 얇게 쪼개어 예시 사진처럼 뚱뚱하지 않고 슬림하게 올라오는 세로 막대로 구현했습니다.
+                left_space, graph_col, right_space = st.columns([2.5, 3, 2.5])
                 
                 with graph_col:
-                    # st.bar_chart는 기본적으로 세로 막대그래프를 그립니다. 
+                    # Streamlit 내장 st.bar_chart로 세로 막대 컴포넌트를 깔끔하게 구현
                     st.bar_chart(df_chart, y=["섭취 칼로리", "운동 소모 칼로리"])
-                    st.caption("※ 날짜별 칼로리 키재기! 섭취 막대보다 운동 소모 막대가 더 높아야 살이 빠집니다!")
+                    st.caption("※ 날짜별 키재기! 파란색 막대보다 주황색 막대가 더 높아야 건강하게 살이 빠집니다!")
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
