@@ -16,15 +16,18 @@ GROW_FILE = "suryong_growth.csv"
 PROFILE_FILE = "user_profile.csv"
 LOGO_FILE = "icon.png"  # 로고 이미지 파일명
 
+
 # --- 공통 함수 정의 ---
 def calculate_bmi(weight, height):
     h = height / 100
     return round(weight / (h ** 2), 1)
 
+
 def calculate_bmr(weight, height, age, gender):
     if gender == "남자":
         return round(10 * weight + 6.25 * height - 5 * age + 5)
     return round(10 * weight + 6.25 * height - 5 * age - 161)
+
 
 def calculate_tdee(bmr, activity):
     factors = {
@@ -36,16 +39,18 @@ def calculate_tdee(bmr, activity):
     }
     return round(bmr * factors[activity])
 
-# [요구사항 반영] 경험치에 따른 진화 단계 및 이미지 파일명 매핑
+
+# [🔥 버그 수정] 파일 확장자를 .png에서 .jpg로 변경했습니다.
 def get_level(exp):
     if exp < 50:
-        return 1, "🥚 알 수룡이", "a.png"
+        return 1, "🥚 알 수룡이", "a.jpg"
     elif exp < 120:
-        return 2, "🐣 아기 수룡이", "b.png"
+        return 2, "🐣 아기 수룡이", "b.jpg"
     elif exp < 220:
-        return 3, "🐉 성장한 수룡이", "c.png"
+        return 3, "🐉 성장한 수룡이", "c.jpg"
     else:
-        return 4, "👑 전설의 수룡이", "d.png"
+        return 4, "👑 전설의 수룡이", "d.jpg"
+
 
 def load_exp():
     if os.path.exists(GROW_FILE):
@@ -53,9 +58,11 @@ def load_exp():
         return int(df["경험치"].iloc[-1])
     return 0
 
+
 def save_exp(exp):
     df = pd.DataFrame([{"경험치": exp}])
     df.to_csv(GROW_FILE, index=False, encoding="utf-8-sig")
+
 
 def load_profile():
     if os.path.exists(PROFILE_FILE):
@@ -63,9 +70,11 @@ def load_profile():
         return df.iloc[-1].to_dict()
     return {}
 
+
 def save_profile(profile):
     df = pd.DataFrame([profile])
     df.to_csv(PROFILE_FILE, index=False, encoding="utf-8-sig")
+
 
 # 데이터셋
 foods = {
@@ -191,7 +200,7 @@ def show_main_page():
 
     st.subheader("💡 분석 및 맞춤 제안 받기")
     st.caption("정보 입력 및 오늘 먹은 음식 선택을 완료한 후 아래 버튼을 클릭하세요.")
-    
+
     if "calc_submitted" not in st.session_state:
         st.session_state.calc_submitted = False
 
@@ -201,7 +210,6 @@ def show_main_page():
     if st.session_state.calc_submitted:
         st.header("🎮 수룡이의 오늘 식단 상태")
 
-        # [요구사항 반영] 오직 '목표 칼로리' 대비 '섭취량' 기준으로만 상태 분기
         if total == 0:
             suryong_img = "normal_suryong.jpg"
             suryong_msg = f"배가 고파요! 오늘 먹은 음식을 기록해주세요. 현재 BMI는 {user_bmi}입니다."
@@ -228,10 +236,14 @@ def show_main_page():
 
         with col_info:
             st.subheader(f"🐲 {name if name else '사용자'}님의 수룡이 식단 체크")
-            if status_color == "info": st.info(suryong_msg)
-            elif status_color == "error": st.error(suryong_msg)
-            elif status_color == "warning": st.warning(suryong_msg)
-            else: st.success(suryong_msg)
+            if status_color == "info":
+                st.info(suryong_msg)
+            elif status_color == "error":
+                st.error(suryong_msg)
+            elif status_color == "warning":
+                st.warning(suryong_msg)
+            else:
+                st.success(suryong_msg)
 
             st.metric("나의 BMI 지수", f"{user_bmi}")
             st.metric("목표 권장 칼로리", f"{daily_calorie} kcal")
@@ -246,9 +258,9 @@ def show_main_page():
             recommended = [
                 f for f in foods
                 if foods[f]["type"] == food_style
-                and foods[f]["is_healthy"] == True
-                and (allergy == "없음" or allergy not in f)
-                and (dislike == "없음" or dislike not in f)
+                   and foods[f]["is_healthy"] == True
+                   and (allergy == "없음" or allergy not in f)
+                   and (dislike == "없음" or dislike not in f)
             ]
             if not recommended:
                 st.warning(f"선택하신 '{food_style}' 카테고리에는 다이어트 전용 추천 식단이 없습니다. 대신 클린 식단을 제공합니다!")
@@ -273,29 +285,43 @@ def show_main_page():
 
             if condition == "컨디션 최고! 🔥":
                 cond_msg = "오늘은 강도 높은 운동도 가능해요!"
-                gym_set = "4세트"; home_mission = "맨몸 스쿼트 20회 + 플랭크 1분 추가 진행!"
+                gym_set = "4세트";
+                home_mission = "맨몸 스쿼트 20회 + 플랭크 1분 추가 진행!"
             elif condition == "보통이에요 🙂":
                 cond_msg = "정석 자세에 집중하면서 무리하지 않게 운동해요."
-                gym_set = "3세트"; home_mission = "영상 가이드를 80% 이상 따라 하기!"
+                gym_set = "3세트";
+                home_mission = "영상 가이드를 80% 이상 따라 하기!"
             else:
                 cond_msg = "오늘은 무리하지 말고 스트레칭과 가벼운 운동 위주로 해요."
-                gym_set = "2세트"; home_mission = "힘들면 앞쪽 10분만 따라 하고 휴식하기!"
+                gym_set = "2세트";
+                home_mission = "힘들면 앞쪽 10분만 따라 하고 휴식하기!"
 
             st.warning(f"🌡️ 오늘의 컨디션 케어: {cond_msg}")
 
             if place_style == "홈트레이닝 (집)":
                 st.success("🏠 오늘의 추천 홈트 영상")
-                if target_part == "전신": st.markdown("- [추천 영상 1](https://youtu.be/gSz5n4sLENI) / [추천 영상 2](https://youtu.be/dZbPtAgofwI)")
-                elif target_part == "상체 (가슴/팔)": st.markdown("- [추천 영상 1](https://youtu.be/2swcod5RYvU) / [추천 영상 2](https://youtu.be/T-bVqdhqW2U)")
-                elif target_part == "하체 (엉덩이/허벅지)": st.markdown("- [추천 영상 1](https://youtu.be/dpBYYEhdofI) / [추천 영상 2](https://youtu.be/NDsjmxTROEo)")
-                else: st.markdown("- [추천 영상 1](https://youtu.be/jpTQdM7okkI) / [추천 영상 2](https://youtu.be/iOSYLKBk894)")
-                with st.expander("ℹ️ 홈트 가이드 설명 보기"): st.write(home_mission)
+                if target_part == "전신":
+                    st.markdown("- [추천 영상 1](https://youtu.be/gSz5n4sLENI) / [추천 영상 2](https://youtu.be/dZbPtAgofwI)")
+                elif target_part == "상체 (가슴/팔)":
+                    st.markdown("- [추천 영상 1](https://youtu.be/2swcod5RYvU) / [추천 영상 2](https://youtu.be/T-bVqdhqW2U)")
+                elif target_part == "하체 (엉덩이/허벅지)":
+                    st.markdown("- [추천 영상 1](https://youtu.be/dpBYYEhdofI) / [추천 영상 2](https://youtu.be/NDsjmxTROEo)")
+                else:
+                    st.markdown("- [추천 영상 1](https://youtu.be/jpTQdM7okkI) / [추천 영상 2](https://youtu.be/iOSYLKBk894)")
+                with st.expander("ℹ️ 홈트 가이드 설명 보기"):
+                    st.write(home_mission)
             else:
                 st.success(f"💪 오늘의 헬스장 추천 머신 루틴 ({gym_set}씩 수행)")
-                if target_part == "상체 (가슴/팔)": st.markdown("- [추천 강좌 보기](https://youtu.be/Dw8PbebpF9w)")
-                elif target_part == "하체 (엉덩이/허벅지)": st.markdown("- [추천 강좌 보기](https://youtu.be/Na0Dhue1oqk)")
-                elif target_part == "코어 (복부/허리)": st.markdown("- [추천 숏츠 1](https://youtube.com/shorts/ocMkMZya3ac) / [추천 숏츠 2](https://youtube.com/shorts/bAFDWHA7fG8)")
-                else: st.markdown("- [추천 숏츠 1](https://youtube.com/shorts/ul5GqyTSSIk) / [추천 숏츠 2](https://youtube.com/shorts/1FZYk9OyxV0)")
+                if target_part == "상체 (가슴/팔)":
+                    st.markdown("- [추천 강좌 보기](https://youtu.be/Dw8PbebpF9w)")
+                elif target_part == "하체 (엉덩이/허벅지)":
+                    st.markdown("- [추천 강좌 보기](https://youtu.be/Na0Dhue1oqk)")
+                elif target_part == "코어 (복부/허리)":
+                    st.markdown(
+                        "- [추천 숏츠 1](https://youtube.com/shorts/ocMkMZya3ac) / [추천 숏츠 2](https://youtube.com/shorts/bAFDWHA7fG8)")
+                else:
+                    st.markdown(
+                        "- [추천 숏츠 1](https://youtube.com/shorts/ul5GqyTSSIk) / [추천 숏츠 2](https://youtube.com/shorts/1FZYk9OyxV0)")
 
             st.subheader("💾 오늘의 운동 기록 저장")
             if st.button("🔥 오늘 운동 완료! 기록 저장하고 경험치 받기"):
@@ -309,12 +335,13 @@ def show_main_page():
                 df.to_csv(LOG_FILE, index=False, encoding="utf-8-sig")
 
                 old_exp = load_exp()
-                gained_exp = 0 if exercise_time == 0 else (10 if exercise_time < 20 else (20 if exercise_time < 40 else (30 if exercise_time < 60 else 40)))
+                gained_exp = 0 if exercise_time == 0 else (
+                    10 if exercise_time < 20 else (20 if exercise_time < 40 else (30 if exercise_time < 60 else 40)))
                 if condition == "컨디션 최고! 🔥": gained_exp += 5
-                
+
                 new_exp = old_exp + gained_exp
                 save_exp(new_exp)
-                
+
                 old_lvl, old_lvl_n, _ = get_level(old_exp)
                 new_lvl, new_lvl_n, _ = get_level(new_exp)
 
@@ -348,7 +375,8 @@ def show_main_page():
                     selected_year = cal_col1.selectbox("연도 선택", years, index=years.index(latest_date.year))
                     selected_month = cal_col2.selectbox("월 선택", list(range(1, 13)), index=latest_date.month - 1)
 
-                    month_data = df_log[(df_log["날짜"].dt.year == selected_year) & (df_log["날짜"].dt.month == selected_month)]
+                    month_data = df_log[
+                        (df_log["날짜"].dt.year == selected_year) & (df_log["날짜"].dt.month == selected_month)]
                     exercise_days = set(month_data["날짜"].dt.day)
                     cal = calendar.monthcalendar(selected_year, selected_month)
 
@@ -360,9 +388,12 @@ def show_main_page():
                     for week in cal:
                         cols = st.columns(7)
                         for i, day in enumerate(week):
-                            if day == 0: cols[i].write("")
-                            elif day in exercise_days: cols[i].markdown(f"🟢 **{day}**")
-                            else: cols[i].markdown(f"{day}")
+                            if day == 0:
+                                cols[i].write("")
+                            elif day in exercise_days:
+                                cols[i].markdown(f"🟢 **{day}**")
+                            else:
+                                cols[i].markdown(f"{day}")
 
                 st.divider()
                 if st.checkbox("⚠️ 전체 기록 지우기"):
@@ -380,7 +411,7 @@ def show_growth_page():
     st.divider()
 
     exp = load_exp()
-    level, level_name, suryong_img = get_level(exp) # [요구사항 반영] a.png ~ d.png 불러오기
+    level, level_name, suryong_img = get_level(exp)
 
     grow_col1, grow_col2 = st.columns([1, 1])
 
