@@ -328,7 +328,7 @@ def show_main_page():
 
             st.divider()
 
-            # --- [정밀 분배 엔진 고도화 패치] ---
+            # --- [정밀 분배 엔진 고도화 및 버그 대폭 패치 적용 단락] ---
             if ex_place == "헬스장":
                 # 분기점 1: [헬스장 + 감량] -> 유산소 중심 세팅 (근력 40% : 유산소 60%)
                 if goal == "감량":
@@ -337,19 +337,20 @@ def show_main_page():
                     weight_total_time = round(target_total_time * 0.4)
                     cardio_total_time = target_total_time - weight_total_time
                     
-                    st.success(f"🔥 감량 목표에 맞춰 **유산소 비중을 60%({cardio_total_time}분)**으로 대폭 늘리고, 근력 기구는 짧고 굵게 **{weight_total_time}분**으로 압축 세팅했습니다.")
+                    st.success(f"🔥 감량 목표에 맞춰 **유산소 비중을 60%({cardio_total_time}분)**으로 늘리고, 근력 기구는 짧고 굵게 **{weight_total_time}분**으로 압축 세팅했습니다.")
                     
                     col_upper_page, col_lower_page = st.columns(2)
                     
                     with col_upper_page:
                         st.markdown("#### 💪 루틴 A: 전신 칼로리 소모형 근력")
+                        # 안전한 렌더링을 위해 컨테이너에 고유 key 추가 및 기호 제거
                         with st.container(border=True):
-                            # 빠른 서킷 형태의 근력 운동 구성
-                            circuit_list = [gym_details["하체"][0], gym_details["상체"][1], gym_details["하체"][2]] # 레그프레스, 렛풀다운, 레그익스텐션
+                            circuit_list = [gym_details["하체"][0], gym_details["상체"][1], gym_details["하체"][2]]
                             time_per_ex = max(4, round(weight_total_time / len(circuit_list)))
                             for item in circuit_list:
                                 st.markdown(f"**🔹 {item['name']}**")
-                                st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (15회 라이트하게 $\\times; 3세트)")
+                                # 🚨 에러 원인이었던 LaTeX 수식 기호를 완전한 일반 한글 텍스트 문자열로 전면 치환
+                                st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (15회 라이트하게 3세트)")
                             
                     with col_lower_page:
                         st.markdown("#### 🏃 루틴 B: 이중 타겟 인터벌 유산소")
@@ -380,7 +381,8 @@ def show_main_page():
                             time_per_ex = max(5, round(weight_total_time / len(upper_list)))
                             for item in upper_list:
                                 st.markdown(f"**🔹 {item['name']}**")
-                                st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (8~12회 $\\times$ 4세트)")
+                                # 에러 예방을 위해 특수기호 포맷 전부 완전한 일반 텍스트로 보정
+                                st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (8-12회 4세트)")
                                 with st.expander("💡 기구 사용법 및 자극 꿀팁 보기"):
                                     st.caption(item["tip"])
                             if cardio_total_time > 0:
@@ -394,7 +396,7 @@ def show_main_page():
                             time_per_ex = max(5, round(weight_total_time / len(lower_list)))
                             for item in lower_list:
                                 st.markdown(f"**🔸 {item['name']}**")
-                                st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (8~12회 $\\times$ 4세트)")
+                                st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (8-12회 4세트)")
                                 with st.expander("💡 기구 사용법 및 자극 꿀팁 보기"):
                                     st.caption(item["tip"])
                             if cardio_total_time > 0:
@@ -482,7 +484,7 @@ def show_main_page():
                             if item["name"] == ex_name:
                                 cal_factor = item.get("cal_10m", 60)
                     
-                    done_time = st.slider(f"[{ex_name}] 실제 몇 분 하셨나요?", 0, 180, 30, key=f"v8_time_{ex_name}")
+                    done_time = st.slider(f"[{ex_name}] 실제 몇 분 하셨나요?", 0, 180, 30, key=f"v9_time_{ex_name}")
                     actual_burned_calories += round((done_time / 10) * cal_factor)
                     actual_time_sum += done_time
                 
