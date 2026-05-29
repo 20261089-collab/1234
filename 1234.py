@@ -3,8 +3,9 @@ import pandas as pd
 from datetime import datetime, time
 import os
 import calendar
+import altair as alt  # 👈 가로 막대그래프를 위해 내장된 altair 사용
 
-# [중요] 모든 Streamlit 컴포넌트 중 반드시 맨 처음에 위치해야 오류가 나지 않습니다.
+# [중요] 모든 st 함수 중 최상단에 위치해야 에러가 나지 않습니다.
 st.set_page_config(
     page_title="수룡이와 함께하는 맞춤형 다이어트",
     page_icon="🐉",
@@ -300,7 +301,7 @@ def show_main_page():
                 
                 for ex_name in selected_ex_list:
                     cal_per_10m = exercises_db[ex_name]["cal_10m"]
-                    ex_time = st.slider(f"[{ex_name}] 진행 시간 (10분당 {cal_per_10m} kcal 소모 기준)", 0, 120, 20, key=f"time_{ex_name}")
+                    ex_time = st.slider(f"[{ex_name}] 진행 시간 (10분당 {cal_per_10m} kcal 소모)", 0, 120, 20, key=f"time_{ex_name}")
                     
                     ex_burned = round((ex_time / 10) * cal_per_10m)
                     total_burned_calories += ex_burned
@@ -345,17 +346,10 @@ def show_main_page():
 
                     old_exp = load_exp()
                     gained_exp = 10
-
                     new_exp = old_exp + gained_exp
                     save_exp(new_exp)
 
-                    old_lvl, old_lvl_n, _ = get_level(old_exp)
-                    new_lvl, new_lvl_n, _ = get_level(new_exp)
-
-                    st.success(f"🎉 {select_date.strftime('%m월 %d일')} 운동 조합 기록 완료! 수룡이가 {gained_exp} EXP를 얻었어요.")
-                    if new_lvl > old_lvl:
-                        st.balloons()
-                        st.success(f"🎊 진화 성공! {old_lvl_n} → {new_lvl_n}")
+                    st.success(f"🎉 {select_date.strftime('%m월 %d일')} 운동 조합 기록 완료! 수룡이가 10 EXP를 얻었어요.")
 
         with tab3:
             st.write("📅 **나의 누적 다이어트 일지**")
@@ -372,29 +366,36 @@ def show_main_page():
 
                 st.subheader("📊 나의 다이어트 요약")
                 col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
-                
                 col_stat1.metric("총 기록 수", f"{len(df_log)} 회")
                 col_stat2.metric("평균 하루 섭취 칼로리", f"{int(df_log['오늘 섭취량'].mean())} kcal")
                 col_stat3.metric("평균 운동 소모 칼로리", f"{int(df_log['운동 부위'].mean())} kcal")
-                total_ex = int(df_log["운동 시간(분)"].sum())
-                col_stat4.metric("누적 운동 시간", f"{total_ex} 분")
+                col_stat4.metric("누적 운동 시간", f"{int(df_log['운동 시간(분)'].sum())} 분")
 
                 st.divider()
                 
-                # 📈 [안정성 최적화 완료된 그래프 파트] 
-                # (세로형) 괄호 글자는 완벽하게 제외하고, 오류 원인이 되는 외부 Plotly 대신 내장 기능을 안전하게 사용했습니다.
+                # 📈 [요청 사항 반영] 가로형 막대그래프 개편 파트 (안정적인 Altair 사용)
                 st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
 
                 df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
-                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum()
-                df_chart = df_chart.rename(columns={"오늘 섭취량": "섭취 칼로리", "운동 부위": "운동 소모 칼로리"})
+                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum().reset_index()
                 
-                # 💡 레이아웃 비율조정([2.5, 3, 2.5])을 통해 양옆에 여백을 주어 예시 사진처럼 아주 '슬림하고 예쁘게' 떨어집니다!
-                left_space, graph_col, right_space = st.columns([2.5, 3, 2.5])
-                with graph_col:
-                    st.bar_chart(df_chart, y=["섭취 칼로리", "운동 소모 칼로리"])
+                # 데이터를 차트 그리기용(Melt)으로 변환
+                df_melted = df_chart.melt(id_vars="날짜_일만", var_name="구분", value_name="칼로리")
+                df_melted["구분"] = df_melted["구분"].replace({"오늘 섭취량": "섭취 칼로리", "운동 부위": "운동 소모 칼로리"})
+
+                # 💡 가로 막대그래프 생성 (y축에 날짜, x축에 칼로리 배치)
+                # properties를 통해 너무 뚱뚱해지지 않게 높이(height)를 데이터 개수에 맞춰 슬림하게 조절했습니다.
+                chart_height = max(150, len(df_chart) * 60) # 데이터가 적어도 기본 150px, 많아지면 늘어남
                 
-                st.caption("💡 운동 소모 칼로리 막대가 높을수록 에너지 소비가 많습니다.")
+                horizontal_bar = alt.Chart(df_melted).mark_bar().encode(
+                    y=alt.Y("날짜_일만:N", title="날짜"),
+                    x=alt.X("칼로리:Q", title="칼로리(kcal)"),
+                    color=alt.Color("구분:N", scale=alt.Scale(range=["#4A90E2", "#FF8C00"])), # 파랑, 주황
+                    offset=alt.XOffset("구분:N"), # 막대를 날짜별로 나란히 배치
+                ).properties(height=chart_height, width=500) # 슬림한 너비 유지
+
+                st.altair_chart(horizontal_bar, use_container_width=False)
+                st.caption("💡 주황색(운동 소모) 막대가 파란색(섭취) 막대보다 길수록 다이어트 효과가 높습니다.")
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
@@ -408,8 +409,7 @@ def show_main_page():
                     selected_year = cal_col1.selectbox("연도 선택", years, index=years.index(latest_date.year))
                     selected_month = cal_col2.selectbox("월 선택", list(range(1, 13)), index=latest_date.month - 1)
 
-                    month_data = df_log[
-                        (df_log["날짜"].dt.year == selected_year) & (df_log["날짜"].dt.month == selected_month)]
+                    month_data = df_log[(df_log["날짜"].dt.year == selected_year) & (df_log["날짜"].dt.month == selected_month)]
                     exercise_days = set(month_data["날짜"].dt.day)
                     cal = calendar.monthcalendar(selected_year, selected_month)
 
@@ -421,12 +421,9 @@ def show_main_page():
                     for week in cal:
                         cols = st.columns(7)
                         for i, day in enumerate(week):
-                            if day == 0:
-                                cols[i].write("")
-                            elif day in exercise_days:
-                                cols[i].markdown(f"🟢 **{day}**")
-                            else:
-                                cols[i].markdown(f"{day}")
+                            if day == 0: cols[i].write("")
+                            elif day in exercise_days: cols[i].markdown(f"🟢 **{day}**")
+                            else: cols[i].markdown(f"{day}")
 
                 st.divider()
                 if st.checkbox("⚠️ 전체 기록 지우기"):
