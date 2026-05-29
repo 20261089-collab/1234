@@ -104,23 +104,23 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
-# 🏋️ [데이터셋] 운동 데이터
+# 🏋️ [데이터셋] 운동 데이터 (전달해주신 최신 유튜브 링크로 교체 완료!)
 exercises_db = {
-    "산책 / 가벼운 걷기": {"cal_10m": 30, "url": "https://youtu.be/jpTQdM7okkI"},
-    "빠르게 걷기 (파워워킹)": {"cal_10m": 40, "url": "https://youtu.be/jpTQdM7okkI"},
-    "가벼운 조깅 (러닝머신)": {"cal_10m": 75, "url": "https://youtu.be/dZbPtAgofwI"},
-    "계단 오르기": {"cal_10m": 75, "url": "https://youtu.be/ul5GqyTSSIk"},
-    "실내 자전거": {"cal_10m": 68, "url": "https://youtu.be/gSz5n4sLENI"},
-    "줄넘기": {"cal_10m": 100, "url": "https://youtu.be/gSz5n4sLENI"},
-    "수영 (자유형)": {"cal_10m": 95, "url": "https://youtu.be/gSz5n4sLENI"},
-    "스트레칭 / 요가": {"cal_10m": 28, "url": "https://youtu.be/jpTQdM7okkI"},
-    "필라테스": {"cal_10m": 35, "url": "https://youtu.be/iOSYLKBk894"},
-    "웨이트 트레이닝 (헬스장 머신)": {"cal_10m": 55, "url": "https://youtu.be/Dw8PbebpF9w"},
-    "맨몸 스쿼트 / 런지": {"cal_10m": 60, "url": "https://youtu.be/dpBYYEhdofI"},
-    "플랭크 / 복근 운동": {"cal_10m": 50, "url": "https://youtu.be/iOSYLKBk894"},
-    "팔굽혀펴기 / 상체 홈트": {"cal_10m": 55, "url": "https://youtu.be/2swcod5RYvU"},
-    "버피 테스트": {"cal_10m": 100, "url": "https://youtu.be/gSz5n4sLENI"},
-    "복싱": {"cal_10m": 95, "url": "https://youtube.com/shorts/ocMkMZya3ac"}
+    "산책 / 가벼운 걷기": {"cal_10m": 30, "url": "https://youtu.be/MWnD6DhLjyc?si=-2IDpUQ8fYxQguKv"},
+    "빠르게 걷기 (파워워킹)": {"cal_10m": 40, "url": "https://youtu.be/Me3IaZS3CdY?si=sGAMVjvBxPmokg01"},
+    "가벼운 조깅 (러닝머신)": {"cal_10m": 75, "url": "https://youtu.be/O3GU4hMK75w?si=foZpMfnW9iu39OAP"},
+    "계단 오르기": {"cal_10m": 75, "url": "https://youtu.be/iRfeov-7KeQ?si=rW4bzFABsSlnhAM-"},
+    "실내 자전거": {"cal_10m": 68, "url": "https://youtu.be/xEhPT6ydXRY?si=645qR1WgmixDdFRI"},
+    "줄넘기": {"cal_10m": 100, "url": "https://youtu.be/7A_XOU4FkIk?si=-4SwZkx474jk-ARY"},
+    "수영 (자유형)": {"cal_10m": 95, "url": "https://youtu.be/tVhe4wXsn5I?si=r7D7QuYyJgaLJ8zt"},
+    "스트레칭 / 요가": {"cal_10m": 28, "url": "https://youtu.be/Kk7TQGqQ3nA?si=_dSuiQeCyyB3Ojib"},
+    "필라테스": {"cal_10m": 35, "url": "https://youtu.be/sb51gF18cYo?si=g65fbxnREHItwbQ-"},
+    "웨이트 트레이닝 (헬스장 머신)": {"cal_10m": 55, "url": "https://youtu.be/e7fOcatby_k?si=GnUzZIBQ-DlMSXnx"},
+    "맨몸 스쿼트 / 런지": {"cal_10m": 60, "url": "https://youtu.be/Xcu271Ia720?si=o7ZDniBYeCamqRT2"},
+    "플랭크 / 복근 운동": {"cal_10m": 50, "url": "https://youtu.be/USJgKSLxDRc?si=OAkWcADFXofRdvRg"},
+    "팔굽혀펴기 / 상체 홈트": {"cal_10m": 55, "url": "https://youtu.be/XmxpYKKlqok?si=MjtgeJUSRYkRqTBV"},
+    "버피 테스트": {"cal_10m": 100, "url": "https://youtu.be/UeVDx20Jbs8?si=XEXhU_FPG2yCr5zw"},
+    "복싱": {"cal_10m": 95, "url": "https://youtu.be/p7IetTCzUUQ?si=Mco-GJrZ0NHMkAW_"}
 }
 
 
@@ -365,18 +365,14 @@ def show_main_page():
 
                 st.divider()
                 
-                # 📈 [오류 없는 세로형 분리 막대그래프 파트]
                 st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
 
                 df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
                 
-                # 날짜별로 섭취량과 운동 소모량을 명확한 컬럼명으로 요약
                 df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum()
                 df_chart = df_chart.rename(columns={"오늘 섭취량": "🍽️ 섭취 칼로리", "운동 부위": "🔥 운동 소모 칼로리"})
                 
-                # 가로축(x)은 날짜, 세로축(y)에 두 컬럼을 배열로 넘기면 0선에서 따로 시작하여 나란히 서게 됩니다!
                 st.bar_chart(df_chart, y=["🍽️ 섭취 칼로리", "🔥 운동 소모 칼로리"])
-                
                 st.caption("💡 각 날짜 아래에 두 종류의 막대가 0부터 나란히 시작하므로 크기를 직접 비교하기 좋습니다.")
 
                 st.divider()
@@ -435,14 +431,34 @@ def show_growth_page():
 
     with grow_col2:
         st.subheader(f"현재 단계: {level_name}")
-        if exp >= 720:
+        if exp >= 220:
             st.progress(1.0)
             st.success("🎉 축하합니다! 전설의 수룡이가 완성되었습니다! 👑")
         else:
-            next_goal = 120 if exp < 120 else 360 if exp < 360 else 720
+            next_goal = 50 if exp < 50 else 120 if exp < 120 else 220
             st.progress(exp / next_goal)
             st.write(f"📈 현재 누적 경험치: **{exp} EXP**")
             st.write(f"✨ 다음 진화까지 **{next_goal - exp} EXP** 남았어요.")
+
+    st.divider()
+    
+    st.subheader("📋 수룡이 진화 단계별 EXP 가이드")
+    level_data = {
+        "진화 단계": ["1단계", "2단계", "3단계", "4단계 (최종)"],
+        "이름": ["🥚 알 수룡이", "🐣 아기 수룡이", "🐉 성장한 수룡이", "👑 전설의 수룡이"],
+        "필요 EXP 범위": ["0 ~ 49 EXP", "50 ~ 119 EXP", "120 ~ 219 EXP", "220 EXP 이상"]
+    }
+    st.table(pd.DataFrame(level_data))
+
+    st.divider()
+    
+    st.subheader("⚙️ 수룡이 성장방 관리")
+    st.caption("수룡이의 레벨과 경험치를 처음부터 다시 시작하고 싶을 때 사용하세요.")
+    if st.checkbox("⚠️ 수룡이 경험치 초기화 활성화"):
+        if st.button("💥 수룡이를 다시 알(🥚)로 되돌리기", type="primary"):
+            if os.path.exists(GROW_FILE):
+                os.remove(GROW_FILE)
+            st.warning("수룡이의 경험치가 완전히 초기화되었습니다! 페이지를 새로고침(F5) 해주세요.")
 
 
 # --- 멀티페이지 내비게이션 구성 ---
