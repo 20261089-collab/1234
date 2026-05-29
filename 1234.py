@@ -121,8 +121,11 @@ def show_main_page():
 
     profile = load_profile()
 
-    st.header("👤 사용자 정보 입력")
-    name = st.text_input("이름", value=profile.get("이름", ""))
+    # 🛠️ '사용자 정보 입력' -> '수정이 정보 입력'으로 수정
+    st.header("👤 수정이 정보 입력")
+    
+    # 🛠️ 이름 기본값을 '영범이의 아이들'로 지정
+    name = st.text_input("이름", value=profile.get("이름", "영범이의 아이들"))
 
     gender_options = ["여자", "남자"]
     gender = st.selectbox(
@@ -270,11 +273,11 @@ def show_main_page():
 
         with tab2:
             st.write("🏋️ **오늘 나의 상태에 딱 맞는 맞춤형 운동 프로그램**")
-            
+
             # 📅 날짜 지정을 위한 선택 컴포넌트 추가
             st.subheader("📅 운동 날짜 지정")
             select_date = st.date_input("기록을 입력할 날짜를 선택하세요", datetime.now().date())
-            
+
             ex_col1, ex_col2, ex_col3 = st.columns(3)
             with ex_col1:
                 place_style = st.selectbox("운동 장소 선택 🏢", ["홈트레이닝 (집)", "헬스장 (Gym)"])
@@ -296,7 +299,7 @@ def show_main_page():
                 gym_set = "3세트";
                 home_mission = "영상 가이드를 80% 이상 따라 하기!"
             else:
-                cond_msg = "오늘은 무리하지 말고 스트레칭과 가벼운 운동 위주로 해요."
+                cond_msg = "오늘은 무리하지 말고 스트레칭 and 가벼운 운동 위주로 해요."
                 gym_set = "2세트";
                 home_mission = "힘들면 앞쪽 10분만 따라 하고 휴식하기!"
 
@@ -332,7 +335,7 @@ def show_main_page():
                 # 현재 시각의 '시:분'을 가져와 선택한 날짜 형식과 결합
                 current_time_str = datetime.now().strftime("%H:%M")
                 formatted_date = f"{select_date.strftime('%Y-%m-%d')} {current_time_str}"
-                
+
                 new_data = {
                     "날짜": formatted_date, "이름": name if name else "사용자",
                     "체중(kg)": weight, "BMI": user_bmi, "목표 칼로리": daily_calorie, "오늘 섭취량": total,
@@ -344,7 +347,7 @@ def show_main_page():
 
                 # 고정으로 10 EXP를 획득하도록 설정
                 old_exp = load_exp()
-                gained_exp = 10 
+                gained_exp = 10
 
                 new_exp = old_exp + gained_exp
                 save_exp(new_exp)
