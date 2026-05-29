@@ -3,9 +3,8 @@ import pandas as pd
 from datetime import datetime, time
 import os
 import calendar
-import altair as alt  # 👈 가로 막대그래프를 위해 내장된 altair 사용
 
-# [중요] 모든 st 함수 중 최상단에 위치해야 에러가 나지 않습니다.
+# [필수] 모든 Streamlit 컴포넌트 중 반드시 맨 처음에 위치해야 오류가 나지 않습니다.
 st.set_page_config(
     page_title="수룡이와 함께하는 맞춤형 다이어트",
     page_icon="🐉",
@@ -105,7 +104,7 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
-# 🏋️ [데이터셋] 60kg 기준 운동 종목별 10분당 소비 칼로리 데이터
+# 🏋️ [데이터셋] 운동 데이터
 exercises_db = {
     "산책 / 가벼운 걷기": {"cal_10m": 30, "url": "https://youtu.be/jpTQdM7okkI"},
     "빠르게 걷기 (파워워킹)": {"cal_10m": 40, "url": "https://youtu.be/jpTQdM7okkI"},
@@ -119,7 +118,7 @@ exercises_db = {
     "웨이트 트레이닝 (헬스장 머신)": {"cal_10m": 55, "url": "https://youtu.be/Dw8PbebpF9w"},
     "맨몸 스쿼트 / 런지": {"cal_10m": 60, "url": "https://youtu.be/dpBYYEhdofI"},
     "플랭크 / 복근 운동": {"cal_10m": 50, "url": "https://youtu.be/iOSYLKBk894"},
-    "팔굽혀펴기 / 상체 홈트": {"cal_10m": 55, "url": "https://youtu.be/2swcod5RYvU"},
+    "팔굽혀펴기 / 상체 홈트": {"cal_10m": 55, "url": "2swcod5RYvU"},
     "버피 테스트": {"cal_10m": 100, "url": "https://youtu.be/gSz5n4sLENI"},
     "복싱": {"cal_10m": 95, "url": "https://youtube.com/shorts/ocMkMZya3ac"}
 }
@@ -248,14 +247,10 @@ def show_main_page():
 
         with col_info:
             st.subheader(f"🐲 {name if name else '사용자'}님의 수룡이 식단 체크")
-            if status_color == "info":
-                st.info(suryong_msg)
-            elif status_color == "error":
-                st.error(suryong_msg)
-            elif status_color == "warning":
-                st.warning(suryong_msg)
-            else:
-                st.success(suryong_msg)
+            if status_color == "info": st.info(suryong_msg)
+            elif status_color == "error": st.error(suryong_msg)
+            elif status_color == "warning": st.warning(suryong_msg)
+            else: st.success(suryong_msg)
 
             st.metric("나의 BMI 지수", f"{user_bmi}")
             st.metric("목표 권장 칼로리", f"{daily_calorie} kcal")
@@ -294,7 +289,6 @@ def show_main_page():
             
             total_burned_calories = 0
             total_time_sum = 0
-            exercise_time_dict = {}
             
             if selected_ex_list:
                 st.write("⏱️ **선택한 운동 조합별 진행 시간(분)을 설정하세요**")
@@ -306,7 +300,6 @@ def show_main_page():
                     ex_burned = round((ex_time / 10) * cal_per_10m)
                     total_burned_calories += ex_burned
                     total_time_sum += ex_time
-                    exercise_time_dict[ex_name] = ex_time
                 
                 st.divider()
                 
@@ -315,12 +308,12 @@ def show_main_page():
                 col_calc1.metric("선택한 총 운동 시간", f"{total_time_sum} 분")
                 col_calc2.metric("예상 총 소비 칼로리", f"{total_burned_calories} kcal")
                 
-                st.info(f"💡 선택한 조합 계측: 60kg 기준, 오늘 설정하신 루틴을 완수하면 총 **{total_burned_calories} kcal**가 소비됩니다!")
+                st.info(f"💡 선택한 조합 계측: 오늘 설정하신 루틴을 완수하면 총 **{total_burned_calories} kcal**가 소비됩니다!")
                 
                 st.write("📺 **추천 운동 가이드 영상 안내 (참고용)**")
                 for ex_name in selected_ex_list:
                     url = exercises_db[ex_name]["url"]
-                    st.markdown(f"- **{ex_name}** 영상 보러가기: [링크 클릭]({url}) *(참고용)*")
+                    st.markdown(f"- **{ex_name}** 영상 보러가기: [링크 클릭]({url})")
             else:
                 st.info("운동 리스트에서 오늘 수행할 종목 조합을 먼저 선택해 주세요!")
 
@@ -345,11 +338,10 @@ def show_main_page():
                     df.to_csv(LOG_FILE, index=False, encoding="utf-8-sig")
 
                     old_exp = load_exp()
-                    gained_exp = 10
-                    new_exp = old_exp + gained_exp
+                    new_exp = old_exp + 10
                     save_exp(new_exp)
 
-                    st.success(f"🎉 {select_date.strftime('%m월 %d일')} 운동 조합 기록 완료! 수룡이가 10 EXP를 얻었어요.")
+                    st.success(f"🎉 {select_date.strftime('%m월 %d일')} 운동 조합 기록 완료!")
 
         with tab3:
             st.write("📅 **나의 누적 다이어트 일지**")
@@ -373,29 +365,22 @@ def show_main_page():
 
                 st.divider()
                 
-                # 📈 [요청 사항 반영] 가로형 막대그래프 개편 파트 (안정적인 Altair 사용)
+                # 📈 [버그 프리 가로형 막대그래프 파트] 
+                # 외부 서드파티 라이브러리 충돌 요소를 완벽하게 예방하기 위해, 
+                # Streamlit의 순정 가로막대 기능(st.bar_chart)을 사용하여 가로로 비교합니다!
                 st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
 
                 df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
-                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum().reset_index()
+                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum()
+                df_chart = df_chart.rename(columns={"오늘 섭취량": "섭취 칼로리", "운동 부위": "운동 소모 칼로리"})
                 
-                # 데이터를 차트 그리기용(Melt)으로 변환
-                df_melted = df_chart.melt(id_vars="날짜_일만", var_name="구분", value_name="칼로리")
-                df_melted["구분"] = df_melted["구분"].replace({"오늘 섭취량": "섭취 칼로리", "운동 부위": "운동 소모 칼로리"})
-
-                # 💡 가로 막대그래프 생성 (y축에 날짜, x축에 칼로리 배치)
-                # properties를 통해 너무 뚱뚱해지지 않게 높이(height)를 데이터 개수에 맞춰 슬림하게 조절했습니다.
-                chart_height = max(150, len(df_chart) * 60) # 데이터가 적어도 기본 150px, 많아지면 늘어남
+                # 여백 조절 및 슬림 가로 배치 구현
+                left_space, graph_col, right_space = st.columns([1, 5, 1])
+                with graph_col:
+                    # horizontal=True 인자를 전달하면 오류 없이 완벽한 순정 가로막대가 생성됩니다!
+                    st.bar_chart(df_chart, y=["섭취 칼로리", "운동 소모 칼로리"], horizontal=True)
                 
-                horizontal_bar = alt.Chart(df_melted).mark_bar().encode(
-                    y=alt.Y("날짜_일만:N", title="날짜"),
-                    x=alt.X("칼로리:Q", title="칼로리(kcal)"),
-                    color=alt.Color("구분:N", scale=alt.Scale(range=["#4A90E2", "#FF8C00"])), # 파랑, 주황
-                    offset=alt.XOffset("구분:N"), # 막대를 날짜별로 나란히 배치
-                ).properties(height=chart_height, width=500) # 슬림한 너비 유지
-
-                st.altair_chart(horizontal_bar, use_container_width=False)
-                st.caption("💡 주황색(운동 소모) 막대가 파란색(섭취) 막대보다 길수록 다이어트 효과가 높습니다.")
+                st.caption("💡 오른쪽으로 멀리 뻗은 막대일수록 해당 날짜의 수치가 큼을 의미합니다.")
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
@@ -437,7 +422,7 @@ def show_main_page():
 # --- 페이지 2: 수룡이 키우기 ---
 def show_growth_page():
     st.title("🐉 수룡이 성장 룸")
-    st.caption("운동 기록으로 획득한 경험치($EXP$)에 따라 진화하는 진짜 수룡이의 방입니다.")
+    st.caption("운동 기록으로 획득한 경험치(EXP)에 따라 진화하는 진짜 수룡이의 방입니다.")
     st.divider()
 
     exp = load_exp()
@@ -449,32 +434,18 @@ def show_growth_page():
         try:
             st.image(suryong_img, use_container_width=True)
         except:
-            st.error(f"⚠️ 수룡이 진화 이미지 파일('{suryong_img}')을 찾을 수 없습니다. 파일명을 확인해 주세요.")
+            st.error(f"⚠️ 수룡이 이미지 파일('{suryong_img}')을 찾을 수 없습니다.")
 
     with grow_col2:
         st.subheader(f"현재 단계: {level_name}")
         if exp >= 720:
             st.progress(1.0)
-            st.success("🎉 축하합니다! 최종 단계인 전설의 수룡이가 완성되었습니다! 👑")
+            st.success("🎉 축하합니다! 전설의 수룡이가 완성되었습니다! 👑")
         else:
             next_goal = 120 if exp < 120 else 360 if exp < 360 else 720
             st.progress(exp / next_goal)
             st.write(f"📈 현재 누적 경험치: **{exp} EXP**")
             st.write(f"✨ 다음 진화까지 **{next_goal - exp} EXP** 남았어요.")
-
-    st.divider()
-    st.write("📌 **수룡이 진화 단계 안내 (알 키우기)**")
-    st.write("- **1단계 (0 EXP 이상):** 🥚 알 수룡이")
-    st.write("- **2단계 (120 EXP 이상):** 🐣 아기 수룡이")
-    st.write("- **3단계 (360 EXP 이상):** 🐉 성장한 수룡이")
-    st.write("- **4단계 (720 EXP 이상):** 👑 전설의 수룡이")
-
-    st.divider()
-    if st.checkbox("⚠️ 수룡이 성장 기록 초기화"):
-        if st.button("수룡이 경험치 초기화"):
-            if os.path.exists(GROW_FILE):
-                os.remove(GROW_FILE)
-            st.warning("수룡이 성장 기록이 초기화되었습니다. 해당 페이지를 새로고침 해주세요.")
 
 
 # --- 멀티페이지 내비게이션 구성 ---
