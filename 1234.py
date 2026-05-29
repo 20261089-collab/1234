@@ -328,45 +328,78 @@ def show_main_page():
 
             st.divider()
 
-            # --- [정밀 엔진 조건식 개조 및 버그 전면 패치] ---
-            # FIX: 감량이든 근육증가든 장소가 '헬스장'이면 오류 없이 75% 근력 웨이트 + 25% 마무리 유산소 자동 세팅 작동!
-            if ex_place == "Helvetica" or ex_place == "헬스장":
-                st.markdown(f"### 🎯 AI 헬스장 기구 루틴 처방")
-                
-                weight_total_time = round(target_total_time * 0.75)
-                cardio_total_time = target_total_time - weight_total_time
-                
-                st.info(f"💡 설정하신 {target_total_time}분 중 **근력 기구 웨이트 {weight_total_time}분 + 마무리 유산소 {cardio_total_time}분**으로 정밀 배분했습니다.")
-                
-                col_upper_page, col_lower_page = st.columns(2)
-                
-                with col_upper_page:
-                    st.markdown("#### 💪 옵션 A: 오늘 상체 기구 루틴")
-                    with st.container(border=True):
-                        upper_list = gym_details["상체"]
-                        time_per_ex = max(5, round(weight_total_time / len(upper_list)))
-                        for item in upper_list:
-                            st.markdown(f"**🔹 {item['name']}**")
-                            st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (8~12회 $\\times$ 4세트)")
-                            with st.expander("💡 기구 사용법 및 자극 꿀팁 보기"):
-                                st.caption(item["tip"])
-                        if cardio_total_time > 0:
-                            st.markdown(f"**🏃 마무리 유산소 ({cardio_total_time}분)**")
-                            st.markdown(f"  - 추천기구: `트레드밀 (러닝머신)`")
+            # --- [정밀 분배 엔진 고도화 패치] ---
+            if ex_place == "헬스장":
+                # 분기점 1: [헬스장 + 감량] -> 유산소 중심 세팅 (근력 40% : 유산소 60%)
+                if goal == "감량":
+                    st.markdown(f"### 🎯 AI 헬스장 체지방 커팅 루틴 처방 (감량 맞춤)")
+                    
+                    weight_total_time = round(target_total_time * 0.4)
+                    cardio_total_time = target_total_time - weight_total_time
+                    
+                    st.success(f"🔥 감량 목표에 맞춰 **유산소 비중을 60%({cardio_total_time}분)**으로 대폭 늘리고, 근력 기구는 짧고 굵게 **{weight_total_time}분**으로 압축 세팅했습니다.")
+                    
+                    col_upper_page, col_lower_page = st.columns(2)
+                    
+                    with col_upper_page:
+                        st.markdown("#### 💪 루틴 A: 전신 칼로리 소모형 근력")
+                        with st.container(border=True):
+                            # 빠른 서킷 형태의 근력 운동 구성
+                            circuit_list = [gym_details["하체"][0], gym_details["상체"][1], gym_details["하체"][2]] # 레그프레스, 렛풀다운, 레그익스텐션
+                            time_per_ex = max(4, round(weight_total_time / len(circuit_list)))
+                            for item in circuit_list:
+                                st.markdown(f"**🔹 {item['name']}**")
+                                st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (15회 라이트하게 $\\times; 3세트)")
                             
-                with col_lower_page:
-                    st.markdown("#### 🍗 옵션 B: 오늘 하체 기구 루틴")
-                    with st.container(border=True):
-                        lower_list = gym_details["하체"]
-                        time_per_ex = max(5, round(weight_total_time / len(lower_list)))
-                        for item in lower_list:
-                            st.markdown(f"**🔸 {item['name']}**")
-                            st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (8~12회 $\\times$ 4세트)")
-                            with st.expander("💡 기구 사용법 및 자극 꿀팁 보기"):
-                                st.caption(item["tip"])
-                        if cardio_total_time > 0:
-                            st.markdown(f"**🏃 마무리 유산소 ({cardio_total_time}분)**")
-                            st.markdown(f"  - 추천기구: `천국의 계단 (스텝밀)`")
+                    with col_lower_page:
+                        st.markdown("#### 🏃 루틴 B: 이중 타겟 인터벌 유산소")
+                        with st.container(border=True):
+                            cardio1 = round(cardio_total_time * 0.6)
+                            cardio2 = cardio_total_time - cardio1
+                            st.markdown(f"**1️⃣ 트레드밀 인터벌 러닝** ➡️ ⏱️ **{cardio1}분**")
+                            st.caption("🏃 2분 빠르게 뛰고, 2분 빠르게 걷는 인터벌 방식으로 체지방 연소를 극대화합니다.")
+                            if cardio2 > 0:
+                                st.markdown(f"**2️⃣ 천국의 계단 (스텝밀)** ➡️ ⏱️ **{cardio2}분**")
+                                st.caption("🪜 하체 근력을 보존하면서 땀을 쏙 빼주는 최고 효율의 유산소 마무리를 진행합니다.")
+
+                # 분기점 2: [헬스장 + 근육증가 또는 유지] -> 근력 중심 세팅 (근력 75% : 유산소 25%)
+                else:
+                    st.markdown(f"### 🎯 AI 헬스장 벌크 및 근비대 루틴 처방 (근육증가 맞춤)")
+                    
+                    weight_total_time = round(target_total_time * 0.75)
+                    cardio_total_time = target_total_time - weight_total_time
+                    
+                    st.info(f"💪 근육 성장을 위해 **근력 기구 웨이트 {weight_total_time}분(75%) + 심폐 마무리 유산소 {cardio_total_time}분(25%)**으로 정밀 배분했습니다.")
+                    
+                    col_upper_page, col_lower_page = st.columns(2)
+                    
+                    with col_upper_page:
+                        st.markdown("#### 💪 옵션 A: 오늘 상체 기구 루틴")
+                        with st.container(border=True):
+                            upper_list = gym_details["상체"]
+                            time_per_ex = max(5, round(weight_total_time / len(upper_list)))
+                            for item in upper_list:
+                                st.markdown(f"**🔹 {item['name']}**")
+                                st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (8~12회 $\\times$ 4세트)")
+                                with st.expander("💡 기구 사용법 및 자극 꿀팁 보기"):
+                                    st.caption(item["tip"])
+                            if cardio_total_time > 0:
+                                st.markdown(f"**🏃 마무리 유산소 ({cardio_total_time}분)**")
+                                st.markdown(f"  - 추천기구: `트레드밀 (러닝머신)`")
+                                
+                    with col_lower_page:
+                        st.markdown("#### 🍗 옵션 B: 오늘 하체 기구 루틴")
+                        with st.container(border=True):
+                            lower_list = gym_details["하체"]
+                            time_per_ex = max(5, round(weight_total_time / len(lower_list)))
+                            for item in lower_list:
+                                st.markdown(f"**🔸 {item['name']}**")
+                                st.markdown(f"  - ⏱️ 목표 소요: **{time_per_ex}분** (8~12회 $\\times$ 4세트)")
+                                with st.expander("💡 기구 사용법 및 자극 꿀팁 보기"):
+                                    st.caption(item["tip"])
+                            if cardio_total_time > 0:
+                                st.markdown(f"**🏃 마무리 유산소 ({cardio_total_time}분)**")
+                                st.markdown(f"  - 추천기구: `천국의 계단 (스텝밀)`")
 
             # CASE 2: 장소가 '홈트'이고 다이어트 목적이 '감량'인 맞춤형 다원화 루틴
             elif ex_place == "홈트" and goal == "감량":
@@ -401,7 +434,7 @@ def show_main_page():
                             
                     st.caption(f"💡 [체크] 1번 영상({video_time}분) + 이후 세션들의 합계가 정확히 {target_total_time}분으로 조율되었습니다.")
 
-            # CASE 3: 그 외 장소가 홈트이면서 유지/근육증가용 서킷
+            # CASE 3: 그 외 상황 (예: 홈트 + 근육증가 / 유지 등)
             else:
                 st.markdown(f"### 🏃 AI 접근성 중심 다단계 유산소 처방")
                 st.info(f"누구나 쉽게 따라 할 수 있는 대중적인 유산소 종목들입니다. 총 {target_total_time}분에 맞춰 배분되었습니다.")
@@ -449,7 +482,7 @@ def show_main_page():
                             if item["name"] == ex_name:
                                 cal_factor = item.get("cal_10m", 60)
                     
-                    done_time = st.slider(f"[{ex_name}] 실제 몇 분 하셨나요?", 0, 180, 30, key=f"v7_time_{ex_name}")
+                    done_time = st.slider(f"[{ex_name}] 실제 몇 분 하셨나요?", 0, 180, 30, key=f"v8_time_{ex_name}")
                     actual_burned_calories += round((done_time / 10) * cal_factor)
                     actual_time_sum += done_time
                 
