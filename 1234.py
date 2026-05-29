@@ -118,7 +118,7 @@ exercises_db = {
     "웨이트 트레이닝 (헬스장 머신)": {"cal_10m": 55, "url": "https://youtu.be/Dw8PbebpF9w"},
     "맨몸 스쿼트 / 런지": {"cal_10m": 60, "url": "https://youtu.be/dpBYYEhdofI"},
     "플랭크 / 복근 운동": {"cal_10m": 50, "url": "https://youtu.be/iOSYLKBk894"},
-    "팔굽혀펴기 / 상체 홈트": {"cal_10m": 55, "url": "2swcod5RYvU"},
+    "팔굽혀펴기 / 상체 홈트": {"cal_10m": 55, "url": "https://youtu.be/2swcod5RYvU"},
     "버피 테스트": {"cal_10m": 100, "url": "https://youtu.be/gSz5n4sLENI"},
     "복싱": {"cal_10m": 95, "url": "https://youtube.com/shorts/ocMkMZya3ac"}
 }
@@ -365,22 +365,27 @@ def show_main_page():
 
                 st.divider()
                 
-                # 📈 [버그 프리 가로형 막대그래프 파트] 
-                # 외부 서드파티 라이브러리 충돌 요소를 완벽하게 예방하기 위해, 
-                # Streamlit의 순정 가로막대 기능(st.bar_chart)을 사용하여 가로로 비교합니다!
+                # 📈 [가로형 막대 분리 배치 파트]
                 st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
 
                 df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%m-%d")
-                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum()
-                df_chart = df_chart.rename(columns={"오늘 섭취량": "섭취 칼로리", "운동 부위": "운동 소모 칼로리"})
+                df_chart = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum().reset_index()
                 
-                # 여백 조절 및 슬림 가로 배치 구현
-                left_space, graph_col, right_space = st.columns([1, 5, 1])
+                # 1. 컬럼명을 깔끔하게 한글 이름으로 변경
+                df_chart = df_chart.rename(columns={"오늘 섭취량": "🍽️ 섭취 칼로리", "운동 부위": "🔥 운동 소모 칼로리"})
+                
+                # 2. 데이터를 일렬로 멜트(Melt)하여 누적 현상 방지
+                df_melted = df_chart.melt(id_vars="날짜_일만", var_name="칼로리 분류", value_name="kcal")
+                
+                # 3. 인덱스를 '날짜_일만'과 '칼로리 분류'의 멀티 인덱스로 지정하여 가로로 완벽 분리
+                df_final = df_melted.set_index(["날짜_일만", "칼로리 분류"])
+
+                left_space, graph_col, right_space = st.columns([1, 6, 1])
                 with graph_col:
-                    # horizontal=True 인자를 전달하면 오류 없이 완벽한 순정 가로막대가 생성됩니다!
-                    st.bar_chart(df_chart, y=["섭취 칼로리", "운동 소모 칼로리"], horizontal=True)
+                    # 💡 가로 배치(horizontal=True)를 켠 상태에서 분리된 인덱스를 바인딩합니다.
+                    st.bar_chart(df_final, y="kcal", horizontal=True)
                 
-                st.caption("💡 오른쪽으로 멀리 뻗은 막대일수록 해당 날짜의 수치가 큼을 의미합니다.")
+                st.caption("💡 섭취 칼로리와 운동 소모 칼로리가 0부터 각각 출발하여 한눈에 직접 비교가 가능합니다.")
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
