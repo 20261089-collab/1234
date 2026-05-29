@@ -5,7 +5,7 @@ import os
 import calendar
 import altair as alt
 
-# 🚨 [중요] 최상단 고정
+# 🚨 [중요] Streamlit 최상단 환경 설정
 st.set_page_config(
     page_title="수룡이와 함께하는 맞춤형 다이어트",
     page_icon="🐉",
@@ -18,7 +18,7 @@ PROFILE_FILE = "user_profile.csv"
 LOGO_FILE = "icon.png"
 
 
-# --- 공통 함수 정의 ---
+# --- 공통 연산 함수 ---
 def calculate_bmi(weight, height):
     h = height / 100
     return round(weight / (h ** 2), 1)
@@ -76,7 +76,7 @@ def save_profile(profile):
     df.to_csv(PROFILE_FILE, index=False, encoding="utf-8-sig")
 
 
-# [데이터셋] 음식 데이터
+# [데이터베이스] 음식 데이터 선언
 foods = {
     "김밥": {"calorie": 450, "type": "한식", "is_healthy": True},
     "참치김밥": {"calorie": 500, "type": "한식", "is_healthy": True},
@@ -105,7 +105,7 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
-# --- 🏋️ 프리셋 데이터베이스 ---
+# --- 🏋️ 프리셋 데이터베이스 (유튜브 제목 피드백 반영 완료) ---
 exercise_presets = {
     "홈트": {
         "근육증가": {
@@ -136,22 +136,22 @@ exercise_presets = {
         },
         "감량": { 
             "최상 (에너지 넘침)": [
-                {"name": "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛]", "cal_10m": 120, "fixed_time": 20, "url": "https://youtu.be/gSz5n4sLENI?si=wQFBWCfq7rSo9ld5", "guide": "🔥 20분 풀버전 올인 타겟", "rest": "⏱️ 영상 페이스 유지", "tip": "층간 소음과 무릎 부담이 적은 루틴이지만 매운맛 강도이므로 호흡을 길게 가져가세요."},
+                {"name": "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛]", "cal_10m": 120, "fixed_time": 20, "url": "https://youtu.be/gSz5n4sLENI", "guide": "🔥 20분 풀버전 올인 타겟", "rest": "⏱️ 영상 페이스 유지", "tip": "층간 소음과 무릎 부담이 적은 전신 루틴입니다. 매운맛 강도이므로 지치지 않게 호흡을 길게 가져가세요."},
                 {"name": "멜킨 튜닝 줄넘기 / 고속 줄넘기", "cal_10m": 110, "guide": "🔥 3세트 × 3분 (인터벌)", "rest": "⏱️ 휴식 40초", "tip": "발앞꿈치로 가볍게 착지하며 손목 회전력을 유지하세요."},
                 {"name": "실내 싸이클 / 러닝 스퍼트", "cal_10m": 85, "guide": "🔥 강력한 페달링 속도 유지", "rest": "⏱️ 지속 가동", "tip": "코어에 힘을 주고 하체의 폭발적인 에너지를 사용합니다."}
             ],
             "정상 (보통)": [
-                {"name": "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛]", "cal_10m": 100, "fixed_time": 20, "url": "https://youtu.be/gSz5n4sLENI?si=wQFBWCfq7rSo9ld5", "guide": "✨ 20분 표준 완주 수행", "rest": "⏱️ 표준 호흡 구사", "tip": "중간에 완전히 멈추지 않고 끝까지 동작을 완수하는 것을 목표로 템포를 맞춥니다."},
+                {"name": "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛]", "cal_10m": 100, "fixed_time": 20, "url": "https://youtu.be/gSz5n4sLENI", "guide": "✨ 20분 표준 완주 수행", "rest": "⏱️ 표준 호흡 구사", "tip": "중간에 완전히 멈추지 않고 끝까지 동작을 완수하는 것을 목표로 템포를 맞춥니다."},
                 {"name": "실내 자전거 (싸이클링)", "cal_10m": 65, "guide": "✨ 일정한 RPM 75 유지", "rest": "⏱️ 릴렉스 템포", "tip": "가볍게 음악을 들으며 무릎 관절에 충격이 가지 않게 굴려줍니다."},
                 {"name": "실외 빠르게 뛰기 및 걷기", "cal_10m": 70, "guide": "✨ 🏃 속도 6.0 지속 페이스", "rest": "⏱️ 호흡 유지", "tip": "발바닥 전체가 부드럽게 땅에 닿도록 리듬을 탑니다."}
             ],
             "피곤함 (가벼운 운동 필요)": [
-                {"name": "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛] (저강도 모드)", "cal_10m": 80, "fixed_time": 20, "url": "https://youtu.be/gSz5n4sLENI?si=wQFBWCfq7rSo9ld5", "guide": "🔋 20분 무리하지 않고 완주", "rest": "⏱️ 동작 크기 줄이기", "tip": "피로도가 높으므로 관절에 힘을 빼고 가벼운 마음으로 전신 순환 위주로 따라 하세요."},
+                {"name": "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛] (저강도 페이스)", "cal_10m": 80, "fixed_time": 20, "url": "https://youtu.be/gSz5n4sLENI", "guide": "🔋 20분 무리하지 않고 완주하기", "rest": "⏱️ 동작 크기 줄이기", "tip": "피로도가 높으므로 관절에 과한 힘을 빼고 가벼운 마음으로 전신 순환 위주로 따라 하세요."},
                 {"name": "동네 한바퀴 가벼운 산책", "cal_10m": 45, "guide": "🔋 30분 산책 페이스 워킹", "rest": "⏱️ 여유롭게 호흡", "tip": "맑은 공기를 마시며 전신 순환을 돕는 가벼운 속도입니다."},
                 {"name": "제자리 걷기 힐링 루틴", "cal_10m": 40, "guide": "🔋 집안에서 가볍게 걷기", "rest": "⏱️ 편안히 가동", "tip": "팔을 앞뒤로 흔들며 몸에 열을 가볍게 내어줍니다."}
             ],
             "근육통 있음": [
-                {"name": "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛] (리커버리)", "cal_10m": 70, "fixed_time": 20, "url": "https://youtu.be/gSz5n4sLENI?si=wQFBWCfq7rSo9ld5", "guide": "🩹 20분 전신 리커버리 코스", "rest": "⏱️ 호흡 집중", "tip": "근육통이 있는 부위는 반동을 줄이고 스트레칭한다는 느낌으로 가볍게 움직입니다."},
+                {"name": "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛] (리커버리 모드)", "cal_10m": 70, "fixed_time": 20, "url": "https://youtu.be/gSz5n4sLENI", "guide": "🩹 20분 전신 스트레칭 리커버리 코스", "rest": "⏱️ 호흡 집중", "tip": "근육통이 심한 부위는 반동을 주지 말고 가볍게 몸을 풀어준다는 느낌으로 움직입니다."},
                 {"name": "폼롤러 전신 근막 이완 코스", "cal_10m": 30, "guide": "🩹 20분 전신 순환 지점 압박", "rest": "⏱️ 힐링 템포", "tip": "아픈 부위를 지그시 누르며 숨을 깊게 내쉬어 이완합니다."},
                 {"name": "동네 가벼운 산책 및 리프레시", "cal_10m": 40, "guide": "🩹 가볍게 발걸음 옮기기", "rest": "⏱️ 무리 금지", "tip": "관절을 가볍게 써주어 혈류 공급을 원활하게 만듭니다."}
             ]
@@ -344,6 +344,7 @@ def show_main_page():
 
         st.divider()
 
+        # 🚨 중요: removeChild 에러 완벽 차단을 위한 유니크 키 세팅 적용구간
         tab1, tab2, tab3 = st.tabs(["🍱 추천 식단", "🏃 AI 목표 시간 맞춤형 루틴", "📅 나의 누적 다이어트 일지"])
 
         with tab1:
@@ -394,10 +395,10 @@ def show_main_page():
             ai_prescribed_exercises = []
             ai_prescribed_calories = 0
             
-            # DOM 중동 및 꼬임 에러(removeChild) 방지를 위한 고유 조합 프리픽스 생성
-            safe_prefix = f"v2_{ex_place}_{goal}_{user_condition}".replace(" ", "_").replace("(", "").replace(")", "")
+            # DOM 중독 및 꼬임 에러(removeChild) 방지를 위한 고유 조합 접두사(Prefix) 생성
+            safe_prefix = f"fix_{ex_place}_{goal}_{user_condition}".replace(" ", "_").replace("(", "").replace(")", "")
 
-            # --- 💡 메인 엔진 렌더링 파트 (상하 스크롤식 단일 컬럼 구조 + 유니크 키 바인딩) ---
+            # --- 💡 메인 엔진 렌더링 파트 (에러 방지를 위해 단일 컨테이너 구조 안에서 독립 Key 바인딩) ---
             with st.container():
                 # 🏠 [분기 A] 홈트레이닝 파트
                 if ex_place == "홈트":
@@ -420,12 +421,12 @@ def show_main_page():
                         st.markdown(f"* **수행 가이드:** {main_item['guide']}")
                         st.markdown(f"* **휴식 시간:** {main_item['rest']}")
                         
-                        # 유튜브 영상 임베딩 및 고유 링크
+                        # 유튜브 영상 임베딩 및 고유 링크 (에러 방지용 키 바인딩 완료)
                         if "url" in main_item:
                             st.video(main_item["url"])
                             st.info(f"🔗 [유튜브 앱/웹에서 직접 확인하기]({main_item['url']})")
                             
-                        with st.expander("📖 운동 효과 극대화 꿀팁", key=f"exp_{safe_prefix}_main"):
+                        with st.expander("📖 운동 효과 극대화 꿀팁", key=f"exp_{safe_prefix}_main_v2"):
                             st.caption(main_item["tip"])
                             
                         ai_prescribed_exercises.append(main_item['name'])
@@ -440,7 +441,7 @@ def show_main_page():
                                 st.markdown(f"### 📎 {item['name']}")
                                 st.markdown(f"* **추천 시간:** **{time_per_sub}분**")
                                 st.markdown(f"* **강도 세팅:** {item['guide']}")
-                                with st.expander(f"💡 {item['name']} 디테일 팁", key=f"exp_{safe_prefix}_sub_{idx}"):
+                                with st.expander(f"💡 {item['name']} 디테일 팁", key=f"exp_{safe_prefix}_sub_{idx}_v2"):
                                     st.caption(item["tip"])
                                 st.write("")
                                 
@@ -458,7 +459,7 @@ def show_main_page():
                             st.markdown(f"🎯 **{idx+1}단계: {item['name']}**")
                             st.markdown(f"* ⏱️ 추천 시간: **{time_per_ex}분**")
                             st.markdown(f"* 📊 수행 가이드: **{item['guide']}** | {item['rest']}\n")
-                            with st.expander("📖 정석 자세 및 부상방지 꿀팁", key=f"exp_{safe_prefix}_muscle_{idx}"):
+                            with st.expander("📖 정석 자세 및 부상방지 꿀팁", key=f"exp_{safe_prefix}_muscle_{idx}_v2"):
                                 st.caption(item["tip"])
                             st.write("")
                             
@@ -471,32 +472,29 @@ def show_main_page():
                     
                     # B-1. 헬스장 + 근육증가 루틴
                     if goal == "근육증가":
-                        st.markdown(f"### 🏋️ **[목표: 근육증가]** 컨디션([{user_condition}]) 맞춤형 [상체 ➡️ 하체] 수직 순차 머신 루틴")
+                        st.markdown(f"### 🏋️ **[목표: 근육증가]** 컨디션([{user_condition}]) 맞춤형 [상체 ➡️ 하체] 머신 루틴")
                         total_items = len(pool_dict["상체"]) + len(pool_dict["하체"])
                         time_per_ex = max(5, round(target_total_time / total_items))
                         
-                        # 1단계 무산소 상체 수행
                         st.markdown("---")
                         st.markdown("## 🦾 STEP 1: 상체 타겟 무산소 라인")
                         for idx, item in enumerate(pool_dict["상체"]):
                             st.markdown(f"### 🔹 {item['name']}")
                             st.markdown(f"  - ⏱️ 분배 시간: **{time_per_ex}분**")
                             st.markdown(f"  - 📊 강도 세팅: **{item['guide']}** | {item['rest']}")
-                            with st.expander("💡 기구 사용 가이드", key=f"exp_{safe_prefix}_gym_up_{idx}"):
+                            with st.expander("💡 기구 사용 가이드", key=f"exp_{safe_prefix}_gym_up_{idx}_v2"):
                                 st.caption(item["tip"])
                             ai_prescribed_exercises.append(item['name'])
                             ai_prescribed_calories += round((time_per_ex / 10) * item["cal_10m"] * condition_multiplier)
                             st.write("")
                         
-                        # 2단계 무산소 하체 수행
                         st.markdown("---")
                         st.markdown("## 🦿 STEP 2: 하체 타겟 무산소 라인")
                         for idx, item in enumerate(pool_dict["하체"]):
                             st.markdown(f"### 🔸 {item['name']}")
                             st.markdown(f"  - ⏱️ 분배 시간: **{time_per_ex}분**")
-                            i_guide = item['guide'].replace("마무리", "집중")
-                            st.markdown(f"  - 📊 강도 세팅: **{i_guide}** | {item['rest']}")
-                            with st.expander("💡 기구 사용 가이드", key=f"exp_{safe_prefix}_gym_low_{idx}"):
+                            st.markdown(f"  - 📊 강도 세팅: **{item['guide']}** | {item['rest']}")
+                            with st.expander("💡 기구 사용 가이드", key=f"exp_{safe_prefix}_gym_low_{idx}_v2"):
                                 st.caption(item["tip"])
                             ai_prescribed_exercises.append(item['name'])
                             ai_prescribed_calories += round((time_per_ex / 10) * item["cal_10m"] * condition_multiplier)
@@ -504,7 +502,7 @@ def show_main_page():
                                 
                     # B-2. 헬스장 + 감량/유지 유산소 집중 루틴
                     else:
-                        st.markdown(f"### 🏃 **[목표: {goal}]** 컨디션([{user_condition}]) 맞춤형 유산소 위-아래 코스 안내")
+                        st.markdown(f"### 🏃 **[목표: {goal}]** 컨디션([{user_condition}]) 맞춤형 유산소 집중 코스 안내")
                         total_items = len(pool_dict["유산소"])
                         time_per_ex = max(5, round(target_total_time / total_items))
                         
@@ -513,7 +511,7 @@ def show_main_page():
                             st.markdown(f"## 🔥 {idx+1}순위 유산소 코스: {item['name']}")
                             st.markdown(f"  - ⏱️ 집중 수행 시간: **{time_per_ex}분**")
                             st.markdown(f"  - 📊 페이스 가이드: **{item['guide']}** | {item['rest']}")
-                            with st.expander("💡 유산소 효과 배가 팁 보기", key=f"exp_{safe_prefix}_gym_cardio_{idx}"):
+                            with st.expander("💡 유산소 효과 배가 팁 보기", key=f"exp_{safe_prefix}_gym_cardio_{idx}_v2"):
                                 st.caption(item["tip"])
                             ai_prescribed_exercises.append(item['name'])
                             ai_prescribed_calories += round((time_per_ex / 10) * item["cal_10m"] * condition_multiplier)
@@ -523,7 +521,7 @@ def show_main_page():
 
             # --- [실제 수행 기록 정산기 단락] ---
             st.subheader("🏋️ 오늘 실제로 완료한 운동 체크")
-            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 컨디션 루틴을 그대로 완료했습니다! (원클릭 자동 등록)", value=False, key="checkbox_ai_routine")
+            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 컨디션 루틴을 그대로 완료했습니다! (원클릭 자동 등록)", value=False, key="checkbox_ai_routine_v2")
 
             actual_burned_calories = 0
             actual_time_sum = 0
@@ -538,11 +536,11 @@ def show_main_page():
                 st.caption("일부만 수행하셨거나 다른 운동을 하셨다면 아래 풀에서 직접 골라 입력하실 수 있습니다.")
                 grand_pool = ["레그 프레스 머신 (허벅지 전체)", "렛 풀 다운 (등)", "체스트 프레스 머신 (가슴)", "트레드밀 (러닝머신)", "천국의 계단 (스텝밀)", "실내 고정식 싸이클 자전거", "줄넘기", "야외 가벼운 산책"]
                 grand_pool.append("전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛]")
-                actual_done_list = st.multiselect("오늘 실제 마친 항목들을 선택해 주세요.", grand_pool, key="manual_select_ex")
+                actual_done_list = st.multiselect("오늘 실제 마친 항목들을 선택해 주세요.", grand_pool, key="manual_select_ex_v2")
                 
                 if actual_done_list:
                     for ex_name in actual_done_list:
-                        done_time = st.slider(f"[{ex_name}] 수행 시간(분)", 0, 180, 30, key=f"v2_time_{ex_name}")
+                        done_time = st.slider(f"[{ex_name}] 수행 시간(분)", 0, 180, 30, key=f"fix_time_{ex_name}")
                         actual_burned_calories += round((done_time / 10) * 60 * condition_multiplier)
                         actual_time_sum += done_time
                     ex_summary = f"[{user_condition}/수동] " + ", ".join(actual_done_list)
@@ -556,7 +554,7 @@ def show_main_page():
 
             st.divider()
             st.subheader("💾 최종 운동 기록 세이브")
-            if st.button("🔥 정산된 수치로 최종 저장하고 수룡이 경험치 받기", key="btn_save_exercise"):
+            if st.button("🔥 정산된 수치로 최종 저장하고 수룡이 경험치 받기", key="btn_save_exercise_v2"):
                 if not use_ai_routine and ('actual_done_list' not in locals() or not actual_done_list):
                     st.error("완료한 운동 수치가 정산되지 않았습니다. AI 원클릭 체크박스를 누르거나 수동 운동을 골라주세요.")
                 else:
@@ -606,7 +604,7 @@ def show_main_page():
                     if available_dates:
                         chart_col1, chart_col2 = st.columns([3, 1.5])
                         with chart_col2:
-                            selected_chart_date = st.selectbox("날짜를 클릭하세요", options=available_dates, index=len(available_dates)-1, key="chart_date_selector")
+                            selected_chart_date = st.selectbox("날짜를 클릭하세요", options=available_dates, index=len(available_dates)-1, key="chart_date_selector_v2")
                         with chart_col1:
                             day_data = df_unique_dates[df_unique_dates["날짜_일만"] == selected_chart_date].iloc[0]
                             plot_df = pd.DataFrame({
@@ -651,8 +649,8 @@ def show_main_page():
                             else: cols[i].markdown(f"{day}")
 
                 st.divider()
-                if st.checkbox("⚠️ 전체 기록 지우기", key="delete_all_logs_check"):
-                    if st.button("정말 삭제하시겠습니까?", key="btn_delete_logs_confirm"):
+                if st.checkbox("⚠️ 전체 기록 지우기", key="delete_all_logs_check_v2"):
+                    if st.button("정말 삭제하시겠습니까?", key="btn_delete_logs_confirm_v2"):
                         os.remove(LOG_FILE)
                         st.warning("모든 다이어트 기록이 삭제되었습니다. 새로고침 해주세요.")
             else:
@@ -706,8 +704,8 @@ def show_growth_page():
     st.table(pd.DataFrame(level_data))
 
     st.divider()
-    if st.checkbox("⚠️ 수룡이 경험치 초기화 활성화", key="reset_exp_check"):
-        if st.button("💥 수룡이를 다시 알(🥚)로 되돌리기", type="primary", key="btn_reset_exp"):
+    if st.checkbox("⚠️ 수룡이 경험치 초기화 활성화", key="reset_exp_check_v2"):
+        if st.button("💥 수룡이를 다시 알(🥚)로 되돌리기", type="primary", key="btn_reset_exp_v2"):
             if os.path.exists(GROW_FILE):
                 os.remove(GROW_FILE)
             st.warning("수룡이의 경험치가 완전히 초기화되었습니다! 페이지를 새로고침(F5) 해주세요.")
