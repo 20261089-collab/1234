@@ -105,7 +105,7 @@ foods = {
     "초밥": {"calorie": 500, "type": "일식", "is_healthy": True}
 }
 
-# 🏋️ [데이터셋 고도화] 실제 유튜브 영상 길이(video_min) 및 적합한 목표 타겟(target_goals) 추가
+# 🏋️ [오류 수정 및 데이터 보완] 수영 부분의 텍스트 깨짐 오타 완벽 제거 및 셋팅 완료
 exercises_db = {
     "산책 / 가벼운 걷기": {"cal_10m": 30, "url": "https://youtu.be/MWnD6DhLjyc?si=-2IDpUQ8fYxQguKv", "type": "유산소", "place": "홈트", "intensity": "하", "video_min": 30, "target_goals": ["감량", "유지"]},
     "빠르게 걷기 (파워워킹)": {"cal_10m": 40, "url": "https://youtu.be/Me3IaZS3CdY?si=sGAMVjvBxPmokg01", "type": "유산소", "place": "홈트", "intensity": "중", "video_min": 30, "target_goals": ["감량", "유지"]},
@@ -297,17 +297,17 @@ def show_main_page():
             st.divider()
 
             # --- [AI 내부 필터링 및 시간 슬라이싱 엔진] ---
-            # 1. 장소 기본 필터링 + 🌟 [보완] 유저 목표(target_goals)에 정확하게 부합하는 종목만 1차 선별 (근육증가에 필라테스 원천 차단)
+            # 1. 목표 타겟팅 기반 1차 필터링 (골격근 증가 시 필라테스/요가 원천 차단)
             available_pool = {
                 k: v for k, v in exercises_db.items() 
                 if v["place"] == ex_place and goal in v["target_goals"]
             }
             
-            # 2. 컨디션 필터링 (피곤 또는 근육통 시 고강도 운동 탈락)
+            # 2. 컨디션 필터링
             if user_condition in ["피곤함 (가벼운 운동 필요)", "근육통 있음"]:
                 available_pool = {k: v for k, v in available_pool.items() if v["intensity"] != "상"}
             
-            # 3. 유산소 / 무산소 풀 분리
+            # 3. 유산소 / 무산소 분리
             aerobic_pool = [k for k, v in available_pool.items() if v["type"] == "유산소"]
             anaerobic_pool = [k for k, v in available_pool.items() if v["type"] == "무산소"]
 
@@ -315,17 +315,16 @@ def show_main_page():
             
             routine_items = []
             
-            # 비율에 기반한 시간 분배 및 유튜브 실재 영상 길이 반영 가이드 빌더 함수
+            # 시간 동적 매칭 매니저 함수
             def build_routine_guide(ex_name, allocated_time):
                 v_min = exercises_db[ex_name]["video_min"]
                 url = exercises_db[ex_name]["url"]
                 
-                # 영상 길이와 할당된 시간의 스케일을 비교하여 안내 문구 생성
                 if allocated_time <= v_min:
-                    guide_text = f"정확히 앞부분부터 총 **{allocated_time}분**간 영상을 집중 시청하며 따라 하세요."
+                    guide_text = f"앞부분부터 집중하여 딱 **{allocated_time}분**간 영상을 보며 완료하세요."
                 else:
                     sets = round(allocated_time / v_min, 1)
-                    guide_text = f"해당 영상(실제 {v_min}분 분량)을 끝까지 완료한 후, 추가로 총 **{sets}바퀴(세트)** 반복하여 총 **{allocated_time}분**을 채우세요."
+                    guide_text = f"전체 분량({v_min}분)을 시청하며 완주한 뒤, 동작을 이어서 총 **{sets}세트 반복(루프)**하여 **{allocated_time}분**을 충족하세요."
                 
                 return (ex_name, guide_text, url, v_min)
 
@@ -342,7 +341,7 @@ def show_main_page():
             elif goal == "근육증가":
                 anaerobic_time = round(target_total_time * 0.7)
                 aerobic_time = target_total_time - anaerobic_time
-                st.info(f"💡 목표가 **[근육증가]**이므로 타겟 부위 **무산소 {anaerobic_time}분 + 유산소 {aerobic_time}분**으로 타임라인을 구성했습니다. (정적인 필라테스/요가 제외)")
+                st.info(f"💡 목표가 **[근육증가]**이므로 **무산소 {anaerobic_time}분 + 유산소 {aerobic_time}분**으로 구성했습니다. (필라테스/요가 완전 제외)")
                 
                 if anaerobic_pool and anaerobic_time > 0:
                     routine_items.append(build_routine_guide(anaerobic_pool[0], anaerobic_time))
@@ -352,31 +351,30 @@ def show_main_page():
             else:  # 유지
                 aerobic_time = round(target_total_time * 0.5)
                 anaerobic_time = target_total_time - aerobic_time
-                st.info(f"💡 목표가 **[유지]**이므로 **유산소 {aerobic_time}분 + 무산소 {anaerobic_time}분**을 균형 있게 조합했습니다.")
+                st.info(f"💡 목표가 **[유지]**이므로 **유산소 {aerobic_time}분 + 무산소 {anaerobic_time}분**을 균형 있게 배분했습니다.")
                 
                 if aerobic_pool and aerobic_time > 0:
                     routine_items.append(build_routine_guide(aerobic_pool[0], aerobic_time))
                 if anaerobic_pool and anaerobic_time > 0:
                     routine_items.append(build_routine_guide(anaerobic_pool[0], anaerobic_time))
 
-            # 처방전 타임라인 시각화 박스 출력
+            # 가이드박스 출력
             if routine_items:
                 with st.container(border=True):
                     st.markdown(f"### 📋 오늘의 영상 연동형 맞춤 처방전")
                     for idx, (ex_title, guide_text, link_url, v_min) in enumerate(routine_items, 1):
-                        st.markdown(f"**{idx}. {ex_title}** *(안내: 실제 유튜브 영상 길이 {v_min}분)*")
+                        st.markdown(f"**{idx}. {ex_title}** *(유튜브 원본 영상 분량: {v_min}분)*")
                         st.markdown(f"   ➡️ {guide_text}")
-                        st.markdown(f"   📺 [시청하며 따라하기 (유튜브 링크 클릭)]({link_url})")
+                        st.markdown(f"   📺 [시청하며 따라하기 (유튜브 링크)]({link_url})")
             else:
-                st.warning("선택하신 조건에 부합하는 정밀 운동 풀이 일시적으로 부족합니다. 다른 장소나 컨디션을 선택해 보세요.")
+                st.warning("조건에 부합하는 정밀 운동 풀이 일시적으로 부족합니다. 다른 장소나 컨디션을 선택해 보세요.")
 
             st.divider()
 
             # --- [실제 수행 기록 섹션] ---
             st.subheader("🏋️ 오늘 실제로 완료한 운동 기록하기")
-            st.caption("AI 추천 루틴 그대로 수행했거나, 혹은 본인 상황에 맞춰 다른 운동을 믹스했을 수도 있으므로 실제 진행한 운동을 아래에서 체크해 주세요!")
+            st.caption("AI 추천 루틴 그대로 수행했거나, 혹은 상황에 맞추어 다르게 믹스했을 수도 있으니 실제 진행한 운동을 선택해 주세요!")
             
-            # 프리셋 전체 리스트 풀 제공하여 유연한 선택 보장
             actual_done_list = st.multiselect("오늘 실제 수행 완료한 모든 종목을 자유롭게 선택하세요", list(exercises_db.keys()))
             
             actual_burned_calories = 0
@@ -387,7 +385,6 @@ def show_main_page():
                 for ex_name in actual_done_list:
                     cal_per_10m = exercises_db[ex_name]["cal_10m"]
                     
-                    # 실시간 미세 조정을 위한 개별 슬라이더
                     done_time = st.slider(f"[{ex_name}] 실제 몇 분 진행하셨나요?", 0, 150, 30, key=f"actual_time_{ex_name}")
                     
                     ex_burned = round((done_time / 10) * cal_per_10m)
