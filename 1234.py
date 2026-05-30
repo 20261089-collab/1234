@@ -24,7 +24,7 @@ def calculate_bmi(weight, height):
     return round(weight / (h ** 2), 1)
 
 
-# 🧮 [요청 반영] 개정된 해리스-베네딕트 공식으로 교체 완료
+# 🧮 개정된 해리스-베네딕트 공식
 def calculate_bmr_harris_benedict(weight, height, age, gender):
     if gender == "남자":
         return round(66.47 + (13.75 * weight) + (5.0 * height) - (6.76 * age), 1)
@@ -77,7 +77,7 @@ def save_profile(profile):
     df.to_csv(PROFILE_FILE, index=False, encoding="utf-8-sig")
 
 
-# 🍱 [통합 데이터베이스] 기존 인기 단품 메뉴와 신규 트렌디 조합
+# 🍱 음식 데이터베이스
 foods = {
     "오트밀 + 바나나": {"calorie": 280, "is_healthy": True, "allergens": []},
     "현미밥 + 닭가슴살 + 구운 야채": {"calorie": 420, "is_healthy": True, "allergens": ["닭고기"]},
@@ -105,7 +105,7 @@ foods = {
     "제로 탄산음료": {"calorie": 0, "is_healthy": True, "allergens": []}
 }
 
-# --- 🏋️ 프리셋 데이터베이스 ---
+# 🏋️ 프리셋 데이터베이스
 exercise_presets = {
     "홈트": {
         "근육증가": {
@@ -159,7 +159,7 @@ exercise_presets = {
     }
 }
 
-# --- 🏋️ 헬스장 다중 기구 루틴 데이터베이스 ---
+# 🏋️ 헬스장 기구 루틴 데이터베이스
 gym_split_presets = {
     "최상 (에너지 넘침)": {
         "상체": [
@@ -275,7 +275,7 @@ def show_main_page():
             saved_allergies = [saved_allergies] if saved_allergies in allergy_options else []
     
     selected_allergies = st.multiselect(
-        "해당하는 알레르기 음식을 선택해 주세요 (해당 재료가 포함된 식단이 제외됩니다)",
+        "해당하는 알레르기 음식을 선택해 주세요",
         allergy_options,
         default=saved_allergies
     )
@@ -286,7 +286,6 @@ def show_main_page():
     })
 
     user_bmi = calculate_bmi(weight, height)
-    # 🧮 개정 해리스-베네딕트 함수 연동
     user_bmr = calculate_bmr_harris_benedict(weight, height, age, gender)
     user_tdee = calculate_tdee(user_bmr, activity)
 
@@ -346,14 +345,12 @@ def show_main_page():
     st.divider()
 
     st.header("🍽️ 오늘 먹은 음식 기록 (+추가 및 직접 입력)")
-    st.caption("추천 식단 외에 추가로 드신 일반식, 간식이나 데이터베이스에 없는 나만의 음식을 기록해 보세요.")
-    
     selected_foods = st.multiselect("오늘 추가로 더 드신 기성 음식을 골라주세요.", list(foods.keys()), key="multiselect_foods_v12")
 
     st.markdown("#### ✍️ 리스트에 없는 음식을 직접 입력하기")
     c_col1, c_col2 = st.columns([2, 1])
     with c_col1:
-        custom_food_name = st.text_input("음식 이름 입력", placeholder="예: 엄마표 닭도리탕, 엽기떡볶이 2접시", key="custom_food_name_v12")
+        custom_food_name = st.text_input("음식 이름 입력", placeholder="예: 엄마표 닭도리탕", key="custom_food_name_v12")
     with c_col2:
         custom_food_cal = st.number_input("칼로리(kcal)", min_value=0, step=5, value=0, key="custom_food_cal_v12")
 
@@ -375,23 +372,6 @@ def show_main_page():
 
     if custom_food_name and custom_food_cal > 0:
         total += custom_food_cal
-
-    if checked_items_summary or selected_foods or (custom_food_name and custom_food_cal > 0):
-        col_h, col_uh = st.columns(2)
-        with col_h:
-            st.write("🍏 **오늘의 든든/클린 푸드**")
-            for item in checked_items_summary:
-                st.write(f"- {item}")
-            for food in selected_foods:
-                if foods[food]["is_healthy"]:
-                    st.write(f"- {food} ({foods[food]['calorie']} kcal)")
-            if custom_food_name and custom_food_cal > 0:
-                st.write(f"- {custom_food_name} ({custom_food_cal} kcal) ✍️")
-        with col_uh:
-            st.write("😈 **주의가 필요한 고칼로리/치팅 푸드**")
-            for food in selected_foods:
-                if not foods[food]["is_healthy"]:
-                    st.write(f"- {food} ({foods[food]['calorie']} kcal)")
 
     st.divider()
 
@@ -436,9 +416,32 @@ def show_main_page():
             elif status_color == "warning": st.warning(suryong_msg)
             else: st.success(suryong_msg)
 
-            # 📊 [요청 반영] BMI 아래에 개정 해리스-베네딕트 기반 기초대사량 스코어 전면 배치
+            # 📊 [요구사항 반영 완료] 메트릭 순서 정렬 및 텍스트 설명 아코디언 추가
             st.metric("나의 BMI 지수", f"{user_bmi}")
             st.metric("나의 기초대사량 (BMR)", f"{user_bmr} kcal")
+            st.metric("나의 활동대사량 (TDEE)", f"{user_tdee} kcal")
+            
+            st.write("") # 가독성을 위한 공백
+            
+            # 💡 접고 펼칠 수 있는 연회색 톤의 이유 설명란 박스
+            with st.expander("💡 왜 기초대사량보다 권장 칼로리가 높을까요?", expanded=False):
+                st.markdown(
+                    """
+                    <div style="color: #666666; font-size: 0.95em; line-height: 1.6; padding: 5px;">
+                    많은 분들이 다이어트를 할 때 '기초대사량보다 적게 먹어야 살이 빠진다'고 오해하곤 합니다. 하지만 실제로는 그렇지 않습니다!<br><br>
+                    <ul>
+                        <li><b>기초대사량(BMR):</b> 하루 종일 누워서 숨만 쉴 때 장기를 돌리기 위해 필요한 최소한의 생존 연료입니다.</li>
+                        <li><b>활동대사량(TDEE):</b> 출퇴근, 공부, 산책 등 일상적인 움직임과 운동을 모두 포함해 하루에 <b>진짜로 소모하는 총에너지</b>입니다.</li>
+                    </ul>
+                    따라서 몸이 하루 동안 실제로 쓰는 양(활동대사량)에서 안전하게 칼로리를 뺀 <b>목표 권장 칼로리</b>는 당연히 기초대사량보다 높게 설정됩니다.<br><br>
+                    만약 기초대사량보다도 적게 먹으며 극단적으로 굶는 다이어트를 하면, 우리 몸은 기근 상태(비상사태)로 인식해 <b>지방 대신 근육을 먼저 분해</b>하고 기초대사량 자체를 낮춰버려 결국 <b>요요가 오기 쉬운 체질</b>로 변하게 됩니다.<br><br>
+                    지금 설정된 권장 칼로리는 몸의 대사율과 건강을 지키면서 <b>지방만 효과적으로 빠지도록 계산된 정밀한 수치</b>이니 안심하고 규칙적으로 챙겨 드셔도 됩니다! 👍
+                    </div>
+                    """, 
+                    unsafe_html=True
+                )
+            
+            st.divider()
             st.metric("오늘의 목표 권장 칼로리", f"{daily_calorie} kcal")
             st.metric("현재 총 섭취량", f"{total} kcal", delta=total - daily_calorie, delta_color="inverse")
 
@@ -489,7 +492,6 @@ def show_main_page():
             ai_prescribed_exercises = []
             ai_prescribed_calories = 0
             
-            # 🚨 [버그 픽스] React DOM 충돌 방지를 위한 엄격한 키 프리픽스 제어계 구축
             safe_prefix = f"v12_{ex_place}_{goal}_{user_condition}_{muscle_gym_part}".replace(" ", "_").replace("(", "").replace(")", "")
 
             with st.container():
@@ -510,11 +512,10 @@ def show_main_page():
                         
                         for idx, item in enumerate(current_pool):
                             st.markdown("---")
-                            
                             if "url" in item and has_youtube:
                                 time_per_ex = 20
                                 st.markdown(f"## 🏃 {idx+1}단계 유산소 트랙 (필수 고정): {item['name']}")
-                                st.markdown(f"  - ⏱️ 집중 수행 시간: **{time_per_ex}분** (유튜브 루틴 고정)")
+                                st.markdown(f"  - ⏱️ 집중 수행 시간: **{time_per_ex}분**")
                             else:
                                 if has_youtube:
                                     rem_time = max(5, target_total_time - 20)
@@ -568,9 +569,9 @@ def show_main_page():
                         
                         for idx, item in enumerate(target_list):
                             st.markdown(f"### 🔹 {item['name']}")
-                            st.markdown(f"  - ⏱️ 권장 할당 시간: **{time_per_machine}분** (세트 사이 휴식 포함)")
+                            st.markdown(f"  - ⏱️ 권장 할당 시간: **{time_per_machine}분**")
                             st.markdown(f"  - 📊 수행 가이드: **{item['guide']}** | {item['rest']}")
-                            with st.expander(f"💡 {item['name']} 기구 사용 가이드 및 고립 자극 꿀팁", key=f"exp_{safe_prefix}_gym_muscle_{idx}"):
+                            with st.expander(f"💡 {item['name']} 기구 사용 가이드", key=f"exp_{safe_prefix}_gym_muscle_{idx}"):
                                 st.caption(item["tip"])
                             ai_prescribed_exercises.append(item['name'])
                             ai_prescribed_calories += round((time_per_machine / 10) * item["cal_10m"] * condition_multiplier)
@@ -596,7 +597,7 @@ def show_main_page():
             st.divider()
 
             st.subheader("🏋️ 오늘 실제로 완료한 운동 체크")
-            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 균형 있는 다중 기구 루틴을 그대로 완료했습니다! (원클릭 등록)", value=False, key="checkbox_ai_routine_v12")
+            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 균형 있는 다중 기구 루틴을 그대로 완료했습니다!", value=False, key="checkbox_ai_routine_v12")
 
             actual_burned_calories = 0
             actual_time_sum = 0
@@ -605,7 +606,7 @@ def show_main_page():
             if use_ai_routine:
                 actual_time_sum = target_total_time
                 actual_burned_calories = ai_prescribed_calories
-                part_tag = f"[{muscle_gym_part}] " if (ex_place == "헬스장" and goal == "근육증가") else ""
+                part_tag = f"[{muscle_gym_part}] " if (ex_place == "Helvetica" and goal == "근육증가") else ""
                 ex_summary = f"[{user_condition}/{goal}] " + part_tag + ", ".join(ai_prescribed_exercises)
                 st.info(f"✨ 연동 완료: 설정하신 총 **{actual_time_sum}분** 운동, 총 **{actual_burned_calories} kcal** 소모로 정밀 연산되었습니다!")
             else:
@@ -637,7 +638,7 @@ def show_main_page():
             st.subheader("💾 최종 운동 기록 세이브")
             if st.button("🔥 정산된 수치로 최종 저장하고 수룡이 경험치 받기", key="btn_save_exercise_v12"):
                 if not use_ai_routine and ('actual_done_list' not in locals() or not actual_done_list):
-                    st.error("완료한 운동 수치가 정산되지 않았습니다. AI 원클릭 체크박스를 누르거나 수동 운동을 골라주세요.")
+                    st.error("완료한 운동 수치가 정산되지 않았습니다.")
                 else:
                     current_time_str = datetime.now().strftime("%H:%M")
                     formatted_date = f"{select_date.strftime('%Y-%m-%d')} {current_time_str}"
@@ -756,7 +757,6 @@ def show_growth_page():
 
     st.divider()
     st.header("🐉 수룡이 알 키우기")
-    st.caption("운동 기록으로 획득한 경험치(EXP)에 따라 진화하는 진짜 수룡이의 방입니다.")
     st.write("")
 
     exp = load_exp()
@@ -793,7 +793,7 @@ def show_growth_page():
         if st.button("💥 수룡이를 다시 알(🥚)로 되돌리기", type="primary", key="btn_reset_exp_v12"):
             if os.path.exists(GROW_FILE):
                 os.remove(GROW_FILE)
-            st.warning("수룡이의 경험치가 완전히 초기화되었습니다! 페이지를 새로고침(F5) 해주세요.")
+            st.warning("수룡이의 경험치가 완전히 초기화되었습니다!")
 
 
 # --- 멀티페이지 내비게이션 구성 ---
