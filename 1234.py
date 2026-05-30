@@ -76,33 +76,33 @@ def save_profile(profile):
     df.to_csv(PROFILE_FILE, index=False, encoding="utf-8-sig")
 
 
-# 🍱 [데이터베이스] 음식 데이터 선언 (질문자님 아이디어를 반영하여 세부 재료 ingredients 추가 완료)
+# 🍱 [데이터베이스] 음식 데이터 선언 (알레르기 유발 성분 allergens 매핑으로 깔끔하게 변경)
 foods = {
-    "김밥": {"calorie": 450, "type": "한식", "is_healthy": True, "ingredients": ["단무지", "당근", "시금치", "계란", "밥", "김"]},
-    "참치김밥": {"calorie": 500, "type": "한식", "is_healthy": True, "ingredients": ["참치", "마요네즈", "깻잎", "단무지", "당근", "밥", "김"]},
-    "치즈김밥": {"calorie": 530, "type": "한식", "is_healthy": False, "ingredients": ["치즈", "단무지", "당근", "계란", "밥", "김"]},
-    "샐러드": {"calorie": 250, "type": "가벼운식단", "is_healthy": True, "ingredients": ["양상추", "토마토", "오이", "올리브", "발사믹"]},
-    "닭가슴살": {"calorie": 165, "type": "단백질", "is_healthy": True, "ingredients": ["닭고기", "닭가슴살"]},
-    "고구마": {"calorie": 130, "type": "가벼운식단", "is_healthy": True, "ingredients": ["고구마"]},
-    "현미밥": {"calorie": 320, "type": "한식", "is_healthy": True, "ingredients": ["현미", "쌀", "밥"]},
-    "라면": {"calorie": 500, "type": "분식", "is_healthy": False, "ingredients": ["밀가루면", "스프", "파", "계란"]},
-    "불닭볶음면": {"calorie": 530, "type": "분식", "is_healthy": False, "ingredients": ["밀가루면", "매운소스", "김가루"]},
-    "짜장면": {"calorie": 700, "type": "중식", "is_healthy": False, "ingredients": ["밀가루면", "춘장", "돼지고기", "양파", "완두콩"]},
-    "짬뽕": {"calorie": 650, "type": "중식", "is_healthy": False, "ingredients": ["밀가루면", "오징어", "홍합", "배추", "고춧가루"]},
-    "햄버거": {"calorie": 550, "type": "패스트푸드", "is_healthy": False, "ingredients": ["빵", "소고기패티", "양상추", "토마토", "치즈", "소스"]},
-    "치킨": {"calorie": 700, "type": "패스트푸드", "is_healthy": False, "ingredients": ["닭고기", "튀김옷", "기름"]},
-    "피자": {"calorie": 800, "type": "패스트푸드", "is_healthy": False, "ingredients": ["밀가루도우", "토마토소스", "모짜렐라치즈", "페페로니", "피망"]},
-    "떡볶이": {"calorie": 450, "type": "분식", "is_healthy": False, "ingredients": ["떡", "고추장", "어묵", "대파", "설탕"]},
-    "순대": {"calorie": 300, "type": "분식", "is_healthy": False, "ingredients": ["당면", "돼지내장", "소금"]},
-    "계란": {"calorie": 80, "type": "단백질", "is_healthy": True, "ingredients": ["계란", "달걀"]},
-    "바나나": {"calorie": 90, "type": "간식", "is_healthy": True, "ingredients": ["바나나"]},
-    "사과": {"calorie": 100, "type": "간식", "is_healthy": True, "ingredients": ["사과"]},
-    "요거트": {"calorie": 120, "type": "간식", "is_healthy": True, "ingredients": ["우유", "유산균", "요거트"]},
-    "연어": {"calorie": 250, "type": "단백질", "is_healthy": True, "ingredients": ["연어", "생선"]},
-    "스테이크": {"calorie": 600, "type": "단백질", "is_healthy": True, "ingredients": ["소고기", "올리브유", "허브"]},
-    "파스타": {"calorie": 650, "type": "양식", "is_healthy": False, "ingredients": ["파스타면", "토마토소스", "마늘", "올리브유"]},
-    "샌드위치": {"calorie": 400, "type": "간단식", "is_healthy": True, "ingredients": ["식빵", "햄", "치즈", "양상추", "토마토"]},
-    "초밥": {"calorie": 500, "type": "일식", "is_healthy": True, "ingredients": ["쌀밥", "생선회", "와사비", "간장"]}
+    "김밥": {"calorie": 450, "type": "한식", "is_healthy": True, "allergens": ["달걀"]},
+    "참치김밥": {"calorie": 500, "type": "한식", "is_healthy": True, "allergens": ["생선", "달걀"]},
+    "치즈김밥": {"calorie": 530, "type": "한식", "is_healthy": False, "allergens": ["우유", "달걀"]},
+    "샐러드": {"calorie": 250, "type": "가벼운식단", "is_healthy": True, "allergens": []},
+    "닭가슴살": {"calorie": 165, "type": "단백질", "is_healthy": True, "allergens": ["닭고기"]},
+    "고구마": {"calorie": 130, "type": "가벼운식단", "is_healthy": True, "allergens": []},
+    "현미밥": {"calorie": 320, "type": "한식", "is_healthy": True, "allergens": []},
+    "라면": {"calorie": 500, "type": "분식", "is_healthy": False, "allergens": ["밀", "달걀"]},
+    "불닭볶음면": {"calorie": 530, "type": "분식", "is_healthy": False, "allergens": ["밀"]},
+    "짜장면": {"calorie": 700, "type": "중식", "is_healthy": False, "allergens": ["밀", "돼지고기", "대두"]},
+    "짬뽕": {"calorie": 650, "type": "중식", "is_healthy": False, "allergens": ["밀", "갑각류(새우/게)", "조개류"]},
+    "햄버거": {"calorie": 550, "type": "패스트푸드", "is_healthy": False, "allergens": ["밀", "쇠고기", "우유", "대두"]},
+    "치킨": {"calorie": 700, "type": "패스트푸드", "is_healthy": False, "allergens": ["밀", "닭고기"]},
+    "피자": {"calorie": 800, "type": "패스트푸드", "is_healthy": False, "allergens": ["밀", "우유", "돼지고기"]},
+    "떡볶이": {"calorie": 450, "type": "분식", "is_healthy": False, "allergens": ["밀", "대두"]},
+    "순대": {"calorie": 300, "type": "분식", "is_healthy": False, "allergens": ["돼지고기"]},
+    "계란": {"calorie": 80, "type": "단백질", "is_healthy": True, "allergens": ["달걀"]},
+    "바나나": {"calorie": 90, "type": "간식", "is_healthy": True, "allergens": []},
+    "사과": {"calorie": 100, "type": "간식", "is_healthy": True, "allergens": []},
+    "요거트": {"calorie": 120, "type": "간식", "is_healthy": True, "allergens": ["우유"]},
+    "연어": {"calorie": 250, "type": "단백질", "is_healthy": True, "allergens": ["생선"]},
+    "스테이크": {"calorie": 600, "type": "단백질", "is_healthy": True, "allergens": ["쇠고기"]},
+    "파스타": {"calorie": 650, "type": "양식", "is_healthy": False, "allergens": ["밀"]},
+    "샌드위치": {"calorie": 400, "type": "간단식", "is_healthy": True, "allergens": ["밀", "우유", "돼지고기"]},
+    "초밥": {"calorie": 500, "type": "일식", "is_healthy": True, "allergens": ["생선"]}
 }
 
 # --- 🏋️ 프리셋 데이터베이스 ---
@@ -237,7 +237,7 @@ def show_main_page():
             st.info("🐉 LOGO")
     with log_col2:
         st.title("핏메이트")
-        st.caption("식단과 운동 기록을 매일 누적하는 수룡이 다이어트 다이어리")
+        st.caption("식단 and 운동 기록을 매일 누적하는 수룡이 다이어트 다이어리")
 
     st.divider()
 
@@ -263,15 +263,32 @@ def show_main_page():
     goal_options = ["감량", "유지", "근육증가"]
     goal = st.selectbox("목표", goal_options, index=goal_options.index(profile.get("목표", "근육증가")))
 
-    allergy = st.text_input("알레르기 음식", value=profile.get("알레르기 음식", "없음"))
-    dislike = st.text_input("싫어하는 음식", value=profile.get("싫어하는 음식", "없음"))
+    # 💡 [질문자님 요청 반영] 한국인 빈출 알레르기 유발 대표 식재료 멀티셀렉트로 교체 (싫어하는 음식 제거)
+    allergy_options = ["밀", "달걀", "우유", "대두", "생선", "조개류", "갑각류(새우/게)", "닭고기", "돼지고기", "쇠고기"]
+    
+    # 기존 프로필에 저장된 데이터 형식이 문자열 리스트 형태일 경우 파싱하여 기본값 매핑
+    saved_allergies = profile.get("알레르기 음식", "[]")
+    if isinstance(saved_allergies, str):
+        if saved_allergies.startswith("[") and saved_allergies.endswith("]"):
+            import ast
+            try: saved_allergies = ast.literal_eval(saved_allergies)
+            except: saved_allergies = []
+        else:
+            saved_allergies = [saved_allergies] if saved_allergies in allergy_options else []
+    
+    selected_allergies = st.multiselect(
+        "해당하는 알레르기 음식을 선택해 주세요 (해당 재료가 포함된 식단이 제외됩니다)",
+        allergy_options,
+        default=saved_allergies
+    )
 
     food_style_options = ["한식", "가벼운식단", "단백질", "간단식", "분식", "중식", "양식", "일식", "간식", "패스트푸드"]
     food_style = st.selectbox("선호 식단", food_style_options, index=food_style_options.index(profile.get("선호 식단", "단백질")))
 
+    # 싫어하는 음식 항목을 아예 제거하고 프로필 저장
     save_profile({
         "이름": name, "성별": gender, "나이": age, "키(cm)": height, "몸무게(kg)": weight,
-        "활동량": activity, "목표": goal, "알레르기 음식": allergy, "싫어하는 음식": dislike, "선호 식단": food_style
+        "활동량": activity, "목표": goal, "알레르기 음식": str(selected_allergies), "선호 식단": food_style
     })
 
     user_bmi = calculate_bmi(weight, height)
@@ -361,27 +378,14 @@ def show_main_page():
         with tab1:
             st.write("✨ **수룡이가 엄선한 선호 맞춤 식단**")
             
-            # 💡 [질문자님 아이디어 전면 반영] 재료 기반의 스마트 필터링 엔진
+            # 💡 [질문자님 요청 반영] 선택된 대표 알레르기 성분이 포함되어 있다면 차단하는 스마트 엔진
             recommended = []
             for f, info in foods.items():
-                # 1단계: 선호 카테고리 스타일 및 건강식 여부 필터
                 if info["type"] == food_style and info["is_healthy"] == True:
                     
-                    is_filtered = False
-                    
-                    # 2단계: 알레르기 교차 매칭 (음식 이름 혹은 세부 재료에 포함되면 차단)
-                    if allergy != "없음" and allergy.strip():
-                        clean_allergy = allergy.strip()
-                        if clean_allergy in f or any(clean_allergy in ing for ing in info.get("ingredients", [])):
-                            is_filtered = True
-                            
-                    # 3단계: 싫어하는 음식 교차 매칭 (음식 이름 혹은 세부 재료에 포함되면 차단)
-                    if dislike != "없음" and dislike.strip():
-                        clean_dislike = dislike.strip()
-                        if clean_dislike in f or any(clean_dislike in ing for ing in info.get("ingredients", [])):
-                            is_filtered = True
-                            
-                    if not is_filtered:
+                    # 사용자가 고른 알레르기 식재료 중 하나라도 음식의 allergens 리스트에 있으면 거름
+                    food_allergens = info.get("allergens", [])
+                    if not any(alg in food_allergens for alg in selected_allergies):
                         recommended.append(f)
                         
             if not recommended:
@@ -402,7 +406,6 @@ def show_main_page():
             with col_ex3:
                 user_condition = st.selectbox("현재 나의 컨디션", ["최상 (에너지 넘침)", "정상 (보통)", "피곤함 (가벼운 운동 필요)", "근육통 있음"], key="main_condition_v9")
 
-            # 💡 [보존] 근육증가 및 헬스장 선택 시 분할 선택 가이드라인 (절대 유지)
             muscle_gym_part = "상체만 진행"
             if ex_place == "헬스장" and goal == "근육증가":
                 st.write("")
@@ -420,7 +423,6 @@ def show_main_page():
 
             st.divider()
 
-            # --- 💡 컨디션 가중치 시스템 ---
             condition_multiplier = 1.0
             if user_condition == "최상 (에너지 넘침)":
                 condition_multiplier = 1.2
@@ -437,13 +439,10 @@ def show_main_page():
             
             safe_prefix = f"v9_{ex_place}_{goal}_{user_condition}".replace(" ", "_").replace("(", "").replace(")", "")
 
-            # --- 💡 다중 기구 로테이션 렌더링 엔진 ---
             with st.container():
-                # 🏠 [분기 A] 홈트레이닝 파트
                 if ex_place == "홈트":
                     sub_goal = "근육증가" if goal == "근육증가" else "감량"
                     
-                    # 💡 [감량 ➔ 홈트 시간 연산 및 유튜브 조건 유지]
                     if sub_goal == "감량":
                         st.markdown(f"### 🏃 **[목표: {goal}]** 컨디션 맞춤형 홈트레이닝 유산소 타임라인")
                         raw_pool = exercise_presets["홈트"]["감량"].get(user_condition, exercise_presets["홈트"]["감량"]["정상 (보통)"])
@@ -486,7 +485,6 @@ def show_main_page():
                             ai_prescribed_exercises.append(item['name'])
                             ai_prescribed_calories += round((time_per_ex / 10) * item["cal_10m"] * condition_multiplier)
                     
-                    # 💡 [근육증가 ➔ 홈트] N분할 시간 연산 반영
                     else:
                         st.markdown(f"### 🏠 오늘 신체 컨디션에 맞춘 {sub_goal} 전신 홈트레이닝")
                         current_pool = exercise_presets["홈트"]["근육증가"].get(user_condition, exercise_presets["홈트"]["근육증가"]["정상 (보통)"])
@@ -503,11 +501,9 @@ def show_main_page():
                             ai_prescribed_exercises.append(item['name'])
                             ai_prescribed_calories += round((time_per_ex / 10) * item["cal_10m"] * condition_multiplier)
 
-                # 🏋️ [분기 B] 헬스장 파트
                 else: 
                     pool_dict = gym_split_presets.get(user_condition, gym_split_presets["정상 (보통)"])
                     
-                    # B-1. 헬스장 + 근육증가 목표 N분할 시간 연산 반영
                     if goal == "근육증가":
                         if muscle_gym_part == "상체만 진행":
                             st.markdown(f"### 🏋️ **[목표: 근육증가 - 상체 분할]** 오늘 진행하는 4종 상체 기구 집중 타겟 라인")
@@ -531,7 +527,6 @@ def show_main_page():
                             ai_prescribed_calories += round((time_per_machine / 10) * item["cal_10m"] * condition_multiplier)
                             st.write("")
                                 
-                    # B-2. 헬스장 + 감량 목표 N분할 시간 연산 반영
                     else:
                         st.markdown(f"### 🏃 **[목표: {goal}]** 컨디션 맞춤형 고효율 다중 유산소 트랙")
                         cardio_list = pool_dict.get("유산소", [])
@@ -551,7 +546,6 @@ def show_main_page():
 
             st.divider()
 
-            # --- [실제 수행 기록 정산기 단락] ---
             st.subheader("🏋️ 오늘 실제로 완료한 운동 체크")
             use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 균형 있는 다중 기구 루틴을 그대로 완료했습니다! (원클릭 등록)", value=False, key="checkbox_ai_routine_v9")
 
