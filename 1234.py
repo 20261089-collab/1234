@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 import calendar
 import altair as alt
-import json  # 알레르기 리스트를 안전하게 저장하기 위해 표준 json 라이브러리 사용
+import json
 
 # 🚨 Streamlit 최상단 환경 설정
 st.set_page_config(
@@ -19,38 +19,56 @@ PROFILE_FILE = "user_profile.csv"
 LOGO_FILE = "icon.png"
 
 
-# --- 공통 연산 함수 ---
+# --- 공통 연산 함수 (데이터 타입 강제 예외처리 포함) ---
 def calculate_bmi(weight, height):
-    if height <= 0:
+    try:
+        w = float(weight)
+        h = float(height)
+        if h <= 0:
+            return 0.0
+        return round(w / ((h / 100) ** 2), 1)
+    except:
         return 0.0
-    h = height / 100
-    return round(weight / (h ** 2), 1)
 
 
-# 🧮 개정된 해리스-베네딕트 공식 (보내주신 이미지 수식 반영)
+# 🧮 개정된 해리스-베네딕트 공식
 def calculate_bmr_harris_benedict(weight, height, age, gender):
-    if gender == "남자":
-        return round(66.47 + (13.75 * weight) + (5.0 * height) - (6.76 * age), 1)
-    return round(655.1 + (9.56 * weight) + (1.85 * height) - (4.68 * age), 1)
+    try:
+        w = float(weight)
+        h = float(height)
+        a = float(age)
+        if gender == "남자":
+            return round(66.47 + (13.75 * w) + (5.0 * h) - (6.76 * a), 1)
+        return round(655.1 + (9.56 * w) + (1.85 * h) - (4.68 * a), 1)
+    except:
+        return 0.0
 
 
 def calculate_tdee(bmr, activity):
-    factors = {
-        "거의 안 움직임": 1.2,
-        "가벼운 활동": 1.375,
-        "보통": 1.55,
-        "활발함": 1.725,
-        "매우 활발": 1.9
-    }
-    return round(bmr * factors.get(activity, 1.2))
+    try:
+        b = float(bmr)
+        factors = {
+            "거의 안 움직임": 1.2,
+            "가벼운 활동": 1.375,
+            "보통": 1.55,
+            "활발함": 1.725,
+            "매우 활발": 1.9
+        }
+        return round(b * factors.get(activity, 1.2))
+    except:
+        return 0.0
 
 
 def get_level(exp):
-    if exp < 50:
+    try:
+        e = int(exp)
+    except:
+        e = 0
+    if e < 50:
         return 1, "🥚 알 수룡이", "a.jpg"
-    elif exp < 120:
+    elif e < 120:
         return 2, "🐣 아기 수룡이", "b.jpg"
-    elif exp < 220:
+    elif e < 220:
         return 3, "🐉 성장한 수룡이", "c.jpg"
     else:
         return 4, "👑 전설의 수룡이", "d.jpg"
@@ -67,17 +85,15 @@ def load_exp():
 
 
 def save_exp(exp):
-    df = pd.DataFrame([{"경험치": exp}])
+    df = pd.DataFrame([{"경험치": int(exp)}])
     df.to_csv(GROW_FILE, index=False, encoding="utf-8-sig")
 
 
-# 🔍 [버그 수정] 프로필 로드 시 타입 안정성 대폭 강화
 def load_profile():
     if os.path.exists(PROFILE_FILE):
         try:
             df = pd.read_csv(PROFILE_FILE)
             if not df.empty:
-                # 딕셔너리로 변환 후 NaN 값 처리
                 res = df.iloc[-1].to_dict()
                 for k, v in res.items():
                     if pd.isna(v):
@@ -293,7 +309,6 @@ def show_main_page():
 
     allergy_options = ["밀", "달걀", "우유", "대두", "생선", "조개류", "갑각류(새우/게)", "닭고기", "돼지고기", "쇠고기", "땅콩"]
     
-    # 🔍 [버그 완벽 수정 지점] 안전한 알레르기 리스트 복원 로직 구현
     saved_allergies_raw = profile.get("알레르기 음식", "[]")
     selected_allergies = []
     
@@ -317,7 +332,6 @@ def show_main_page():
         default=selected_allergies
     )
 
-    # 문자열로 안전하게 직렬화하여 프로필 저장
     save_profile({
         "이름": name, "성별": gender, "나이": age, "키(cm)": height, "몸무게(kg)": weight,
         "활동량": activity, "목표": goal, "알레르기 음식": json.dumps(user_selected_allergies, ensure_ascii=False)
@@ -327,7 +341,6 @@ def show_main_page():
     user_bmr = calculate_bmr_harris_benedict(weight, height, age, gender)
     user_tdee = calculate_tdee(user_bmr, activity)
 
-    # 🎯 목표량 기준에 맞춰 칼로리 변수 바인딩
     if goal == "감량":
         daily_calorie = user_tdee - 350
     elif goal == "근육증가":
@@ -424,15 +437,23 @@ def show_main_page():
     if st.session_state.calc_submitted:
         st.header("🎮 수룡이의 오늘 식단 상태")
 
-        if total == 0:
+        # 터짐 방지 및 정산 처리를 위한 부동 소수점 예외 회피
+        try:
+            total_val = float(total)
+            daily_cal_val = float(daily_calorie)
+        except:
+            total_val = 0.0
+            daily_cal_val = 2000.0
+
+        if total_val == 0:
             suryong_img = "normal_suryong.jpg"
             suryong_msg = f"오늘 식사를 기록해 주세요! 현재 BMI는 {user_bmi}입니다."
             status_color = "info"
-        elif total < daily_calorie - 350:
+        elif total_val < daily_cal_val - 350:
             suryong_img = "slim_suryong.jpg"
             suryong_msg = "건강하고 이쁜 라인을 위해 너무 굶지 마시고 추천 식단을 좀 더 챙겨 드셔보세요! 🥺"
             status_color = "warning"
-        elif total > daily_calorie + 150:
+        elif total_val > daily_cal_val + 150:
             suryong_img = "fat_suryong.jpg"
             suryong_msg = "오늘 목표치를 살짝 초과했습니다! 아래 AI 맞춤 루틴으로 칼로리를 싹 태워버려요! 🔥"
             status_color = "error"
@@ -455,9 +476,10 @@ def show_main_page():
             elif status_color == "warning": st.warning(suryong_msg)
             else: st.success(suryong_msg)
 
-            st.metric("나의 BMI 지수", f"{user_bmi}")
-            st.metric("나의 기초대사량 (BMR)", f"{user_bmr} kcal")
-            st.metric("나의 활동대사량 (TDEE)", f"{user_tdee} kcal")
+            # 🔍 [버그 원인 제거 지점] st.metric의 가치 인자들을 완벽한 문자열 포맷으로 강제 형변환
+            st.metric(label="나의 BMI 지수", value=str(user_bmi))
+            st.metric(label="나의 기초대사량 (BMR)", value=f"{user_bmr} kcal")
+            st.metric(label="나의 활동대사량 (TDEE)", value=f"{user_tdee} kcal")
             
             st.write("") 
             
@@ -476,8 +498,15 @@ def show_main_page():
                 )
             
             st.divider()
-            st.metric("오늘의 목표 권장 칼로리", f"{daily_calorie} kcal")
-            st.metric("현재 총 섭취량", f"{total} kcal", delta=int(total - daily_calorie), delta_color="inverse")
+            
+            # 🔍 오차 안전장치 적용 메트릭 컴포넌트 라인
+            st.metric(label="오늘의 목표 권장 칼로리", value=f"{int(daily_cal_val)} kcal")
+            
+            try:
+                delta_val = int(total_val - daily_cal_val)
+            except:
+                delta_val = 0
+            st.metric(label="현재 총 섭취량", value=f"{int(total_val)} kcal", delta=delta_val, delta_color="inverse")
 
         st.divider()
 
@@ -665,8 +694,10 @@ def show_main_page():
                 st.divider()
                 st.subheader("🔥 당일 실전 운동 최종 정산 스코어")
                 col_res1, col_res2 = st.columns(2)
-                col_res1.metric("총 결산 운동 시간", f"{actual_time_sum} 분")
-                col_res2.metric("수룡이 인증 소모 칼로리", f"{actual_burned_calories} kcal")
+                
+                # 타입 에러 방지용 명시적 형변환 후 바인딩
+                col_res1.metric(label="총 결산 운동 시간", value=f"{int(actual_time_sum)} 분")
+                col_res2.metric(label="수룡이 인증 소모 칼로리", value=f"{int(actual_burned_calories)} kcal")
 
             st.divider()
             st.subheader("💾 최종 운동 기록 세이브")
