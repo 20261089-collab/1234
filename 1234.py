@@ -76,7 +76,7 @@ def save_profile(profile):
     df.to_csv(PROFILE_FILE, index=False, encoding="utf-8-sig")
 
 
-# 🍱 [데이터베이스] 음식 데이터 선언 (알레르기 유발 성분 allergens 매핑으로 깔끔하게 변경)
+# 🍱 [데이터베이스] 음식 데이터 선언 (삼시세끼 매칭 및 알레르기 식재료 포함)
 foods = {
     "김밥": {"calorie": 450, "type": "한식", "is_healthy": True, "allergens": ["달걀"]},
     "참치김밥": {"calorie": 500, "type": "한식", "is_healthy": True, "allergens": ["생선", "달걀"]},
@@ -263,10 +263,8 @@ def show_main_page():
     goal_options = ["감량", "유지", "근육증가"]
     goal = st.selectbox("목표", goal_options, index=goal_options.index(profile.get("목표", "근육증가")))
 
-    # 💡 [질문자님 요청 반영] 한국인 빈출 알레르기 유발 대표 식재료 멀티셀렉트로 교체 (싫어하는 음식 제거)
     allergy_options = ["밀", "달걀", "우유", "대두", "생선", "조개류", "갑각류(새우/게)", "닭고기", "돼지고기", "쇠고기"]
     
-    # 기존 프로필에 저장된 데이터 형식이 문자열 리스트 형태일 경우 파싱하여 기본값 매핑
     saved_allergies = profile.get("알레르기 음식", "[]")
     if isinstance(saved_allergies, str):
         if saved_allergies.startswith("[") and saved_allergies.endswith("]"):
@@ -285,7 +283,6 @@ def show_main_page():
     food_style_options = ["한식", "가벼운식단", "단백질", "간단식", "분식", "중식", "양식", "일식", "간식", "패스트푸드"]
     food_style = st.selectbox("선호 식단", food_style_options, index=food_style_options.index(profile.get("선호 식단", "단백질")))
 
-    # 싫어하는 음식 항목을 아예 제거하고 프로필 저장
     save_profile({
         "이름": name, "성별": gender, "나이": age, "키(cm)": height, "몸무게(kg)": weight,
         "활동량": activity, "목표": goal, "알레르기 음식": str(selected_allergies), "선호 식단": food_style
@@ -304,17 +301,84 @@ def show_main_page():
 
     st.divider()
 
-    st.header("🍽️ 오늘 먹은 음식 기록")
-    selected_foods = st.multiselect("오늘 어떤 음식을 드셨나요?", list(foods.keys()))
+    # 💡 [질문자님 요청 반영 ①] 추천 식단을 상단으로 재배치하고 아침/점심/저녁 세분화 분배
+    st.header("🍱 수룡이가 엄선한 오늘의 삼시세끼 추천 식단")
+    st.caption("수정이님이 선택하신 선호 스타일 및 알레르기를 우회하여 안전하게 구성한 맞춤 식단표입니다.")
+    
+    # 알레르기 식재료 필터링을 거친 안전 풀 구축
+    safe_food_pool = []
+    for f, info in foods.items():
+        if info["type"] == food_style and info["is_healthy"] == True:
+            food_allergens = info.get("allergens", [])
+            if not any(alg in food_allergens for alg in selected_allergies):
+                safe_food_pool.append(f)
 
+    # 안전 풀이 고갈될 경우를 대비한 디폴트 대체 건강식단
+    if not safe_food_pool:
+        safe_food_pool = ["닭가슴살", "연어", "계란", "현미밥", "샐러드", "고구마", "바나나"]
+
+    # 균등 분할 알고리즘으로 삼시세끼 매칭
+    breakfast_food = safe_food_pool[0]
+    lunch_food = safe_food_pool[1 % len(safe_food_pool)]
+    dinner_food = safe_food_pool[2 % len(safe_food_pool)]
+
+    # 칼로리 정보 추출
+    bf_cal = foods.get(breakfast_food, {"calorie": 200})["calorie"]
+    lc_cal = foods.get(lunch_food, {"calorie": 350})["calorie"]
+    dn_cal = foods.get(dinner_food, {"calorie": 300})["calorie"]
+
+    # 💡 [질문자님 요청 반영 ②] 식단 추천 카드 및 각각의 간편 체크박스 구현
+    r_col1, r_col2, r_col3 = st.columns(3)
+    
+    with r_col1:
+        st.markdown("### 🌅 아침 식단")
+        st.info(f"**{breakfast_food}**\n\n({bf_cal} kcal)")
+        chk_breakfast = st.checkbox("아침 추천대로 먹었어요", key="chk_bf_diet")
+
+    with r_col2:
+        st.markdown("### ☀️ 점심 식단")
+        st.success(f"**{lunch_food}**\n\n({lc_cal} kcal)")
+        chk_lunch = st.checkbox("점심 추천대로 먹었어요", key="chk_lc_diet")
+
+    with r_col3:
+        st.markdown("### 🌌 저녁 식단")
+        st.warning(f"**{dinner_food}**\n\n({dn_cal} kcal)")
+        chk_dinner = st.checkbox("저녁 추천대로 먹었어요", key="chk_dn_diet")
+
+    st.divider()
+
+    # 💡 [질문자님 요청 반영 ③] 추천 식단 체크와 단품 추가 기록이 완벽히 결합되는 유연한 연산 엔진
+    st.header("🍽️ 오늘 먹은 음식 기록 (+추가 기록)")
+    st.caption("위의 추천 식단을 체크했더라도, 간식이나 추가로 더 드신 음식이 있다면 아래에서 편하게 중복 선택해 주세요!")
+    
+    selected_foods = st.multiselect("오늘 추가로 더 드신 음식을 골라주세요.", list(foods.keys()))
+
+    # 실시간 총 칼로리 누적 합산 로직
     total = 0
+    checked_items_summary = []
+
+    if chk_breakfast:
+        total += bf_cal
+        checked_items_summary.append(f"{breakfast_food}(아침추천)")
+    if chk_lunch:
+        total += lc_cal
+        checked_items_summary.append(f"{lunch_food}(점심추천)")
+    if chk_dinner:
+        total += dn_cal
+        checked_items_summary.append(f"{dinner_food}(저녁추천)")
+
     for food in selected_foods:
         total += foods[food]["calorie"]
 
-    if selected_foods:
+    # 섭취한 영양 리스트 시각화 브리핑
+    if checked_items_summary or selected_foods:
         col_h, col_uh = st.columns(2)
         with col_h:
             st.write("🍏 **다이어트 및 근성장 식단**")
+            # 체크박스 분량 출력
+            for item in checked_items_summary:
+                st.write(f"- {item}")
+            # 추가 수동 선택 분량 중 건강식 출력
             for food in selected_foods:
                 if foods[food]["is_healthy"]:
                     st.write(f"- {food} ({foods[food]['calorie']} kcal)")
@@ -373,28 +437,9 @@ def show_main_page():
 
         st.divider()
 
-        tab1, tab2, tab3 = st.tabs(["🍱 추천 식단", "🏃 AI 목표 시간 맞춤형 다중 기구 루틴", "📅 나의 누적 다이어트 일지"])
+        tab1, tab2 = st.tabs(["🏃 AI 목표 시간 맞춤형 다중 기구 루틴", "📅 나의 누적 다이어트 일지"])
 
         with tab1:
-            st.write("✨ **수룡이가 엄선한 선호 맞춤 식단**")
-            
-            # 💡 [질문자님 요청 반영] 선택된 대표 알레르기 성분이 포함되어 있다면 차단하는 스마트 엔진
-            recommended = []
-            for f, info in foods.items():
-                if info["type"] == food_style and info["is_healthy"] == True:
-                    
-                    # 사용자가 고른 알레르기 식재료 중 하나라도 음식의 allergens 리스트에 있으면 거름
-                    food_allergens = info.get("allergens", [])
-                    if not any(alg in food_allergens for alg in selected_allergies):
-                        recommended.append(f)
-                        
-            if not recommended:
-                recommended = ["닭가슴살", "연어", "계란", "현미밥", "샐러드"]
-
-            for f in recommended:
-                st.write(f"- {f}: {foods[f]['calorie']} kcal")
-
-        with tab2:
             st.write("🤖 **수룡이 AI 스포츠 닥터의 부위별 기구 다중 분배 시스템**")
 
             st.subheader("📋 오늘의 환경 및 신체 컨디션")
@@ -607,7 +652,7 @@ def show_main_page():
                     save_exp(new_exp)
                     st.success(f"🎉 성공! 지정 분할 기구 조합이 로그에 누적되었으며, 경험치 10 EXP가 지급되었습니다!")
 
-        with tab3:
+        with tab2:
             st.write("📅 **나의 누적 다이어트 일지**")
             if os.path.exists(LOG_FILE):
                 df_log = pd.read_csv(LOG_FILE)
