@@ -1,10 +1,10 @@
-import streamlit as str # 수정: st로 주로 쓰이므로 하단에서 st 사용을 위해 st로 바인딩하거나 아래처럼 st로 정의합니다.
 import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
 import calendar
 import altair as alt
+import json  # 알레르기 리스트를 안전하게 저장하기 위해 표준 json 라이브러리 사용
 
 # 🚨 Streamlit 최상단 환경 설정
 st.set_page_config(
@@ -21,11 +21,13 @@ LOGO_FILE = "icon.png"
 
 # --- 공통 연산 함수 ---
 def calculate_bmi(weight, height):
+    if height <= 0:
+        return 0.0
     h = height / 100
     return round(weight / (h ** 2), 1)
 
 
-# 🧮 개정된 해리스-베네딕트 공식
+# 🧮 개정된 해리스-베네딕트 공식 (보내주신 이미지 수식 반영)
 def calculate_bmr_harris_benedict(weight, height, age, gender):
     if gender == "남자":
         return round(66.47 + (13.75 * weight) + (5.0 * height) - (6.76 * age), 1)
@@ -40,7 +42,7 @@ def calculate_tdee(bmr, activity):
         "활발함": 1.725,
         "매우 활발": 1.9
     }
-    return round(bmr * factors[activity])
+    return round(bmr * factors.get(activity, 1.2))
 
 
 def get_level(exp):
@@ -56,8 +58,11 @@ def get_level(exp):
 
 def load_exp():
     if os.path.exists(GROW_FILE):
-        df = pd.read_csv(GROW_FILE)
-        return int(df["경험치"].iloc[-1])
+        try:
+            df = pd.read_csv(GROW_FILE)
+            return int(df["경험치"].iloc[-1])
+        except:
+            return 0
     return 0
 
 
@@ -66,10 +71,20 @@ def save_exp(exp):
     df.to_csv(GROW_FILE, index=False, encoding="utf-8-sig")
 
 
+# 🔍 [버그 수정] 프로필 로드 시 타입 안정성 대폭 강화
 def load_profile():
     if os.path.exists(PROFILE_FILE):
-        df = pd.read_csv(PROFILE_FILE)
-        return df.iloc[-1].to_dict()
+        try:
+            df = pd.read_csv(PROFILE_FILE)
+            if not df.empty:
+                # 딕셔너리로 변환 후 NaN 값 처리
+                res = df.iloc[-1].to_dict()
+                for k, v in res.items():
+                    if pd.isna(v):
+                        res[k] = ""
+                return res
+        except:
+            return {}
     return {}
 
 
@@ -228,7 +243,7 @@ gym_split_presets = {
 }
 
 
-# --- 패이지 1: 메인 다이어리 ---
+# --- 페이지 1: 메인 다이어리 ---
 def show_main_page():
     log_col1, log_col2 = st.columns([1, 4])
     with log_col1:
@@ -238,59 +253,81 @@ def show_main_page():
             st.info("🐉 LOGO")
     with log_col2:
         st.title("핏메이트")
-        st.caption("목적별 자동 맞춤 식단과 스마트 운동 루틴을 제공하는 수정이 전용 다이어리")
+        st.caption("목적별 자동 맞춤 식단과 스마트 운동 루틴을 제공하는 전용 다이어리")
 
     st.divider()
 
     profile = load_profile()
 
     st.header("👤 수정이 정보 입력")
-    name = st.text_input("이름", value=profile.get("이름", "에융이"))
+    name = st.text_input("이름", value=str(profile.get("이름", "에융이")))
 
     gender_options = ["여자", "남자"]
-    gender = st.selectbox("성별", gender_options, index=gender_options.index(profile.get("성별", "여자")))
+    saved_gender = profile.get("성별", "여자")
+    gender_idx = gender_options.index(saved_gender) if saved_gender in gender_options else 0
+    gender = st.selectbox("성별", gender_options, index=gender_idx)
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        age = st.number_input("나이", min_value=1, step=1, value=int(profile.get("나이", 22)))
+        try: saved_age = int(profile.get("나이", 22))
+        except: saved_age = 22
+        age = st.number_input("나이", min_value=1, step=1, value=saved_age)
     with col2:
-        height = st.number_input("키(cm)", min_value=1.0, value=float(profile.get("키(cm)", 163.0)))
+        try: saved_height = float(profile.get("키(cm)", 163.0))
+        except: saved_height = 163.0
+        height = st.number_input("키(cm)", min_value=1.0, value=saved_height)
     with col3:
-        weight = st.number_input("몸무게(kg)", min_value=1.0, value=float(profile.get("몸무게(kg)", 54.0)))
+        try: saved_weight = float(profile.get("몸무게(kg)", 54.0))
+        except: saved_weight = 54.0
+        weight = st.number_input("몸무게(kg)", min_value=1.0, value=saved_weight)
 
     activity_options = ["거의 안 움직임", "가벼운 활동", "보통", "활발함", "매우 활발"]
-    activity = st.selectbox("활동량", activity_options, index=activity_options.index(profile.get("활동량", "보통")))
+    saved_activity = profile.get("활동량", "보통")
+    activity_idx = activity_options.index(saved_activity) if saved_activity in activity_options else 2
+    activity = st.selectbox("활동량", activity_options, index=activity_idx)
 
     goal_options = ["감량", "유지", "근육증가"]
-    goal = st.selectbox("현재 나의 목표", goal_options, index=goal_options.index(profile.get("목표", "감량")))
+    saved_goal = profile.get("목표", "감량")
+    goal_idx = goal_options.index(saved_goal) if saved_goal in goal_options else 0
+    goal = st.selectbox("현재 나의 목표", goal_options, index=goal_idx)
 
     allergy_options = ["밀", "달걀", "우유", "대두", "생선", "조개류", "갑각류(새우/게)", "닭고기", "돼지고기", "쇠고기", "땅콩"]
     
-    saved_allergies = profile.get("알레르기 음식", "[]")
-    if isinstance(saved_allergies, str):
-        if saved_allergies.startswith("[") and saved_allergies.endswith("]"):
-            import ast
-            try: saved_allergies = ast.literal_eval(saved_allergies)
-            except: saved_allergies = []
-        else:
-            saved_allergies = [saved_allergies] if saved_allergies in allergy_options else []
+    # 🔍 [버그 완벽 수정 지점] 안전한 알레르기 리스트 복원 로직 구현
+    saved_allergies_raw = profile.get("알레르기 음식", "[]")
+    selected_allergies = []
     
-    selected_allergies = st.multiselect(
+    if isinstance(saved_allergies_raw, str):
+        if saved_allergies_raw.strip().startswith("["):
+            try:
+                decoded = json.loads(saved_allergies_raw.replace("'", '"'))
+                if isinstance(decoded, list):
+                    selected_allergies = [x for x in decoded if x in allergy_options]
+            except:
+                selected_allergies = []
+        else:
+            if saved_allergies_raw in allergy_options:
+                selected_allergies = [saved_allergies_raw]
+    elif isinstance(saved_allergies_raw, list):
+        selected_allergies = [x for x in saved_allergies_raw if x in allergy_options]
+
+    user_selected_allergies = st.multiselect(
         "해당하는 알레르기 음식을 선택해 주세요",
         allergy_options,
-        default=saved_allergies
+        default=selected_allergies
     )
 
+    # 문자열로 안전하게 직렬화하여 프로필 저장
     save_profile({
         "이름": name, "성별": gender, "나이": age, "키(cm)": height, "몸무게(kg)": weight,
-        "활동량": activity, "목표": goal, "알레르기 음식": str(selected_allergies)
+        "활동량": activity, "목표": goal, "알레르기 음식": json.dumps(user_selected_allergies, ensure_ascii=False)
     })
 
     user_bmi = calculate_bmi(weight, height)
     user_bmr = calculate_bmr_harris_benedict(weight, height, age, gender)
     user_tdee = calculate_tdee(user_bmr, activity)
 
-    # 🎯 [요청 반영 및 수정] 감량/유지/근육증가에 따른 목표 칼로리 설정 연동 확인
+    # 🎯 목표량 기준에 맞춰 칼로리 변수 바인딩
     if goal == "감량":
         daily_calorie = user_tdee - 350
     elif goal == "근육증가":
@@ -305,7 +342,7 @@ def show_main_page():
     safe_food_pool = []
     for f, info in foods.items():
         food_allergens = info.get("allergens", [])
-        if not any(alg in food_allergens for alg in selected_allergies):
+        if not any(alg in food_allergens for alg in user_selected_allergies):
             safe_food_pool.append(f)
 
     if goal == "감량":
@@ -314,12 +351,12 @@ def show_main_page():
         lunch_food = "현미밥 + 닭가슴살 + 구운 야채" if "현미밥 + 닭가슴살 + 구운 야채" in safe_food_pool else "곤약볶음밥 + 달걀후라이"
         dinner_food = "연어 아보카도 샐러드" if "연어 아보카도 샐러드" in safe_food_pool else "그릭요거트 + 블루베리 + 그래놀라"
     elif goal == "유지":
-        st.caption("🥗 **부담 없이 일상을 지속하는 20대 맞춤형 웰빙 일반식 조합**")
+        st.caption("🥗 **부담 없이 일상을 지속하는 맞춤형 웰빙 일반식 조합**")
         breakfast_food = "그릭요거트 + 블루베리 + 그래놀라" if "그릭요거트 + 블루베리 + 그래놀라" in safe_food_pool else "사과 + 땅콩버터 1스푼"
         lunch_food = "참치김밥" if "참치김밥" in safe_food_pool else "통밀 식빵 샌드위치 (닭가슴살 햄)"
         dinner_food = "곤약볶음밥 + 달걀후라이" if "곤약볶음밥 + 달걀후라이" in safe_food_pool else "스리라차 닭가슴살 통밀 브리또"
     else:
-        st.caption("💪 **근육 성장을 위해 양을 늘리고 에너지를 가득 채운 고칼로리 단백질 조합**")
+        st.caption("💪 **근육 성장을 위해 양을 늘리고 에너지를 채운 고칼로리 단백질 조합**")
         breakfast_food = "통밀 식빵 샌드위치 (닭가슴살 햄)" if "통밀 식빵 샌드위치 (닭가슴살 햄)" in safe_food_pool else "오트밀 + 바나나"
         lunch_food = "소고기 부채살 + 버섯 구이 (곱빼기)" if "소고기 부채살 + 버섯 구이 (곱빼기)" in safe_food_pool else "현미밥 + 닭가슴살 + 구운 야채"
         dinner_food = "고구마 2개 + 훈제오리 샐러드 대짜" if "고구마 2개 + 훈제오리 샐러드 대짜" in safe_food_pool else "두부면 토마토 파스타 + 닭가슴살 소시지"
@@ -332,29 +369,29 @@ def show_main_page():
     with r_col1:
         st.markdown("### 🌅 아침 식단")
         st.info(f"**{breakfast_food}**\n\n({bf_cal} kcal)")
-        chk_breakfast = st.checkbox("아침 추천대로 먹었어요", key="chk_bf_diet_v12")
+        chk_breakfast = st.checkbox("아침 추천대로 먹었어요", key="chk_bf_diet_v13")
 
     with r_col2:
         st.markdown("### ☀️ 점심 식단")
         st.success(f"**{lunch_food}**\n\n({lc_cal} kcal)")
-        chk_lunch = st.checkbox("점심 추천대로 먹었어요", key="chk_lc_diet_v12")
+        chk_lunch = st.checkbox("점심 추천대로 먹었어요", key="chk_lc_diet_v13")
 
     with r_col3:
         st.markdown("### 🌌 저녁 식단")
         st.warning(f"**{dinner_food}**\n\n({dn_cal} kcal)")
-        chk_dinner = st.checkbox("저녁 추천대로 먹었어요", key="chk_dn_diet_v12")
+        chk_dinner = st.checkbox("저녁 추천대로 먹었어요", key="chk_dn_diet_v13")
 
     st.divider()
 
     st.header("🍽️ 오늘 먹은 음식 기록 (+추가 및 직접 입력)")
-    selected_foods = st.multiselect("오늘 추가로 더 드신 기성 음식을 골라주세요.", list(foods.keys()), key="multiselect_foods_v12")
+    selected_foods = st.multiselect("오늘 추가로 더 드신 기성 음식을 골라주세요.", list(foods.keys()), key="multiselect_foods_v13")
 
     st.markdown("#### ✍️ 리스트에 없는 음식을 직접 입력하기")
     c_col1, c_col2 = st.columns([2, 1])
     with c_col1:
-        custom_food_name = st.text_input("음식 이름 입력", placeholder="예: 엄마표 닭도리탕", key="custom_food_name_v12")
+        custom_food_name = st.text_input("음식 이름 입력", placeholder="예: 엄마표 닭도리탕", key="custom_food_name_v13")
     with c_col2:
-        custom_food_cal = st.number_input("칼로리(kcal)", min_value=0, step=5, value=0, key="custom_food_cal_v12")
+        custom_food_cal = st.number_input("칼로리(kcal)", min_value=0, step=5, value=0, key="custom_food_cal_v13")
 
     total = 0
     checked_items_summary = []
@@ -401,7 +438,7 @@ def show_main_page():
             status_color = "error"
         else:
             suryong_img = "normal_suryong.jpg"
-            suryong_msg = "대박! 칼로리 밸런스가 정말 완벽해요. 이대로만 유지하면 다이어트 무조건 성공입니다! 👍"
+            suryong_msg = "대박! 칼로리 밸런스가 정말 완벽해요. 이대로만 유지하면 대성공입니다! 👍"
             status_color = "success"
 
         col_char, col_info = st.columns([1, 1])
@@ -418,35 +455,29 @@ def show_main_page():
             elif status_color == "warning": st.warning(suryong_msg)
             else: st.success(suryong_msg)
 
-            # 📊 [오류 수정 및 가독성 패치] 메트릭 배치 정상화 및 주석 구문 제거
             st.metric("나의 BMI 지수", f"{user_bmi}")
             st.metric("나의 기초대사량 (BMR)", f"{user_bmr} kcal")
             st.metric("나의 활동대사량 (TDEE)", f"{user_tdee} kcal")
             
-            st.write("") # 가독성을 위한 공백
+            st.write("") 
             
-            # 💡 접고 펼칠 수 있는 연회색 톤의 설명 박스 
             with st.expander("💡 왜 기초대사량보다 권장 칼로리가 높을까요?", expanded=False):
                 st.markdown(
                     """
                     <div style="color: #666666; font-size: 0.95em; line-height: 1.6; padding: 5px;">
-                    많은 분들이 다이어트를 할 때 '기초대사량보다 적게 먹어야 살이 빠진다'고 오해하곤 합니다. 하지만 실제로는 그렇지 않습니다!<br><br>
                     <ul>
-                        <li><b>기초대사량(BMR):</b> 하루 종일 누워서 숨만 쉴 때 장기를 돌리기 위해 필요한 최소한의 생존 연료입니다.</li>
-                        <li><b>활동대사량(TDEE):</b> 출퇴근, 공부, 산책 등 일상적인 움직임과 운동을 모두 포함해 하루에 <b>진짜로 소모하는 총에너지</b>입니다.</li>
+                        <li><b>기초대사량(BMR):</b> 하루 종일 누워서 숨만 쉴 때 필요한 최소한의 생존 연료입니다.</li>
+                        <li><b>활동대사량(TDEE):</b> 출퇴근, 일상적인 움직임과 운동을 포함해 하루에 <b>진짜로 소모하는 총에너지</b>입니다.</li>
                     </ul>
-                    따라서 몸이 하루 동안 실제로 쓰는 양(활동대사량)에서 안전하게 칼로리를 뺀 <b>목표 권장 칼로리</b>는 당연히 기초대사량보다 높게 설정됩니다.<br><br>
-                    만약 기초대사량보다도 적게 먹으며 극단적으로 굶는 다이어트를 하면, 우리 몸은 기근 상태(비상사태)로 인식해 <b>지방 대신 근육을 먼저 분해</b>하고 기초대사량 자체를 낮춰버려 결국 <b>요요가 오기 쉬운 체질</b>로 변하게 됩니다.<br><br>
-                    지금 설정된 권장 칼로리는 몸의 대사율과 건강을 지키면서 <b>지방만 효과적으로 빠지도록 계산된 정밀한 수치</b>이니 안심하고 규칙적으로 챙겨 드셔도 됩니다! 👍
+                    따라서 활동대사량(TDEE)을 기반으로 계산된 목표 권장 칼로리는 기초대사량보다 높게 설정됩니다. 극단적으로 굶는 다이어트를 하면 지방 대신 근육이 먼저 빠져 요요 체질로 변하니 정밀하게 계산된 권장 칼로리를 안심하고 섭취해 주세요!
                     </div>
                     """, 
                     unsafe_html=True
                 )
             
             st.divider()
-            # 🎯 [요청 반영] 목표(감량/유지/근육증가)에 상응하는 권장 칼로리가 고스란히 노출됩니다.
             st.metric("오늘의 목표 권장 칼로리", f"{daily_calorie} kcal")
-            st.metric("현재 총 섭취량", f"{total} kcal", delta=total - daily_calorie, delta_color="inverse")
+            st.metric("현재 총 섭취량", f"{total} kcal", delta=int(total - daily_calorie), delta_color="inverse")
 
         st.divider()
 
@@ -460,9 +491,9 @@ def show_main_page():
             with col_ex1:
                 select_date = st.date_input("기록 날짜", datetime.now().date())
             with col_ex2:
-                ex_place = st.radio("오늘의 운동 장소", ["헬스장", "홈트"], key="main_ex_place_v12")
+                ex_place = st.radio("오늘의 운동 장소", ["헬스장", "홈트"], key="main_ex_place_v13")
             with col_ex3:
-                user_condition = st.selectbox("현재 나의 컨디션", ["최상 (에너지 넘침)", "정상 (보통)", "피곤함 (가벼운 운동 필요)", "근육통 있음"], key="main_condition_v12")
+                user_condition = st.selectbox("현재 나의 컨디션", ["최상 (에너지 넘침)", "정상 (보통)", "피곤함 (가벼운 운동 필요)", "근육통 있음"], key="main_condition_v13")
 
             muscle_gym_part = "상체만 진행"
             if ex_place == "헬스장" and goal == "근육증가":
@@ -471,13 +502,13 @@ def show_main_page():
                 muscle_gym_part = st.radio(
                     "오늘은 상체 and 하체 중 어느 부위를 집중 타겟팅하시겠습니까?", 
                     ["상체만 진행", "하체만 진행"], 
-                    key="muscle_gym_part_selector_v12",
+                    key="muscle_gym_part_selector_v13",
                     horizontal=True
                 )
 
             st.write("")
             st.subheader("⏱️ 오늘 운동에 투자할 총 시간 설정")
-            target_total_time = st.slider("오늘은 총 몇 분 동안 운동을 진행하시겠습니까?", 20, 180, 50, step=5, key="main_time_slider_v12")
+            target_total_time = st.slider("오늘은 총 몇 분 동안 운동을 진행하시겠습니까?", 20, 180, 50, step=5, key="main_time_slider_v13")
 
             st.divider()
 
@@ -495,7 +526,7 @@ def show_main_page():
             ai_prescribed_exercises = []
             ai_prescribed_calories = 0
             
-            safe_prefix = f"v12_{ex_place}_{goal}_{user_condition}_{muscle_gym_part}".replace(" ", "_").replace("(", "").replace(")", "")
+            safe_prefix = f"v13_{ex_place}_{goal}_{user_condition}_{muscle_gym_part}".replace(" ", "_").replace("(", "").replace(")", "")
 
             with st.container():
                 if ex_place == "홈트":
@@ -561,10 +592,10 @@ def show_main_page():
                     
                     if goal == "근육증가":
                         if muscle_gym_part == "상체만 진행":
-                            st.markdown(f"### 🏋️ **[목표: 근육증가 - 상체 분할]** 오늘 진행하는 4종 상체 기구 집중 타겟 라인")
+                            st.markdown(f"### 🏋️ **[목표: 근육증가 - 상체 분할]** 오늘 진행하는 상체 기구 집중 타겟 라인")
                             target_list = pool_dict.get("상체", [])
                         else:
-                            st.markdown(f"### 🏋️ **[목표: 근육증가 - 하체 분할]** 오늘 진행하는 4종 하체 기구 집중 타겟 라인")
+                            st.markdown(f"### 🏋️ **[목표: 근육증가 - 하체 분할]** 오늘 진행하는 하체 기구 집중 타겟 라인")
                             target_list = pool_dict.get("하체", [])
 
                         time_per_machine = max(4, round(target_total_time / len(target_list))) if target_list else target_total_time
@@ -588,7 +619,6 @@ def show_main_page():
                         
                         for idx, item in enumerate(cardio_list):
                             st.markdown("---")
-                            # 🚨 [버그 수정 완료] 오타로 기재되어 있던 ex_place 조건문 제거하고 정상 렌더링되도록 복구
                             st.markdown(f"## 🏃 {idx+1}단계 유산소 트랙: {item['name']}")
                             st.markdown(f"  - ⏱️ 집중 수행 시간: **{time_per_ex}분**")
                             st.markdown(f"  - 📊 페이스 가이드: **{item['guide']}** | {item['rest']}")
@@ -601,7 +631,7 @@ def show_main_page():
             st.divider()
 
             st.subheader("🏋️ 오늘 실제로 완료한 운동 체크")
-            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 균형 있는 다중 기구 루틴을 그대로 완료했습니다!", value=False, key="checkbox_ai_routine_v12")
+            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 균형 있는 다중 기구 루틴을 그대로 완료했습니다!", value=False, key="checkbox_ai_routine_v13")
 
             actual_burned_calories = 0
             actual_time_sum = 0
@@ -622,11 +652,11 @@ def show_main_page():
                     "레그 익스텐션 머신 (허벅지 앞쪽 고립)", "시티드 레그 컬 머신 (허벅지 뒤쪽 햄스트링)",
                     "천국의 계단 (스텝밀)", "트레드밀 (러닝머신)", "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛]"
                 ]
-                actual_done_list = st.multiselect("오늘 실제 마친 항목들을 골라주세요.", grand_pool, key="manual_select_ex_v12")
+                actual_done_list = st.multiselect("오늘 실제 마친 항목들을 골라주세요.", grand_pool, key="manual_select_ex_v13")
                 
                 if actual_done_list:
                     for ex_name in actual_done_list:
-                        done_time = st.slider(f"[{ex_name}] 수행 시간(분)", 0, 180, 15, key=f"fix_time_v12_{ex_name}")
+                        done_time = st.slider(f"[{ex_name}] 수행 시간(분)", 0, 180, 15, key=f"fix_time_v13_{ex_name}")
                         actual_burned_calories += round((done_time / 10) * 65 * condition_multiplier)
                         actual_time_sum += done_time
                     ex_summary = f"[{user_condition}/수동] " + ", ".join(actual_done_list)
@@ -640,7 +670,7 @@ def show_main_page():
 
             st.divider()
             st.subheader("💾 최종 운동 기록 세이브")
-            if st.button("🔥 정산된 수치로 최종 저장하고 수룡이 경험치 받기", key="btn_save_exercise_v12"):
+            if st.button("🔥 정산된 수치로 최종 저장하고 수룡이 경험치 받기", key="btn_save_exercise_v13"):
                 if not use_ai_routine and ('actual_done_list' not in locals() or not actual_done_list):
                     st.error("완료한 운동 수치가 정산되지 않았습니다.")
                 else:
@@ -663,30 +693,30 @@ def show_main_page():
                     old_exp = load_exp()
                     new_exp = old_exp + 10
                     save_exp(new_exp)
-                    st.success(f"🎉 성공! 지정 분할 기구 조합이 로그에 누적되었으며, 경험치 10 EXP가 지급되었습니다!")
+                    st.success(f"🎉 성공! 로그에 누적되었으며, 경험치 10 EXP가 지급되었습니다!")
 
         with tab2:
             st.write("📅 **나의 누적 다이어트 일지**")
             if os.path.exists(LOG_FILE):
-                df_log = pd.read_csv(LOG_FILE)
-                df_log["오늘 섭취량"] = pd.to_numeric(df_log["오늘 섭취량"], errors="coerce").fillna(0)
-                df_log["운동 부위"] = pd.to_numeric(df_log["운동 부위"], errors="coerce").fillna(0)
-                df_log["운동 시간(분)"] = pd.to_numeric(df_log["운동 시간(분)"].fillna(0), errors="coerce")
-                
-                df_display = df_log.copy()
-                df_display = df_display.rename(columns={"운동 장소": "수행한 운동 조합", "운동 부위": "소비 칼로리(kcal)", "오늘 컨디션": "수행 시 컨디션"})
-                st.dataframe(df_display.iloc[::-1], use_container_width=True)
-
-                st.subheader("📊 나의 다이어트 요약")
-                col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
-                col_stat1.metric("총 기록 수", f"{len(df_log)} 회")
-                col_stat2.metric("평균 하루 섭취 칼로리", f"{int(df_log['오늘 섭취량'].mean())} kcal")
-                col_stat3.metric("평균 운동 소모 칼로리", f"{int(df_log['운동 부위'].mean())} kcal")
-                col_stat4.metric("누적 운동 시간", f"{int(df_log['운동 시간(분)'].sum())} 분")
-
-                st.divider()
-                st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
                 try:
+                    df_log = pd.read_csv(LOG_FILE)
+                    df_log["오늘 섭취량"] = pd.to_numeric(df_log["오늘 섭취량"], errors="coerce").fillna(0)
+                    df_log["운동 부위"] = pd.to_numeric(df_log["운동 부위"], errors="coerce").fillna(0)
+                    df_log["운동 시간(분)"] = pd.to_numeric(df_log["운동 시간(분)"].fillna(0), errors="coerce")
+                    
+                    df_display = df_log.copy()
+                    df_display = df_display.rename(columns={"운동 장소": "수행한 운동 조합", "운동 부위": "소비 칼로리(kcal)", "오늘 컨디션": "수행 시 컨디션"})
+                    st.dataframe(df_display.iloc[::-1], use_container_width=True)
+
+                    st.subheader("📊 나의 다이어트 요약")
+                    col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
+                    col_stat1.metric("총 기록 수", f"{len(df_log)} 회")
+                    col_stat2.metric("평균 하루 섭취 칼로리", f"{int(df_log['오늘 섭취량'].mean())} kcal")
+                    col_stat3.metric("평균 운동 소모 칼로리", f"{int(df_log['운동 부위'].mean())} kcal")
+                    col_stat4.metric("누적 운동 시간", f"{int(df_log['운동 시간(분)'].sum())} 분")
+
+                    st.divider()
+                    st.subheader("📊 일자별 섭취량 vs 운동 소모량 비교")
                     df_log["날짜_일만"] = pd.to_datetime(df_log["날짜"]).dt.strftime("%Y-%m-%d")
                     df_unique_dates = df_log.groupby("날짜_일만")[["오늘 섭취량", "운동 부위"]].sum().reset_index()
                     available_dates = df_unique_dates["날짜_일만"].tolist()
@@ -694,7 +724,7 @@ def show_main_page():
                     if available_dates:
                         chart_col1, chart_col2 = st.columns([3, 1.5])
                         with chart_col2:
-                            selected_chart_date = st.selectbox("날짜를 클릭하세요", options=available_dates, index=len(available_dates)-1, key="chart_date_selector_v12")
+                            selected_chart_date = st.selectbox("날짜를 선택하세요", options=available_dates, index=len(available_dates)-1, key="chart_date_selector_v13")
                         with chart_col1:
                             day_data = df_unique_dates[df_unique_dates["날짜_일만"] == selected_chart_date].iloc[0]
                             plot_df = pd.DataFrame({
@@ -712,36 +742,40 @@ def show_main_page():
 
                 st.divider()
                 st.subheader("🗓️ 월별 운동 캘린더")
-                df_log["날짜"] = pd.to_datetime(df_log["날짜"], errors="coerce")
-                df_log = df_log.dropna(subset=["날짜"])
+                try:
+                    df_log["날짜"] = pd.to_datetime(df_log["날짜"], errors="coerce")
+                    df_log = df_log.dropna(subset=["날짜"])
 
-                if len(df_log) > 0:
-                    latest_date = df_log["날짜"].max()
-                    years = sorted(df_log["날짜"].dt.year.unique())
-                    cal_col1, cal_col2 = st.columns(2)
-                    selected_year = cal_col1.selectbox("연도 선택", years, index=years.index(latest_date.year))
-                    selected_month = cal_col2.selectbox("월 선택", list(range(1, 13)), index=latest_date.month - 1)
+                    if len(df_log) > 0:
+                        latest_date = df_log["날짜"].max()
+                        years = sorted(df_log["날짜"].dt.year.unique())
+                        cal_col1, cal_col2 = st.columns(2)
+                        selected_year = cal_col1.selectbox("연도 선택", years, index=years.index(latest_date.year) if latest_date.year in years else 0)
+                        selected_month = cal_col2.selectbox("월 선택", list(range(1, 13)), index=latest_date.month - 1)
 
-                    month_data = df_log[(df_log["날짜"].dt.year == selected_year) & (df_log["날짜"].dt.month == selected_month)]
-                    exercise_days = set(month_data["날짜"].dt.day)
-                    cal = calendar.monthcalendar(selected_year, selected_month)
+                        month_data = df_log[(df_log["날짜"].dt.year == selected_year) & (df_log["날짜"].dt.month == selected_month)]
+                        exercise_days = set(month_data["날짜"].dt.day)
+                        cal = calendar.monthcalendar(selected_year, selected_month)
 
-                    st.write(f"📅 {selected_year}년 {selected_month}월")
-                    days_kor = ["월", "화", "수", "목", "금", "토", "일"]
-                    header = st.columns(7)
-                    for i, d in enumerate(days_kor): header[i].markdown(f"**{d}**")
+                        st.write(f"📅 {selected_year}년 {selected_month}월")
+                        days_kor = ["월", "화", "수", "목", "금", "토", "일"]
+                        header = st.columns(7)
+                        for i, d in enumerate(days_kor): header[i].markdown(f"**{d}**")
 
-                    for week in cal:
-                        cols = st.columns(7)
-                        for i, day in enumerate(week):
-                            if day == 0: cols[i].write("")
-                            elif day in exercise_days: cols[i].markdown(f"🟢 **{day}**")
-                            else: cols[i].markdown(f"{day}")
+                        for week in cal:
+                            cols = st.columns(7)
+                            for i, day in enumerate(week):
+                                if day == 0: cols[i].write("")
+                                elif day in exercise_days: cols[i].markdown(f"🟢 **{day}**")
+                                else: cols[i].markdown(f"{day}")
+                except:
+                    pass
 
                 st.divider()
-                if st.checkbox("⚠️ 전체 기록 지우기", key="delete_all_logs_check_v12"):
-                    if st.button("정말 삭제하시겠습니까?", key="btn_delete_logs_confirm_v12"):
-                        os.remove(LOG_FILE)
+                if st.checkbox("⚠️ 전체 기록 지우기", key="delete_all_logs_check_v13"):
+                    if st.button("정말 삭제하시겠습니까?", key="btn_delete_logs_confirm_v13"):
+                        try: os.remove(LOG_FILE)
+                        except: pass
                         st.warning("모든 다이어트 기록이 삭제되었습니다. 새로고침 해주세요.")
             else:
                 st.info("아직 저장된 다이어트 일지가 없습니다.")
@@ -793,8 +827,8 @@ def show_growth_page():
     st.table(pd.DataFrame(level_data))
 
     st.divider()
-    if st.checkbox("⚠️ 수룡이 경험치 초기화 활성화", key="reset_exp_check_v12"):
-        if st.button("💥 수룡이를 다시 알(🥚)로 되돌리기", type="primary", key="btn_reset_exp_v12"):
+    if st.checkbox("⚠️ 수룡이 경험치 초기화 활성화", key="reset_exp_check_v13"):
+        if st.button("💥 수룡이를 다시 알(🥚)로 되돌리기", type="primary", key="btn_reset_exp_v13"):
             if os.path.exists(GROW_FILE):
                 os.remove(GROW_FILE)
             st.warning("수룡이의 경험치가 완전히 초기화되었습니다!")
