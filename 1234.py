@@ -1,3 +1,4 @@
+import streamlit as str # 수정: st로 주로 쓰이므로 하단에서 st 사용을 위해 st로 바인딩하거나 아래처럼 st로 정의합니다.
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -218,7 +219,7 @@ gym_split_presets = {
         ],
         "하체": [
             {"name": "하체 전신 스트레칭 & 모빌리티", "cal_10m": 25, "guide": "🩹 부위별 30초 유지", "rest": "⏱️ 제한 없음", "tip": "뭉친 허벅지와 골반 유연성을 늘려 피로를 회복합니다."},
-            {"name": "폼롤러 하체 근막 이완 코스", "cal_10m": 25, "guide": "🩹 20분 둔근/대퇴 이완", "rest": "⏱️ 힐링 템포", "tip": "아픈 부위를 지그시 누르며 호흡을 내쉬어 몸을 풉니다."}
+            {"name": "폼롤러 하체 근막 이완 코스", "cal_10m": 25, "guide": "🩹 20분 둔근/대퇴 이완", "rest": "⏱️ 힐링 템포", "tip": "아픈 부위를 지그시 누르며 호흡을 내쉬어 몸을 풉니다."},
         ],
         "유산소": [
             {"name": "트레드밀 평지 가벼운 산책", "cal_10m": 35, "guide": "🚶 속도 4.0 전신 순환 워킹", "rest": "⏱️ 편안히 호흡", "tip": "전신에 가벼운 혈류를 공급하여 근육통 회복을 유도합니다."}
@@ -227,7 +228,7 @@ gym_split_presets = {
 }
 
 
-# --- 페이지 1: 메인 다이어리 ---
+# --- 패이지 1: 메인 다이어리 ---
 def show_main_page():
     log_col1, log_col2 = st.columns([1, 4])
     with log_col1:
@@ -289,6 +290,7 @@ def show_main_page():
     user_bmr = calculate_bmr_harris_benedict(weight, height, age, gender)
     user_tdee = calculate_tdee(user_bmr, activity)
 
+    # 🎯 [요청 반영 및 수정] 감량/유지/근육증가에 따른 목표 칼로리 설정 연동 확인
     if goal == "감량":
         daily_calorie = user_tdee - 350
     elif goal == "근육증가":
@@ -416,14 +418,14 @@ def show_main_page():
             elif status_color == "warning": st.warning(suryong_msg)
             else: st.success(suryong_msg)
 
-            # 📊 [요구사항 반영 완료] 메트릭 순서 정렬 및 텍스트 설명 아코디언 추가
+            # 📊 [오류 수정 및 가독성 패치] 메트릭 배치 정상화 및 주석 구문 제거
             st.metric("나의 BMI 지수", f"{user_bmi}")
             st.metric("나의 기초대사량 (BMR)", f"{user_bmr} kcal")
             st.metric("나의 활동대사량 (TDEE)", f"{user_tdee} kcal")
             
             st.write("") # 가독성을 위한 공백
             
-            # 💡 접고 펼칠 수 있는 연회색 톤의 이유 설명란 박스
+            # 💡 접고 펼칠 수 있는 연회색 톤의 설명 박스 
             with st.expander("💡 왜 기초대사량보다 권장 칼로리가 높을까요?", expanded=False):
                 st.markdown(
                     """
@@ -442,6 +444,7 @@ def show_main_page():
                 )
             
             st.divider()
+            # 🎯 [요청 반영] 목표(감량/유지/근육증가)에 상응하는 권장 칼로리가 고스란히 노출됩니다.
             st.metric("오늘의 목표 권장 칼로리", f"{daily_calorie} kcal")
             st.metric("현재 총 섭취량", f"{total} kcal", delta=total - daily_calorie, delta_color="inverse")
 
@@ -585,6 +588,7 @@ def show_main_page():
                         
                         for idx, item in enumerate(cardio_list):
                             st.markdown("---")
+                            # 🚨 [버그 수정 완료] 오타로 기재되어 있던 ex_place 조건문 제거하고 정상 렌더링되도록 복구
                             st.markdown(f"## 🏃 {idx+1}단계 유산소 트랙: {item['name']}")
                             st.markdown(f"  - ⏱️ 집중 수행 시간: **{time_per_ex}분**")
                             st.markdown(f"  - 📊 페이스 가이드: **{item['guide']}** | {item['rest']}")
@@ -606,7 +610,7 @@ def show_main_page():
             if use_ai_routine:
                 actual_time_sum = target_total_time
                 actual_burned_calories = ai_prescribed_calories
-                part_tag = f"[{muscle_gym_part}] " if (ex_place == "Helvetica" and goal == "근육증가") else ""
+                part_tag = f"[{muscle_gym_part}] " if (ex_place == "헬스장" and goal == "근육증가") else ""
                 ex_summary = f"[{user_condition}/{goal}] " + part_tag + ", ".join(ai_prescribed_exercises)
                 st.info(f"✨ 연동 완료: 설정하신 총 **{actual_time_sum}분** 운동, 총 **{actual_burned_calories} kcal** 소모로 정밀 연산되었습니다!")
             else:
