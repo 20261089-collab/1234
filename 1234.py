@@ -76,33 +76,33 @@ def save_profile(profile):
     df.to_csv(PROFILE_FILE, index=False, encoding="utf-8-sig")
 
 
-# 🍱 [데이터베이스] 음식 데이터 선언 (삼시세끼 매칭 및 알레르기 식재료 포함)
+# 🍱 [데이터베이스] 20대 초반 여성 다이어터 타겟 꿀조합 & 일상 음식 리스트
+# 추천용 '세트 식단'과 추가 기록용 '단품'을 유연하게 수용하도록 설계했습니다.
 foods = {
-    "김밥": {"calorie": 450, "type": "한식", "is_healthy": True, "allergens": ["달걀"]},
-    "참치김밥": {"calorie": 500, "type": "한식", "is_healthy": True, "allergens": ["생선", "달걀"]},
-    "치즈김밥": {"calorie": 530, "type": "한식", "is_healthy": False, "allergens": ["우유", "달걀"]},
-    "샐러드": {"calorie": 250, "type": "가벼운식단", "is_healthy": True, "allergens": []},
-    "닭가슴살": {"calorie": 165, "type": "단백질", "is_healthy": True, "allergens": ["닭고기"]},
-    "고구마": {"calorie": 130, "type": "가벼운식단", "is_healthy": True, "allergens": []},
-    "현미밥": {"calorie": 320, "type": "한식", "is_healthy": True, "allergens": []},
-    "라면": {"calorie": 500, "type": "분식", "is_healthy": False, "allergens": ["밀", "달걀"]},
-    "불닭볶음면": {"calorie": 530, "type": "분식", "is_healthy": False, "allergens": ["밀"]},
-    "짜장면": {"calorie": 700, "type": "중식", "is_healthy": False, "allergens": ["밀", "돼지고기", "대두"]},
-    "짬뽕": {"calorie": 650, "type": "중식", "is_healthy": False, "allergens": ["밀", "갑각류(새우/게)", "조개류"]},
-    "햄버거": {"calorie": 550, "type": "패스트푸드", "is_healthy": False, "allergens": ["밀", "쇠고기", "우유", "대두"]},
-    "치킨": {"calorie": 700, "type": "패스트푸드", "is_healthy": False, "allergens": ["밀", "닭고기"]},
-    "피자": {"calorie": 800, "type": "패스트푸드", "is_healthy": False, "allergens": ["밀", "우유", "돼지고기"]},
+    # ✨ [강력 추천] 20대 여성 맞춤형 다이어트 조합 식단
+    "오트밀 + 바나나": {"calorie": 280, "type": "가벼운식단", "is_healthy": True, "allergens": []},
+    "그릭요거트 + 블루베리 + 그래놀라": {"calorie": 310, "type": "가벼운식단", "is_healthy": True, "allergens": ["우유", "밀"]},
+    "사과 + 땅콩버터 1스푼": {"calorie": 240, "type": "간단식", "is_healthy": True, "allergens": ["땅콩"]},
+    "현미밥 + 닭가슴살 + 구운 야채": {"calorie": 420, "type": "단백질", "is_healthy": True, "allergens": ["닭고기"]},
+    "고구마 + 훈제오리 샐러드": {"calorie": 450, "type": "단백질", "is_healthy": True, "allergens": ["오리고기"]},
+    "곤약볶음밥 + 달걀후라이": {"calorie": 350, "type": "한식", "is_healthy": True, "allergens": ["달걀", "대두"]},
+    "연어 아보카도 샐러드": {"calorie": 380, "type": "가벼운식단", "is_healthy": True, "allergens": ["생선"]},
+    "소고기 부채살 + 버섯 구이": {"calorie": 490, "type": "단백질", "is_healthy": True, "allergens": ["쇠고기"]},
+    "두부면 토마토 파스타": {"calorie": 290, "type": "양식", "is_healthy": True, "allergens": ["대두"]},
+    "통밀 식빵 샌드위치 (닭가슴살 햄)": {"calorie": 360, "type": "간단식", "is_healthy": True, "allergens": ["밀", "닭고기", "달걀"]},
+    "스리라차 닭가슴살 통밀 브리또": {"calorie": 340, "type": "간단식", "is_healthy": True, "allergens": ["밀", "닭고기"]},
+    
+    # 😈 일반식 및 자취생 단골 음식 / 배달 / 디저트 풀 (추가 기록용)
+    "참치김밥": {"calorie": 500, "type": "한식", "is_healthy": True, "allergens": ["생선", "달걀", "밀"]},
     "떡볶이": {"calorie": 450, "type": "분식", "is_healthy": False, "allergens": ["밀", "대두"]},
-    "순대": {"calorie": 300, "type": "분식", "is_healthy": False, "allergens": ["돼지고기"]},
-    "계란": {"calorie": 80, "type": "단백질", "is_healthy": True, "allergens": ["달걀"]},
-    "바나나": {"calorie": 90, "type": "간식", "is_healthy": True, "allergens": []},
-    "사과": {"calorie": 100, "type": "간식", "is_healthy": True, "allergens": []},
-    "요거트": {"calorie": 120, "type": "간식", "is_healthy": True, "allergens": ["우유"]},
-    "연어": {"calorie": 250, "type": "단백질", "is_healthy": True, "allergens": ["생선"]},
-    "스테이크": {"calorie": 600, "type": "단백질", "is_healthy": True, "allergens": ["쇠고기"]},
-    "파스타": {"calorie": 650, "type": "양식", "is_healthy": False, "allergens": ["밀"]},
-    "샌드위치": {"calorie": 400, "type": "간단식", "is_healthy": True, "allergens": ["밀", "우유", "돼지고기"]},
-    "초밥": {"calorie": 500, "type": "일식", "is_healthy": True, "allergens": ["생선"]}
+    "마라탕 (야채+소고기 기본)": {"calorie": 600, "type": "중식", "is_healthy": False, "allergens": ["밀", "대두", "쇠고기", "땅콩"]},
+    "로제 찜닭 (소량)": {"calorie": 650, "type": "한식", "is_healthy": False, "allergens": ["닭고기", "우유", "대두"]},
+    "불닭볶음면": {"calorie": 530, "type": "분식", "is_healthy": False, "allergens": ["밀", "대두"]},
+    "치즈케이크 1조각": {"calorie": 350, "type": "간식", "is_healthy": False, "allergens": ["우유", "밀", "달걀"]},
+    "아이스 아메리카노": {"calorie": 10, "type": "간식", "is_healthy": True, "allergens": []},
+    "연세우유 생크림빵 (반 개)": {"calorie": 230, "type": "간식", "is_healthy": False, "allergens": ["밀", "우유", "달걀"]},
+    "프로틴 어니언 칩 / 다이어트 스낵": {"calorie": 120, "type": "간식", "is_healthy": True, "allergens": ["대두"]},
+    "제로 탄산음료": {"calorie": 0, "type": "간식", "is_healthy": True, "allergens": []}
 }
 
 # --- 🏋️ 프리셋 데이터베이스 ---
@@ -129,14 +129,14 @@ exercise_presets = {
             ],
             "근육통 있음": [
                 {"name": "하체 전신 스트레칭", "cal_10m": 25, "guide": "🩹 부위별 30초 유지", "rest": "⏱️ 제한 없음", "tip": "뭉친 허벅지와 둔근 유연성을 늘려 피로 물질을 제거합니다."},
-                {"name": "상체 및 어깨 회전 리커버리", "cal_10m": 25, "guide": "🩹 3세트 반복", "rest": "⏱️ 편안하게 휴식", "tip": "가슴과 회전근개를 부드럽게 풀어주어 통증을 완화합니다."},
+                {"name": "상체 및 어깨 회전 리커버리", "cal_10m": 25, "guide": "🩹 3세트 반복", "rest": "⏱️ 편안하게 휴식", "tip": "가슴และ 회전근개를 부드럽게 풀어주어 통증을 완화합니다."},
                 {"name": "코어 데드버그 코스", "cal_10m": 35, "guide": "🩹 3세트 × 10회", "rest": "⏱️ 휴식 90초", "tip": "누운 자세에서 팔다리를 교차해 움직이며 척추 부담 없이 코어를 깨웁니다."},
                 {"name": "요가 릴렉스 가이드", "cal_10m": 25, "guide": "🩹 15분 전신 호흡", "rest": "⏱️ 릴렉스", "tip": "호흡에 집중하며 전신의 긴장을 풀어주는 힐링 타임입니다."}
             ]
         },
         "감량": { 
             "최상 (에너지 넘침)": [
-                {"name": "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛]", "cal_10m": 120, "url": "https://youtu.be/gSz5n4sLENI", "guide": "🔥 설정된 시간 동안 올인 타겟", "rest": "⏱️ 영상 페이스 유지", "tip": "층간 소음 and 무릎 부담이 적은 전신 루틴입니다. 지치지 않게 호흡을 길게 가져가세요."},
+                {"name": "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛]", "cal_10m": 120, "url": "https://youtu.be/gSz5n4sLENI", "guide": "🔥 설정된 시간 동안 올인 타겟", "rest": "⏱️ 영상 페이스 유지", "tip": "층간 소음 및 무릎 부담이 적은 전신 루틴입니다. 지치지 않게 호흡을 길게 가져가세요."},
                 {"name": "멜킨 튜닝 줄넘기 / 고속 줄넘기", "cal_10m": 110, "guide": "🔥 인터벌 페이스 집중 수행", "rest": "⏱️ 휴식 40초", "tip": "발앞꿈치로 가볍게 착지하며 손목 회전력을 유지하세요."},
                 {"name": "실내 싸이클 / 러닝 스퍼트", "cal_10m": 85, "guide": "🔥 강력한 페달링 속도 유지", "rest": "⏱️ 지속 가동", "tip": "코어에 힘을 주고 하체의 폭발적인 에너지를 사용합니다."}
             ],
@@ -251,19 +251,19 @@ def show_main_page():
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        age = st.number_input("나이", min_value=1, step=1, value=int(profile.get("나이", 20)))
+        age = st.number_input("나이", min_value=1, step=1, value=int(profile.get("나이", 22)))
     with col2:
-        height = st.number_input("키(cm)", min_value=1.0, value=float(profile.get("키(cm)", 165.0)))
+        height = st.number_input("키(cm)", min_value=1.0, value=float(profile.get("키(cm)", 163.0)))
     with col3:
-        weight = st.number_input("몸무게(kg)", min_value=1.0, value=float(profile.get("몸무게(kg)", 60.0)))
+        weight = st.number_input("몸무게(kg)", min_value=1.0, value=float(profile.get("몸무게(kg)", 54.0)))
 
     activity_options = ["거의 안 움직임", "가벼운 활동", "보통", "활발함", "매우 활발"]
     activity = st.selectbox("활동량", activity_options, index=activity_options.index(profile.get("활동량", "보통")))
 
     goal_options = ["감량", "유지", "근육증가"]
-    goal = st.selectbox("목표", goal_options, index=goal_options.index(profile.get("목표", "근육증가")))
+    goal = st.selectbox("목표", goal_options, index=goal_options.index(profile.get("목표", "감량")))
 
-    allergy_options = ["밀", "달걀", "우유", "대두", "생선", "조개류", "갑각류(새우/게)", "닭고기", "돼지고기", "쇠고기"]
+    allergy_options = ["밀", "달걀", "우유", "대두", "생선", "조개류", "갑각류(새우/게)", "닭고기", "돼지고기", "쇠고기", "땅콩"]
     
     saved_allergies = profile.get("알레르기 음식", "[]")
     if isinstance(saved_allergies, str):
@@ -280,8 +280,8 @@ def show_main_page():
         default=saved_allergies
     )
 
-    food_style_options = ["한식", "가벼운식단", "단백질", "간단식", "분식", "중식", "양식", "일식", "간식", "패스트푸드"]
-    food_style = st.selectbox("선호 식단", food_style_options, index=food_style_options.index(profile.get("선호 식단", "단백질")))
+    food_style_options = ["가벼운식단", "단백질", "간단식", "한식", "분식", "중식", "양식", "간식"]
+    food_style = st.selectbox("선호 식단 스타일", food_style_options, index=food_style_options.index(profile.get("선호 식단", "가벼운식단")))
 
     save_profile({
         "이름": name, "성별": gender, "나이": age, "키(cm)": height, "몸무게(kg)": weight,
@@ -293,7 +293,7 @@ def show_main_page():
     user_tdee = calculate_tdee(user_bmr, activity)
 
     if goal == "감량":
-        daily_calorie = user_tdee - 300
+        daily_calorie = user_tdee - 350
     elif goal == "근육증가":
         daily_calorie = user_tdee + 300
     else:
@@ -301,89 +301,83 @@ def show_main_page():
 
     st.divider()
 
-    # 💡 [질문자님 요청 반영 ①] 추천 식단을 상단으로 재배치하고 아침/점심/저녁 세분화 분배
-    st.header("🍱 수룡이가 엄선한 오늘의 삼시세끼 추천 식단")
-    st.caption("수정이님이 선택하신 선호 스타일 및 알레르기를 우회하여 안전하게 구성한 맞춤 식단표입니다.")
+    # 🍱 [질문자님 요청 반영] 20대 타겟 현실 고효율 다이어트 삼시세끼 추천 섹션
+    st.header("🍱 오늘 추천하는 삼시세끼 트렌디 식단 조합")
+    st.caption("인스타, 유튜브 다이어터들이 가장 애용하는 간편하고 건강한 식단 레이아웃입니다.")
     
-    # 알레르기 식재료 필터링을 거친 안전 풀 구축
+    # 알레르기 필터링 로직 거치기
     safe_food_pool = []
     for f, info in foods.items():
-        if info["type"] == food_style and info["is_healthy"] == True:
+        if info["is_healthy"] == True:
             food_allergens = info.get("allergens", [])
             if not any(alg in food_allergens for alg in selected_allergies):
                 safe_food_pool.append(f)
 
-    # 안전 풀이 고갈될 경우를 대비한 디폴트 대체 건강식단
-    if not safe_food_pool:
-        safe_food_pool = ["닭가슴살", "연어", "계란", "현미밥", "샐러드", "고구마", "바나나"]
+    # 20대 워너비 베이직 루틴 고정 구성 및 안전 우회 장치
+    breakfast_food = "오트밀 + 바나나" if "오트밀 + 바나나" in safe_food_pool else "사과 + 땅콩버터 1스푼"
+    lunch_food = "현미밥 + 닭가슴살 + 구운 야채" if "현미밥 + 닭가슴살 + 구운 야채" in safe_food_pool else "곤약볶음밥 + 달걀후라이"
+    dinner_food = "연어 아보카도 샐러드" if "연어 아보카도 샐러드" in safe_food_pool else "그릭요거트 + 블루베리 + 그래놀라"
 
-    # 균등 분할 알고리즘으로 삼시세끼 매칭
-    breakfast_food = safe_food_pool[0]
-    lunch_food = safe_food_pool[1 % len(safe_food_pool)]
-    dinner_food = safe_food_pool[2 % len(safe_food_pool)]
+    # 실시간 칼로리 데이터 매핑
+    bf_cal = foods.get(breakfast_food, {"calorie": 280})["calorie"]
+    lc_cal = foods.get(lunch_food, {"calorie": 420})["calorie"]
+    dn_cal = foods.get(dinner_food, {"calorie": 380})["calorie"]
 
-    # 칼로리 정보 추출
-    bf_cal = foods.get(breakfast_food, {"calorie": 200})["calorie"]
-    lc_cal = foods.get(lunch_food, {"calorie": 350})["calorie"]
-    dn_cal = foods.get(dinner_food, {"calorie": 300})["calorie"]
-
-    # 💡 [질문자님 요청 반영 ②] 식단 추천 카드 및 각각의 간편 체크박스 구현
+    # 3단 카드 레이아웃 배치
     r_col1, r_col2, r_col3 = st.columns(3)
     
     with r_col1:
         st.markdown("### 🌅 아침 식단")
         st.info(f"**{breakfast_food}**\n\n({bf_cal} kcal)")
-        chk_breakfast = st.checkbox("아침 추천대로 먹었어요", key="chk_bf_diet")
+        chk_breakfast = st.checkbox("아침 추천대로 먹었어요", key="chk_bf_diet_v10")
 
     with r_col2:
         st.markdown("### ☀️ 점심 식단")
         st.success(f"**{lunch_food}**\n\n({lc_cal} kcal)")
-        chk_lunch = st.checkbox("점심 추천대로 먹었어요", key="chk_lc_diet")
+        chk_lunch = st.checkbox("점심 추천대로 먹었어요", key="chk_lc_diet_v10")
 
     with r_col3:
         st.markdown("### 🌌 저녁 식단")
         st.warning(f"**{dinner_food}**\n\n({dn_cal} kcal)")
-        chk_dinner = st.checkbox("저녁 추천대로 먹었어요", key="chk_dn_diet")
+        chk_dinner = st.checkbox("저녁 추천대로 먹었어요", key="chk_dn_diet_v10")
 
     st.divider()
 
-    # 💡 [질문자님 요청 반영 ③] 추천 식단 체크와 단품 추가 기록이 완벽히 결합되는 유연한 연산 엔진
+    # 🍽️ 오늘 추가로 먹은 음식 기록 교차 연산 인터페이스
     st.header("🍽️ 오늘 먹은 음식 기록 (+추가 기록)")
-    st.caption("위의 추천 식단을 체크했더라도, 간식이나 추가로 더 드신 음식이 있다면 아래에서 편하게 중복 선택해 주세요!")
+    st.caption("추천 식단 외에 간식, 야식, 디저트 혹은 일반식을 더 드셨다면 자유롭게 추가해 주세요!")
     
     selected_foods = st.multiselect("오늘 추가로 더 드신 음식을 골라주세요.", list(foods.keys()))
 
-    # 실시간 총 칼로리 누적 합산 로직
+    # 최종 칼로리 계산
     total = 0
     checked_items_summary = []
 
     if chk_breakfast:
         total += bf_cal
-        checked_items_summary.append(f"{breakfast_food}(아침추천)")
+        checked_items_summary.append(f"{breakfast_food}(아침)")
     if chk_lunch:
         total += lc_cal
-        checked_items_summary.append(f"{lunch_food}(점심추천)")
+        checked_items_summary.append(f"{lunch_food}(점심)")
     if chk_dinner:
         total += dn_cal
-        checked_items_summary.append(f"{dinner_food}(저녁추천)")
+        checked_items_summary.append(f"{dinner_food}(저녁)")
 
     for food in selected_foods:
         total += foods[food]["calorie"]
 
-    # 섭취한 영양 리스트 시각화 브리핑
+    # 먹은 음식 실시간 시각화 리포트
     if checked_items_summary or selected_foods:
         col_h, col_uh = st.columns(2)
         with col_h:
-            st.write("🍏 **다이어트 및 근성장 식단**")
-            # 체크박스 분량 출력
+            st.write("🍏 **클린 다이어트 식단 성적**")
             for item in checked_items_summary:
                 st.write(f"- {item}")
-            # 추가 수동 선택 분량 중 건강식 출력
             for food in selected_foods:
                 if foods[food]["is_healthy"]:
                     st.write(f"- {food} ({foods[food]['calorie']} kcal)")
         with col_uh:
-            st.write("😈 **주의가 필요한 일반 식단**")
+            st.write("😈 **치팅 및 주의가 필요한 일반식/디저트**")
             for food in selected_foods:
                 if not foods[food]["is_healthy"]:
                     st.write(f"- {food} ({foods[food]['calorie']} kcal)")
@@ -404,17 +398,17 @@ def show_main_page():
             suryong_img = "normal_suryong.jpg"
             suryong_msg = f"오늘 식사를 기록해 주세요! 현재 BMI는 {user_bmi}입니다."
             status_color = "info"
-        elif total < daily_calorie - 400:
+        elif total < daily_calorie - 350:
             suryong_img = "slim_suryong.jpg"
-            suryong_msg = "근육을 늘리거나 건강을 유지하려면 조금 더 든든하게 드셔야 해요! 🥺"
+            suryong_msg = "건강하고 이쁜 라인을 위해 너무 굶지 마시고 추천 식단을 좀 더 챙겨 드셔보세요! 🥺"
             status_color = "warning"
         elif total > daily_calorie + 150:
             suryong_img = "fat_suryong.jpg"
-            suryong_msg = "오늘 권장 칼로리를 초과했습니다! 무산소 볼륨 분배 및 유산소 타임라인을 확인해 보세요! 🔥"
+            suryong_msg = "오늘 목표치를 살짝 초과했습니다! 아래 AI 맞춤 루틴으로 칼로리를 싹 태워버려요! 🔥"
             status_color = "error"
         else:
             suryong_img = "normal_suryong.jpg"
-            suryong_msg = "완벽합니다! 근성장 및 체력 유지를 위한 아주 훌륭한 칼로리 밸런스예요. 👍"
+            suryong_msg = "대박! 칼로리 밸런스가 정말 완벽해요. 이대로만 유지하면 다이어트 무조건 성공입니다! 👍"
             status_color = "success"
 
         col_char, col_info = st.columns([1, 1])
@@ -432,8 +426,8 @@ def show_main_page():
             else: st.success(suryong_msg)
 
             st.metric("나의 BMI 지수", f"{user_bmi}")
-            st.metric("목표 권장 칼로리", f"{daily_calorie} kcal")
-            st.metric("현재 섭취량", f"{total} kcal", delta=total - daily_calorie, delta_color="inverse")
+            st.metric("오늘의 목표 권장 칼로리", f"{daily_calorie} kcal")
+            st.metric("현재 총 섭취량", f"{total} kcal", delta=total - daily_calorie, delta_color="inverse")
 
         st.divider()
 
@@ -447,9 +441,9 @@ def show_main_page():
             with col_ex1:
                 select_date = st.date_input("기록 날짜", datetime.now().date())
             with col_ex2:
-                ex_place = st.radio("오늘의 운동 장소", ["헬스장", "홈트"], key="main_ex_place_v9")
+                ex_place = st.radio("오늘의 운동 장소", ["헬스장", "홈트"], key="main_ex_place_v10")
             with col_ex3:
-                user_condition = st.selectbox("현재 나의 컨디션", ["최상 (에너지 넘침)", "정상 (보통)", "피곤함 (가벼운 운동 필요)", "근육통 있음"], key="main_condition_v9")
+                user_condition = st.selectbox("현재 나의 컨디션", ["최상 (에너지 넘침)", "정상 (보통)", "피곤함 (가벼운 운동 필요)", "근육통 있음"], key="main_condition_v10")
 
             muscle_gym_part = "상체만 진행"
             if ex_place == "헬스장" and goal == "근육증가":
@@ -458,13 +452,13 @@ def show_main_page():
                 muscle_gym_part = st.radio(
                     "오늘은 상체 and 하체 중 어느 부위를 집중 타겟팅하시겠습니까?", 
                     ["상체만 진행", "하체만 진행"], 
-                    key="muscle_gym_part_selector_v9",
+                    key="muscle_gym_part_selector_v10",
                     horizontal=True
                 )
 
             st.write("")
             st.subheader("⏱️ 오늘 운동에 투자할 총 시간 설정")
-            target_total_time = st.slider("오늘은 총 몇 분 동안 운동을 진행하시겠습니까?", 20, 180, 80, step=5, key="main_time_slider_v9")
+            target_total_time = st.slider("오늘은 총 몇 분 동안 운동을 진행하시겠습니까?", 20, 180, 50, step=5, key="main_time_slider_v10")
 
             st.divider()
 
@@ -482,7 +476,7 @@ def show_main_page():
             ai_prescribed_exercises = []
             ai_prescribed_calories = 0
             
-            safe_prefix = f"v9_{ex_place}_{goal}_{user_condition}".replace(" ", "_").replace("(", "").replace(")", "")
+            safe_prefix = f"v10_{ex_place}_{goal}_{user_condition}".replace(" ", "_").replace("(", "").replace(")", "")
 
             with st.container():
                 if ex_place == "홈트":
@@ -524,7 +518,7 @@ def show_main_page():
                                 st.video(item["url"])
                                 st.info(f"🔗 [유튜브 앱에서 직접 보기]({item['url']})")
                                 
-                            with st.expander("💡 유산소 효과 배가 꿀팁", key=f"exp_{safe_prefix}_gym_cardio_home_{idx}_v9"):
+                            with st.expander("💡 유산소 효과 배가 꿀팁", key=f"exp_{safe_prefix}_gym_cardio_home_{idx}_v10"):
                                 st.caption(item["tip"])
                                 
                             ai_prescribed_exercises.append(item['name'])
@@ -540,7 +534,7 @@ def show_main_page():
                             st.markdown(f"## 🎯 {idx+1}단계 코스: {item['name']}")
                             st.markdown(f"  - ⏱️ 추천 할당 시간: **{time_per_ex}분**")
                             st.markdown(f"  - 📊 수행 가이드: **{item['guide']}** | {item['rest']}")
-                            with st.expander("📖 정석 자세 및 부상방지 꿀팁", key=f"exp_{safe_prefix}_muscle_{idx}_v9"):
+                            with st.expander("📖 정석 자세 및 부상방지 꿀팁", key=f"exp_{safe_prefix}_muscle_{idx}_v10"):
                                 st.caption(item["tip"])
                             st.write("")
                             ai_prescribed_exercises.append(item['name'])
@@ -566,7 +560,7 @@ def show_main_page():
                             st.markdown(f"### 🔹 {item['name']}")
                             st.markdown(f"  - ⏱️ 권장 할당 시간: **{time_per_machine}분** (세트 사이 휴식 포함)")
                             st.markdown(f"  - 📊 수행 가이드: **{item['guide']}** | {item['rest']}")
-                            with st.expander(f"💡 {item['name']} 기구 사용 가이드 및 고립 자극 꿀팁", key=f"exp_{safe_prefix}_gym_parts_{idx}_v9"):
+                            with st.expander(f"💡 {item['name']} 기구 사용 가이드 및 고립 자극 꿀팁", key=f"exp_{safe_prefix}_gym_parts_{idx}_v10"):
                                 st.caption(item["tip"])
                             ai_prescribed_exercises.append(item['name'])
                             ai_prescribed_calories += round((time_per_machine / 10) * item["cal_10m"] * condition_multiplier)
@@ -583,7 +577,7 @@ def show_main_page():
                             st.markdown(f"## 🏃 {idx+1}단계 유산소 트랙: {item['name']}")
                             st.markdown(f"  - ⏱️ 집중 수행 시간: **{time_per_ex}분**")
                             st.markdown(f"  - 📊 페이스 가이드: **{item['guide']}** | {item['rest']}")
-                            with st.expander("💡 유산소 효과 배가 꿀팁", key=f"exp_{safe_prefix}_gym_cardio_{idx}_v9"):
+                            with st.expander("💡 유산소 효과 배가 꿀팁", key=f"exp_{safe_prefix}_gym_cardio_{idx}_v10"):
                                 st.caption(item["tip"])
                             ai_prescribed_exercises.append(item['name'])
                             ai_prescribed_calories += round((time_per_ex / 10) * item["cal_10m"] * condition_multiplier)
@@ -592,7 +586,7 @@ def show_main_page():
             st.divider()
 
             st.subheader("🏋️ 오늘 실제로 완료한 운동 체크")
-            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 균형 있는 다중 기구 루틴을 그대로 완료했습니다! (원클릭 등록)", value=False, key="checkbox_ai_routine_v9")
+            use_ai_routine = st.checkbox("✅ 오늘 AI가 추천해 준 균형 있는 다중 기구 루틴을 그대로 완료했습니다! (원클릭 등록)", value=False, key="checkbox_ai_routine_v10")
 
             actual_burned_calories = 0
             actual_time_sum = 0
@@ -613,11 +607,11 @@ def show_main_page():
                     "레그 익스텐션 머신 (허벅지 앞쪽 고립)", "시티드 레그 컬 머신 (허벅지 뒤쪽 햄스트링)",
                     "천국의 계단 (스텝밀)", "트레드밀 (러닝머신)", "전신 다이어트 최고의 운동 [칼소폭 찐 핵핵핵 매운맛]"
                 ]
-                actual_done_list = st.multiselect("오늘 실제 마친 항목들을 골라주세요.", grand_pool, key="manual_select_ex_v9")
+                actual_done_list = st.multiselect("오늘 실제 마친 항목들을 골라주세요.", grand_pool, key="manual_select_ex_v10")
                 
                 if actual_done_list:
                     for ex_name in actual_done_list:
-                        done_time = st.slider(f"[{ex_name}] 수행 시간(분)", 0, 180, 15, key=f"fix_time_v9_{ex_name}")
+                        done_time = st.slider(f"[{ex_name}] 수행 시간(분)", 0, 180, 15, key=f"fix_time_v10_{ex_name}")
                         actual_burned_calories += round((done_time / 10) * 65 * condition_multiplier)
                         actual_time_sum += done_time
                     ex_summary = f"[{user_condition}/수동] " + ", ".join(actual_done_list)
@@ -631,7 +625,7 @@ def show_main_page():
 
             st.divider()
             st.subheader("💾 최종 운동 기록 세이브")
-            if st.button("🔥 정산된 수치로 최종 저장하고 수룡이 경험치 받기", key="btn_save_exercise_v9"):
+            if st.button("🔥 정산된 수치로 최종 저장하고 수룡이 경험치 받기", key="btn_save_exercise_v10"):
                 if not use_ai_routine and ('actual_done_list' not in locals() or not actual_done_list):
                     st.error("완료한 운동 수치가 정산되지 않았습니다. AI 원클릭 체크박스를 누르거나 수동 운동을 골라주세요.")
                 else:
@@ -681,7 +675,7 @@ def show_main_page():
                     if available_dates:
                         chart_col1, chart_col2 = st.columns([3, 1.5])
                         with chart_col2:
-                            selected_chart_date = st.selectbox("날짜를 클릭하세요", options=available_dates, index=len(available_dates)-1, key="chart_date_selector_v9")
+                            selected_chart_date = st.selectbox("날짜를 클릭하세요", options=available_dates, index=len(available_dates)-1, key="chart_date_selector_v10")
                         with chart_col1:
                             day_data = df_unique_dates[df_unique_dates["날짜_일만"] == selected_chart_date].iloc[0]
                             plot_df = pd.DataFrame({
@@ -726,8 +720,8 @@ def show_main_page():
                             else: cols[i].markdown(f"{day}")
 
                 st.divider()
-                if st.checkbox("⚠️ 전체 기록 지우기", key="delete_all_logs_check_v9"):
-                    if st.button("정말 삭제하시겠습니까?", key="btn_delete_logs_confirm_v9"):
+                if st.checkbox("⚠️ 전체 기록 지우기", key="delete_all_logs_check_v10"):
+                    if st.button("정말 삭제하시겠습니까?", key="btn_delete_logs_confirm_v10"):
                         os.remove(LOG_FILE)
                         st.warning("모든 다이어트 기록이 삭제되었습니다. 새로고침 해주세요.")
             else:
@@ -781,8 +775,8 @@ def show_growth_page():
     st.table(pd.DataFrame(level_data))
 
     st.divider()
-    if st.checkbox("⚠️ 수룡이 경험치 초기화 활성화", key="reset_exp_check_v9"):
-        if st.button("💥 수룡이를 다시 알(🥚)로 되돌리기", type="primary", key="btn_reset_exp_v9"):
+    if st.checkbox("⚠️ 수룡이 경험치 초기화 활성화", key="reset_exp_check_v10"):
+        if st.button("💥 수룡이를 다시 알(🥚)로 되돌리기", type="primary", key="btn_reset_exp_v10"):
             if os.path.exists(GROW_FILE):
                 os.remove(GROW_FILE)
             st.warning("수룡이의 경험치가 완전히 초기화되었습니다! 페이지를 새로고침(F5) 해주세요.")
